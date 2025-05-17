@@ -1,0 +1,12 @@
+loguru
+supabase
+python-dotenv
+fastapi
+python-jose
+slowapi
+aiofiles
+redis
+pycryptodome
+httpx
+pydantic
+uvicorn

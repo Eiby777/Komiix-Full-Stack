@@ -1,0 +1,27 @@
+.crosshair-container {
+  position: absolute;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 30;
+  /* Width and height will be set dynamically */
+}
+
+.crosshair-line {
+  position: absolute;
+  background-color: red;
+  transform-origin: top left;
+}
+
+.crosshair-line.horizontal {
+  width: 100%;
+  height: 1px;
+  left: 0;
+  top: 0;
+}
+
+.crosshair-line.vertical {
+  height: 100%;
+  width: 1px;
+  top: 0;
+  left: 0;
+}

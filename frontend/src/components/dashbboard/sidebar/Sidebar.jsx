@@ -1,0 +1,160 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDashboard } from '../../../hooks/useDashboard';
+
+export default function Sidebar({ darkMode, setActiveSection }) {
+  const navigate = useNavigate();
+  const { toggleSidebar, isSidebarCollapsed } = useDashboard();
+
+  return (
+    <aside
+      className={`md:relative z-20 min-h-screen text-white transition-all duration-300 ease-in-out transform shadow-2xl ${isSidebarCollapsed ? '-translate-x-full md:translate-x-0 md:w-20' : 'translate-x-0 w-72'
+        } ${darkMode ? 'bg-gradient-to-b from-gray-900 to-black' : 'bg-gradient-to-b from-blue-800 to-indigo-900'}`}
+    >
+      {/* Toggle Button */}
+      <button
+        onClick={toggleSidebar}
+        className="md:hidden absolute -right-12 top-4 p-2 rounded-r-lg bg-opacity-80 bg-gray-800 hover:bg-opacity-100 transition-all duration-200"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 transform transition-transform duration-200"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={isSidebarCollapsed ? 'M4 6h16M4 12h16M4 18h16' : 'M6 18L18 6M6 6l12 12'}
+          />
+        </svg>
+      </button>
+
+      {/* Header */}
+      <div className="p-3 pb-3 border-b border-white/10">
+        <h2
+          className={`text-2xl font-extrabold tracking-tight transition-all duration-300 ${isSidebarCollapsed ? 'text-center text-lg md:opacity-0' : 'text-left'
+            }`}
+        >
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">
+            <div className="flex justify-center">
+              <img src="/logo.png" alt="Komiix" className="w-[150px] h-auto" />
+            </div>
+          </span>
+        </h2>
+      </div>
+
+      {/* Navigation */}
+      <nav className="p-4">
+        <ul className="space-y-3">
+          <li>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/');
+              }}
+              className={`flex items-center p-3 rounded-lg transition-all duration-200 group ${isSidebarCollapsed ? 'justify-center' : 'space-x-3 hover:bg-white/10'
+                }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-6 h-6 group-hover:scale-110 transition-transform duration-200"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              {!isSidebarCollapsed && (
+                <span className="text-sm font-medium group-hover:text-blue-200 transition-colors duration-200">
+                  Ir a la Página Principal
+                </span>
+              )}
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setActiveSection('projects');
+              }}
+              className={`flex items-center p-3 rounded-lg transition-all duration-200 group ${isSidebarCollapsed ? 'justify-center' : 'space-x-3 hover:bg-white/10'
+                }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-6 h-6 group-hover:scale-110 transition-transform duration-200"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12h6m-3-3v6m-8.5 6.5h17a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"
+                />
+              </svg>
+              {!isSidebarCollapsed && (
+                <span className="text-sm font-medium group-hover:text-blue-200 transition-colors duration-200">
+                  Proyectos
+                </span>
+              )}
+            </a>
+          </li>
+          <li>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setActiveSection('mergeImages');
+              }}
+              className={`flex items-center p-3 rounded-lg transition-all duration-200 group ${isSidebarCollapsed ? 'justify-center' : 'space-x-3 hover:bg-white/10'
+                }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-6 h-6 group-hover:scale-110 transition-transform duration-200"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"
+                />
+              </svg>
+              {!isSidebarCollapsed && (
+                <span className="text-sm font-medium group-hover:text-blue-200 transition-colors duration-200">
+                  Unir y Recortar
+                </span>
+              )}
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      {/* Footer */}
+      <div className="absolute bottom-0 w-full p-4">
+        <p
+          className={`text-xs text-white/60 transition-opacity duration-300 ${isSidebarCollapsed ? 'opacity-0 md:opacity-100 text-center' : 'opacity-100'
+            }`}
+        >
+          © 2025 Komiix
+        </p>
+      </div>
+    </aside>
+  );
+}

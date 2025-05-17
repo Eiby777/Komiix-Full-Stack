@@ -1,0 +1,61 @@
+services:
+  komiix-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    environment:
+      - PYTHONPATH=/app
+      - REDIS_HOST=redis
+    command: uvicorn server:app --host 0.0.0.0 --port 8000
+    networks:
+      - komiix-network
+    depends_on:
+      - libretranslate
+      - redis
+
+  libretranslate:
+    image: libretranslate/libretranslate
+    ports:
+      - "5000:5000"
+    environment:
+      - LT_LOAD_ONLY=es,ja,zh,ko,en
+    networks:
+      - komiix-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - komiix-network
+
+  komiix-frontend:
+    build:
+      context: ./frontend
+      secrets:
+        - supabase_url
+        - supabase_key
+    ports:
+      - "80:80"
+    env_file:
+      - ./frontend/.env
+    restart: unless-stopped
+    container_name: komiix
+    networks:
+      - komiix-network
+
+secrets:
+  supabase_url:
+    file: ./frontend/supabase_url.txt
+  supabase_key:
+    file: ./frontend/supabase_key.txt
+
+networks:
+  komiix-network:
+    driver: bridge

@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /auth
+Allow: /forgot-password 
+Allow: /reset-password
+Allow: /confirm-signup
+Allow: /terms
+Allow: /privacy
+
+Disallow: /dashboard
+Disallow: /editor
+
+Sitemap: https://komiix.com/sitemap.xml
