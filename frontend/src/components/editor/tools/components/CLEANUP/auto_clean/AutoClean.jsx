@@ -9,7 +9,7 @@ import { getImages, getRectangles, addCleanedObjects, nonSolidBackgroundRects } 
 import useLayerHistory from "../../../../canvas/UndoRedoMenu/handlers/fabricHistoryManager";
 
 const AutoClean = () => {
-  const { canvasInstances, MASK, getCanvasInstance, setCanvasObjectStatus, resetActiveTools } = useEditorStore();
+  const { canvasInstances, MASK, getCanvasInstance, setCanvasObjectStatus, resetActiveTools, activeImageIndex } = useEditorStore();
   const [showWarning, setShowWarning] = useState(true);
   const [isDownloadingModels, setIsDownloadingModels] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,11 +22,11 @@ const AutoClean = () => {
   const [languageError, setLanguageError] = useState(false);
   const [isProcessingComplete, setIsProcessingComplete] = useState(false);
   const downloadCompletedRef = useRef(false);
+  const [selectAllImages, setSelectAllImages] = useState(true);
   const { saveState } = useLayerHistory();
 
   useEffect(() => {
     if (isLoading && isProcessingComplete && progress.canvasProgress.current >= progress.canvasProgress.total && progress.canvasProgress.total > 0) {
-      console.log("Procesamiento completado, ocultando...");
       setHideLoading(true);
       setIsLoading(false);
       resetActiveTools();
@@ -83,16 +83,17 @@ const AutoClean = () => {
     setIsLoading(true);
 
     try {
-      const images = await getImages(canvasInstances);
+      const selectedCanvasInstances = selectAllImages ? canvasInstances : [canvasInstances[activeImageIndex]];
+      const images = await getImages(selectedCanvasInstances);
       if (!images) {
-        console.log("Las imágenes no fueron guardadas");
+        console.warn("Las imágenes no fueron guardadas");
         setIsLoading(false);
         return;
       }
 
-      const rectangles = await getRectangles(canvasInstances, images);
+      const rectangles = await getRectangles(selectedCanvasInstances, images);
       if (!rectangles) {
-        console.log("Hubo un problema recalculando las coordenadas de las imágenes");
+        console.warn("Hubo un problema recalculando las coordenadas de las imágenes");
         setIsLoading(false);
         return;
       }
@@ -102,17 +103,20 @@ const AutoClean = () => {
         images,
         updateProgress,
         selectedLanguage,
-        updateDownloadingStatus
+        updateDownloadingStatus,
+        selectAllImages
       );
 
+      console.log("Result: ", result);
+
       if (!result) {
-        console.log("Hubo un problema limpiando las imágenes");
+        console.warn("Hubo un problema limpiando las imágenes");
         setIsLoading(false);
         return;
       }
 
-      await addCleanedObjects(result, canvasInstances, saveState);
-      await nonSolidBackgroundRects(result, canvasInstances, MASK, saveState);
+      await addCleanedObjects(result, selectedCanvasInstances, saveState);
+      await nonSolidBackgroundRects(result, selectedCanvasInstances, MASK, saveState);
 
       setIsProcessingComplete(true);
       setIsLoading(false);
@@ -131,7 +135,6 @@ const AutoClean = () => {
   };
 
   if (hideLoading) {
-    console.log("Componente AutoClean no renderizado (hideLoading = true)");
     return null;
   }
 
@@ -154,6 +157,8 @@ const AutoClean = () => {
           <WarningModal
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
+            selectAllImages={selectAllImages}
+            setSelectAllImages={setSelectAllImages}
             languageError={languageError}
             setLanguageError={setLanguageError}
             onAccept={handleAccept}

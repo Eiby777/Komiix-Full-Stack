@@ -7,13 +7,15 @@ import { upscaleCroppedImages, downScaleBoundingBoxes } from "../../components/h
  * @param {number} groupSize - Size of each recorte group
  * @returns {Object} Object containing recorteGroups, recorteMapping, and totalRecortes
  */
-const prepareRecorteGroups = (scaledBinarizedImages, counts, groupSize) => {
+export const prepareRecorteGroups = (scaledBinarizedImages, counts, groupSize) => {
     const recorteGroups = [];
     const recorteMapping = [];
     let flatRecortes = [];
 
     scaledBinarizedImages.forEach((canvasCrops, canvasIndex) => {
-        if (counts[canvasIndex] === 0) return;
+        if (counts[canvasIndex] === 0) {
+            return;
+        }
         canvasCrops.forEach((crop, cropIndex) => {
             flatRecortes.push({
                 image: crop.image,
@@ -45,7 +47,7 @@ const prepareRecorteGroups = (scaledBinarizedImages, counts, groupSize) => {
  * @param {number} groupSize - Size of each recorte group
  * @returns {Array} Array of downscaled OCR results organized by canvas
  */
-const processOCRResults = (tesseractResultsFlat, recorteMapping, scaledBinarizedImages, scaleFactors, groupSize) => {
+export const processOCRResults = (tesseractResultsFlat, recorteMapping, scaledBinarizedImages, scaleFactors, groupSize) => {
     const tesseractResults = Array(scaledBinarizedImages.length).fill().map(() => []);
     const downscaledResults = Array(scaledBinarizedImages.length).fill().map(() => []);
 
@@ -76,7 +78,7 @@ const processOCRResults = (tesseractResultsFlat, recorteMapping, scaledBinarized
  * @param {Array<number>} counts - Array of rectangle counts per canvas
  * @returns {Array} Array of rectangles with non-solid backgrounds
  */
-const identifyNonSolidBackgrounds = (cleanedImages, counts) => {
+export const identifyNonSolidBackgrounds = (cleanedImages, counts) => {
     const nonSolidBackgroundRects = [];
 
     for (let canvasIndex = 0; canvasIndex < cleanedImages.length; canvasIndex++) {

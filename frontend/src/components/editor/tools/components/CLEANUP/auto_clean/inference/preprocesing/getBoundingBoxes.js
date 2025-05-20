@@ -159,11 +159,17 @@ export class PreProcess {
     const furiganaProcessor = new Furigana();
     this.setRemoveFurigana(selectedLanguage === 'jap');
 
-    return analysisResults.map(result => {
+    // Agrupar los resultados por canvasIndex
+    const groupedResults = {};
+    analysisResults.forEach(result => {
+      if (!groupedResults[result.canvasIndex]) {
+        groupedResults[result.canvasIndex] = [];
+      }
       const { canvas, id, coords, color, image, canvasIndex, background, text, binarizedThreshold } = result;
 
       if (result.error) {
-        return { ...result, boundingRect: null, numTextLines: 0, annotatedImage: null };
+        groupedResults[result.canvasIndex].push({ ...result, boundingRect: null, numTextLines: 0, annotatedImage: null });
+        return;
       }
 
       const pt_x = Math.floor(background.position.x);
@@ -173,7 +179,7 @@ export class PreProcess {
       const binarizedCanvas = this.binarizeCanvas(canvas, background, text);
       // If result color matches text color, return full canvas bounding box
       if (result.color === textColor) {
-        return {
+        groupedResults[result.canvasIndex].push({
           id,
           coords,
           color,
@@ -191,7 +197,8 @@ export class PreProcess {
           },
           numTextLines: 0,
           annotatedImage: null
-        };
+        });
+        return;
       }
 
       const backgroundValue = background.color === 'oscuro' ? 0 : 255;
@@ -232,7 +239,7 @@ export class PreProcess {
         annotatedImage = annotatedCanvas.toDataURL('image/png');
       }
 
-      return {
+      groupedResults[result.canvasIndex].push({
         id,
         coords,
         color,
@@ -245,8 +252,11 @@ export class PreProcess {
         boundingRect,
         numTextLines,
         annotatedImage
-      };
+      });
     });
+
+    // Convertir el objeto de grupos en un array de arrays
+    return Object.values(groupedResults);
   }
 
   /**
