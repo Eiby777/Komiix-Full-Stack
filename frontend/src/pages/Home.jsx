@@ -17,6 +17,7 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const url = "http://localhost:5173";
 
   useEffect(() => {
     // Listen for auth state changes (e.g., after login or OAuth redirect)
@@ -37,7 +38,7 @@ export default function Home() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: "http://localhost:80", // Redirect to frontend (HTTPS)
+          redirectTo: url, // Redirect to frontend (HTTPS)
         },
       });
       if (error) throw error;
@@ -58,7 +59,7 @@ export default function Home() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: "http://localhost:80", // Redirect to frontend (HTTPS)
+          redirectTo: url, // Redirect to frontend (HTTPS)
         },
       });
       if (error) throw error;

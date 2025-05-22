@@ -173,21 +173,4 @@ export const upscaleCroppedImages = (croppedImages, defaultScaleFactor = 3) => {
     };
 };
 
-/**
- * Reduce el tamaño de las bounding boxes dividiendo por el factor de escala
- * @param {Array<Object>} boundingBoxes - Array de objetos con bounding boxes
- * @param {number} scaleFactor - Factor por el cual dividir las coordenadas
- * @returns {Array<Object>} - Array de bounding boxes con coordenadas reducidas
- */
-export const downScaleBoundingBoxes = (boundingBoxes, scaleFactor) => {
-    if (scaleFactor === 1) return boundingBoxes;
-    return boundingBoxes.map((boundingBox) => ({
-        ...boundingBox,
-        bbox: {
-            x0: boundingBox.bbox.x0 / scaleFactor,
-            x1: boundingBox.bbox.x1 / scaleFactor,
-            y0: boundingBox.bbox.y0 / scaleFactor,
-            y1: boundingBox.bbox.y1 / scaleFactor,
-        },
-    }));
-};
+

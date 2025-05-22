@@ -38,7 +38,7 @@ const ToolsContainer = memo(({ currentImageIndex }) => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const accesToken = session.access_token;
-      console.log(accesToken);
+      //console.log(accesToken);
     };
     checkSession();
   }, []);

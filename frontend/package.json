@@ -46,12 +46,12 @@
   "devDependencies": {
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
-    "@vitejs/plugin-react": "^3.1.0",
+    "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.0.2",
-    "vite": "^4.5.5"
+    "vite": "^6.3.5"
   },
   "resolutions": {
     "glob": "^9.0.0",

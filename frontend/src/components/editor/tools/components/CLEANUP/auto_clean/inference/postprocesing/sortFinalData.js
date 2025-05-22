@@ -1,5 +1,3 @@
-import { upscaleCroppedImages, downScaleBoundingBoxes } from "../../components/handlers/scalingImages";
-
 /**
  * Prepares recorte groups and mapping for OCR processing
  * @param {Array} scaledBinarizedImages - Array of scaled binarized image crops

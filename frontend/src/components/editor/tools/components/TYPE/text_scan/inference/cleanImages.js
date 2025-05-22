@@ -3,7 +3,7 @@ import { filterRectangles } from "./filterRectangles";
 import { croppImages } from "./croppImages";
 import detectTextOrientation from "./detectTextOrientation";
 import reorderTextByOrientation from "./reorderTextByOrientation";
-import { upscaleCroppedImages, downScaleBoundingBoxes } from "./scalingImages";
+import { upscaleCroppedImages } from "./scalingImages";
 import { supabase } from "../../../../../../../lib/supabaseClient";
 /**
  * Procesa imágenes recortadas para detectar y reordenar texto utilizando Tesseract.js.
@@ -100,11 +100,7 @@ const cleanImages = async (
         if (canvasIndex !== undefined && cropIndex !== undefined) {
           tesseractResults[canvasIndex][cropIndex] = result;
           downscaledResults[canvasIndex][cropIndex] = {
-            ...result,
-            boundingBoxes: downScaleBoundingBoxes(
-              result.boundingBoxes,
-              scaleFactors[canvasIndex]?.[cropIndex] || 1
-            ),
+            ...result
           };
         }
       });
