@@ -27,8 +27,7 @@ const cleanImages = async (
     images,
     onProgress = () => {},
     selectedLanguage,
-    onDownloadProgress = () => {},
-    selectAllImages
+    onDownloadProgress = () => {}
 ) => {
     try {
         const filteredData = filterRectangles(rectangles);
@@ -40,14 +39,14 @@ const cleanImages = async (
         preprocessor.setVerticalOrientation(false); // Set if vertical text is known
         const processedResults = preprocessor.processImages(backgroundColors, selectedLanguage);
 
-        const { scaledBinarizedImages, scaledOriginalImages, scaleFactors } = upscaleCroppedImages(processedResults);
+        const { ocrImages, originalImages } = upscaleCroppedImages(processedResults);
 
         const counts = filteredData.counts;
         const validCanvases = counts.reduce((sum, count) => sum + (count > 0 ? 1 : 0), 0);
         let processedRectangles = 0;
         const GROUP_SIZE = 2;
 
-        const { recorteGroups, recorteMapping, totalRecortes } = prepareRecorteGroups(scaledBinarizedImages, counts, GROUP_SIZE);
+        const { recorteGroups, recorteMapping, totalRecortes } = prepareRecorteGroups(ocrImages, counts, GROUP_SIZE);
 
         const tesseractResultsFlat = await processWithTesseract(
             recorteGroups,
@@ -69,9 +68,9 @@ const cleanImages = async (
             onDownloadProgress
         );
 
-        const downscaledResults = processOCRResults(tesseractResultsFlat, recorteMapping, scaledBinarizedImages, scaleFactors, GROUP_SIZE);
+        const downscaledResults = processOCRResults(tesseractResultsFlat, recorteMapping, ocrImages, GROUP_SIZE);
 
-        const cleanedImages = await cleanCroppedImages(scaledOriginalImages, downscaledResults, counts, images, selectedLanguage);
+        const cleanedImages = await cleanCroppedImages(originalImages, counts, images);
 
         const nonSolidBackgroundRects = identifyNonSolidBackgrounds(cleanedImages, counts);
 

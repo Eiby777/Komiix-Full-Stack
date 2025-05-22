@@ -43,11 +43,10 @@ export const prepareRecorteGroups = (scaledBinarizedImages, counts, groupSize) =
  * @param {Array} tesseractResultsFlat - Flat array of OCR results
  * @param {Array} recorteMapping - Mapping of flat indices to canvas and crop indices
  * @param {Array} scaledBinarizedImages - Array of scaled binarized image crops
- * @param {Array} scaleFactors - Array of scale factors for downscaling
  * @param {number} groupSize - Size of each recorte group
  * @returns {Array} Array of downscaled OCR results organized by canvas
  */
-export const processOCRResults = (tesseractResultsFlat, recorteMapping, scaledBinarizedImages, scaleFactors, groupSize) => {
+export const processOCRResults = (tesseractResultsFlat, recorteMapping, scaledBinarizedImages, groupSize) => {
     const tesseractResults = Array(scaledBinarizedImages.length).fill().map(() => []);
     const downscaledResults = Array(scaledBinarizedImages.length).fill().map(() => []);
 
@@ -59,10 +58,7 @@ export const processOCRResults = (tesseractResultsFlat, recorteMapping, scaledBi
                 tesseractResults[canvasIndex][cropIndex] = result;
                 downscaledResults[canvasIndex][cropIndex] = {
                     ...result,
-                    boundingBoxes: downScaleBoundingBoxes(
-                        result.boundingBoxes,
-                        scaleFactors[canvasIndex]?.[cropIndex] || 1
-                    ),
+                    boundingBoxes: result.boundingBoxes,
                 };
             }
         });

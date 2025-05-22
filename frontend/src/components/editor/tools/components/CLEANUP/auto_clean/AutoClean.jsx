@@ -103,8 +103,7 @@ const AutoClean = () => {
         images,
         updateProgress,
         selectedLanguage,
-        updateDownloadingStatus,
-        selectAllImages
+        updateDownloadingStatus
       );
 
       console.log("Result: ", result);

@@ -1,5 +1,476 @@
 import { Furigana } from './furigana.js';
 
+const calcularTiempoEjecucion = (func, texto) => {
+  const inicio = performance.now();
+  const resultado = func();
+  const fin = performance.now();
+  const tiempoEjecucion = fin - inicio;
+  console.log(`${texto} - Tiempo de ejecución: ${tiempoEjecucion} ms`);
+  return resultado;
+}
+
+class CanvasPreProcessor {
+  constructor(scaleFactor = 3.5, darkBgThreshold = 0.6) {
+    this.scaleFactor = scaleFactor;
+    this.darkBgThreshold = darkBgThreshold;
+    this.borderWidth = 10;
+    this.targetTextHeight = { min: 20, max: 30 }; //
+  }
+
+  /**
+   * Crea una copia del canvas
+   * @param {HTMLCanvasElement} canvas - Canvas original
+   * @returns {HTMLCanvasElement} Copia del canvas
+   */
+  createCanvasCopy(canvas) {
+    const copyCanvas = document.createElement('canvas');
+    copyCanvas.width = canvas.width;
+    copyCanvas.height = canvas.height;
+    const ctx = copyCanvas.getContext('2d');
+    ctx.drawImage(canvas, 0, 0);
+    return copyCanvas;
+  }
+
+  /**
+   * Convierte el canvas a escala de grises
+   * @param {HTMLCanvasElement} canvas - Canvas a procesar
+   * @returns {HTMLCanvasElement} Canvas en escala de grises
+   */
+  convertToGrayscale(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const gray = 0.299 * r + 0.587 * g + 0.114 * b; // Fórmula de luminancia
+      data[i] = data[i + 1] = data[i + 2] = gray;
+      data[i + 3] = 255;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    return canvas;
+  }
+
+  /**
+   * Detecta el tamaño de una letra a partir del pixel superior izquierdo negro
+   * @param {HTMLCanvasElement} canvas - Canvas binarizado
+   * @param {number} textValue - Valor del texto
+   * @returns {Object} { width: number, height: number, letterImage64: string } Tamaño de la letra en píxeles y imagen data64 del rectangulo de la letra encontrada
+   */
+  detectLetterSize(canvas, textValue) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Función auxiliar para verificar si un bloque de 3x3 contiene textValue
+    function hasTextInBlock(startX, startY, checkHeight = 3, checkWidth = 3) {
+      for (let y = Math.max(0, startY); y < Math.min(height, startY + checkHeight); y++) {
+        for (let x = Math.max(0, startX); x < Math.min(width, startX + checkWidth); x++) {
+          const idx = (y * width + x) * 4;
+          if (data[idx] === textValue) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    // Función auxiliar para verificar si una fila está vacía (sin textValue)
+    function isRowEmpty(y, startX, endX) {
+      for (let x = Math.max(0, startX); x <= Math.min(width - 1, endX); x++) {
+        const idx = (y * width + x) * 4;
+        if (data[idx] === textValue) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Función auxiliar para verificar si una columna está vacía (sin textValue)
+    function isColumnEmpty(x, startY, endY) {
+      for (let y = Math.max(0, startY); y <= Math.min(height - 1, endY); y++) {
+        const idx = (y * width + x) * 4;
+        if (data[idx] === textValue) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Buscar el primer bloque de 3x3 con texto desde la esquina superior izquierda
+    let startX = 0, startY = 0;
+    outerLoop: for (let y = 0; y < height; y += 3) {
+      for (let x = 0; x < width; x += 3) {
+        if (hasTextInBlock(x, y)) {
+          startX = x;
+          startY = y;
+          break outerLoop;
+        }
+      }
+    }
+
+    // Expandir hasta encontrar los límites iniciales de la letra
+    let left = startX, top = startY, right = startX, bottom = startY;
+    const maxExpansion = 90; // Cubre letras altas como la "I"
+
+    // Expandir hacia la izquierda
+    for (let x = startX; x > Math.max(0, startX - maxExpansion); x -= 3) {
+      if (!hasTextInBlock(x - 3, top, 3, 3)) break;
+      left = x - 3;
+    }
+
+    // Expandir hacia arriba
+    for (let y = startY; y > Math.max(0, startY - maxExpansion); y -= 3) {
+      if (!hasTextInBlock(left, y - 3, 3, right - left + 3)) break;
+      top = y - 3;
+    }
+
+    // Expandir hacia la derecha
+    for (let x = startX; x < Math.min(width - 3, startX + maxExpansion); x += 3) {
+      if (!hasTextInBlock(x + 3, top, 3, 3)) break;
+      right = x + 3;
+    }
+
+    // Expandir hacia abajo
+    for (let y = startY; y < Math.min(height - 3, startY + maxExpansion); y += 3) {
+      if (!hasTextInBlock(left, y + 3, 3, right - left + 3)) break;
+      bottom = y + 3;
+    }
+
+    // Refinar los límites para eliminar filas y columnas vacías
+    // Ajustar 'top' (eliminar filas vacías desde arriba)
+    while (top < bottom && isRowEmpty(top, left, right)) {
+      top++;
+    }
+
+    // Ajustar 'bottom' (eliminar filas vacías desde abajo)
+    while (bottom > top && isRowEmpty(bottom, left, right)) {
+      bottom--;
+    }
+
+    // Ajustar 'left' (eliminar columnas vacías desde la izquierda)
+    while (left < right && isColumnEmpty(left, top, bottom)) {
+      left++;
+    }
+
+    // Ajustar 'right' (eliminar columnas vacías desde la derecha)
+    while (right > left && isColumnEmpty(right, top, bottom)) {
+      right--;
+    }
+
+    const letterWidth = right - left + 1; // Ajustar al área exacta
+    const letterHeight = bottom - top + 1;
+
+    // Crear una imagen data64 del rectángulo encerrado de la letra encontrada
+    const letterCanvas = document.createElement('canvas');
+    letterCanvas.width = letterWidth;
+    letterCanvas.height = letterHeight;
+    const letterCtx = letterCanvas.getContext('2d');
+    letterCtx.drawImage(canvas, left, top, letterWidth, letterHeight, 0, 0, letterWidth, letterHeight);
+    const letterImage64 = letterCanvas.toDataURL();
+
+    return { width: letterWidth, height: letterHeight, letterImage64 };
+  }
+  /**
+    * Escala el canvas para que la altura del texto esté entre 20 y 30 píxeles
+    * @param {HTMLCanvasElement} canvas - Canvas a escalar
+    * @param {Object} scaleFactor - Factor de escala
+    * @returns {HTMLCanvasElement} Canvas escalado
+    */
+  scale(canvas, scaleFactor) {
+    const factor = 25 / scaleFactor.height;
+    const scaledCanvas = document.createElement('canvas');
+    const ctx = scaledCanvas.getContext('2d');
+    scaledCanvas.width = canvas.width * factor;
+    scaledCanvas.height = canvas.height * factor;
+    ctx.scale(factor, factor);
+    ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+    return scaledCanvas;
+  }
+  /**
+   * Suaviza la imagen para mejorar la calidad de OCR
+   * @param {HTMLCanvasElement} canvas - Canvas a suavizar
+   * @returns {HTMLCanvasElement} Canvas suavizado
+   */
+  smoothForOCR(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Suavizado específico para OCR en imágenes binarias
+    const threshold = 128; // Umbral para blanco/negro
+
+    // Crear una copia de los datos para el suavizado
+    const smoothedData = new Uint8ClampedArray(data);
+
+    // Aplicar suavizado con kernel 3x3 en cada píxel
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        let sum = 0;
+        let count = 0;
+
+        // Kernel 3x3 para suavizado
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const nx = x + dx;
+            const ny = y + dy;
+
+            // Verificar si estamos dentro de los límites
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+              const idx = (ny * width + nx) * 4;
+              sum += data[idx]; // Solo usamos el canal rojo ya que es binario
+              count++;
+            }
+          }
+        }
+
+        // Calcular el nuevo valor basado en el promedio del vecindario
+        const idx = (y * width + x) * 4;
+        const avg = sum / count;
+
+        // Aplicar umbral suave para mantener bordes pero suavizar ruido
+        const newValue = avg > threshold ? 255 : 0;
+
+        smoothedData[idx] = smoothedData[idx + 1] = smoothedData[idx + 2] = newValue;
+        smoothedData[idx + 3] = 255; // Mantener alpha
+      }
+    }
+
+    // Actualizar la imagen con los datos suavizados
+    ctx.putImageData(new ImageData(smoothedData, width, height), 0, 0);
+    return canvas;
+  }
+
+  /**
+    * Aplica un filtro de enfoque (unsharp masking simplificado)
+    * @param {HTMLCanvasElement} canvas - Canvas a enfocar
+    * @returns {HTMLCanvasElement} Canvas enfocado
+    */
+  unsharpMask(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    const width = canvas.width;
+    const height = canvas.height;
+
+    const blurredData = new Uint8ClampedArray(data);
+    const radius = 5;
+    const fract = 2.5;
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        let sum = 0;
+        let count = 0;
+        for (let dy = -radius; dy <= radius; dy++) {
+          for (let dx = -radius; dx <= radius; dx++) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+              const idx = (ny * width + nx) * 4;
+              sum += blurredData[idx];
+              count++;
+            }
+          }
+        }
+        const idx = (y * width + x) * 4;
+        const avg = sum / count;
+        blurredData[idx] = blurredData[idx + 1] = blurredData[idx + 2] = avg;
+      }
+    }
+
+    for (let i = 0; i < data.length; i += 4) {
+      const original = data[i];
+      const blurred = blurredData[i];
+      const sharpened = original + fract * (original - blurred);
+      const value = Math.max(0, Math.min(255, sharpened));
+      data[i] = data[i + 1] = data[i + 2] = value;
+      data[i + 3] = 255;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    return canvas;
+  }
+
+  /**
+ * Reduce el ruido eliminando blobs pequeños
+ * @param {HTMLCanvasElement} canvas - Canvas binarizado
+ * @param {number} backgroundValue - Valor del fondo
+ * @param {number} textValue - Valor del texto
+ * @returns {HTMLCanvasElement} Canvas con ruido reducido
+ */
+  removeNoise(canvas, backgroundValue, textValue) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    const width = canvas.width;
+    const height = canvas.height;
+    const minBlobSize = 6; // Tamaño mínimo para considerar un blob
+
+    const visited = new Array(height).fill().map(() => new Array(width).fill(false));
+    const toRemove = new Set();
+
+    const floodFill = (x, y) => {
+      const stack = [[x, y]];
+      const blob = [];
+      while (stack.length > 0) {
+        const [cx, cy] = stack.pop();
+        if (cx < 0 || cx >= width || cy < 0 || cy >= height || visited[cy][cx] || data[(cy * width + cx) * 4] !== textValue) {
+          continue;
+        }
+        visited[cy][cx] = true;
+        blob.push([cx, cy]);
+        stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
+      }
+      return blob;
+    };
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        if (!visited[y][x] && data[(y * width + x) * 4] === textValue) {
+          const blob = floodFill(x, y);
+          if (blob.length < minBlobSize) {
+            blob.forEach(([bx, by]) => toRemove.add(by * width + bx));
+          }
+        }
+      }
+    }
+
+    for (const idx of toRemove) {
+      const dataIdx = idx * 4;
+      data[dataIdx] = data[dataIdx + 1] = data[dataIdx + 2] = backgroundValue;
+      data[dataIdx + 3] = 255;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    return canvas;
+  }
+
+  /**
+   * Detecta e invierte el fondo oscuro basado en valores predefinidos
+   * @param {HTMLCanvasElement} canvas - Canvas binarizado
+   * @param {number} backgroundValue - Valor del fondo (0 o 255)
+   * @param {number} textValue - Valor del texto (0 o 255)
+   * @returns {Object} Objeto con el canvas procesado, backgroundValue y textValue
+   */
+  detectAndInvertDarkBackground(canvas, backgroundValue, textValue) {
+    let finalBackgroundValue = backgroundValue;
+    let finalTextValue = textValue;
+
+    if (backgroundValue === 0) { // Fondo oscuro, invertir colores
+      const ctx = canvas.getContext('2d');
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = data[i + 1] = data[i + 2] = 255 - data[i]; // Invertir colores
+        data[i + 3] = 255;
+      }
+      ctx.putImageData(imageData, 0, 0);
+      // Actualizar los valores después de la inversión
+      finalBackgroundValue = 255;
+      finalTextValue = 0;
+    }
+
+    return { canvas, backgroundValue: finalBackgroundValue, textValue: finalTextValue };
+  }
+
+
+
+  /**
+   * Recorta el canvas al área del texto
+   * @param {HTMLCanvasElement} canvas - Canvas binarizado
+   * @param {{x:number, y:number, w:number, h:number}} boundingRect - Coordenadas de recorte
+   * @returns {HTMLCanvasElement} Canvas recortado
+   */
+  clipToForeground(canvas, boundingRect) {
+    const ctx = canvas.getContext('2d');
+    const clippedCanvas = document.createElement('canvas');
+    clippedCanvas.width = boundingRect.w;
+    clippedCanvas.height = boundingRect.h;
+    const clippedCtx = clippedCanvas.getContext('2d');
+    clippedCtx.drawImage(canvas, boundingRect.x, boundingRect.y, boundingRect.w, boundingRect.h, 0, 0, boundingRect.w, boundingRect.h);
+    return clippedCanvas;
+  }
+
+  /**
+   * Agrega un borde blanco de 10 píxeles
+   * @param {HTMLCanvasElement} canvas - Canvas a procesar
+   * @returns {HTMLCanvasElement} Canvas con borde
+   */
+  addBorder(canvas) {
+    const borderedCanvas = document.createElement('canvas');
+    borderedCanvas.width = canvas.width + 2 * this.borderWidth;
+    borderedCanvas.height = canvas.height + 2 * this.borderWidth;
+    const ctx = borderedCanvas.getContext('2d');
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, borderedCanvas.width, borderedCanvas.height);
+    ctx.drawImage(canvas, this.borderWidth, this.borderWidth);
+    return borderedCanvas;
+  }
+
+  /**
+   * Procesa el canvas para OCR
+   * @param {HTMLCanvasElement} canvas - Canvas original
+   * @param {Object} background - Propiedades del fondo
+   * @param {Object} text - Propiedades del texto
+   * @param {boolean} verticalText - Orientación del texto
+   * @param {boolean} removeFurigana - Si eliminar furigana
+   * @param {Function} binarizeCanvas - Función para binarizar
+   * @param {Function} dilateCanvas - Función para dilatar
+   * @param {Function} removeBorderText - Función para eliminar bordes conectados
+   * @param {Function} extractTextBlock - Función para extraer bloques de texto
+   * @returns {Object{HTMLCanvasElement, Object}} Canvas procesado y coordenadas del texto
+   */
+  processForOCR(canvas, background, text, textColor, color, verticalText, removeFurigana, binarizeCanvas, dilateCanvas, removeBorderText, extractTextBlock) {
+    let processedCanvas = this.createCanvasCopy(canvas);
+    processedCanvas = this.convertToGrayscale(processedCanvas);
+    processedCanvas = binarizeCanvas(processedCanvas, background, text, false);
+    const backgroundValue = background.color === 'oscuro' ? 0 : 255;
+    const textValue = background.color === 'oscuro' ? 255 : 0;
+    const { canvas: invertedCanvas, backgroundValue: finalBackgroundValue, textValue: finalTextValue } =
+      this.detectAndInvertDarkBackground(processedCanvas, backgroundValue, textValue);
+    processedCanvas = invertedCanvas;
+
+    if (color !== textColor) {
+      processedCanvas = removeBorderText(processedCanvas, finalBackgroundValue, finalTextValue);
+    }
+    
+    const letterSize = this.detectLetterSize(processedCanvas, finalTextValue);
+
+    processedCanvas = this.unsharpMask(processedCanvas);
+    processedCanvas = this.removeNoise(processedCanvas, finalBackgroundValue, finalTextValue);
+    const binarizedCanvas = binarizeCanvas(processedCanvas, background, text, false);
+
+    const dilatedCanvas = dilateCanvas(binarizedCanvas);
+    const center_x = dilatedCanvas.width / 2;
+    const center_y = dilatedCanvas.height / 2;
+    const boundingRect = extractTextBlock(dilatedCanvas, background, center_x, center_y, true);
+
+    const furiganaProcessor = new Furigana();
+    if (removeFurigana) {
+      const { canvas: updatedCanvas, numTextLines } = verticalText
+        ? furiganaProcessor.eraseFuriganaVertical(processedCanvas, this.scaleFactor)
+        : furiganaProcessor.eraseFuriganaHorizontal(processedCanvas, this.scaleFactor);
+      processedCanvas = updatedCanvas;
+    }
+
+    processedCanvas = this.clipToForeground(processedCanvas, boundingRect);
+    
+    const scaledCanvas = this.scale(processedCanvas, letterSize);
+    processedCanvas = scaledCanvas;
+    processedCanvas = this.addBorder(processedCanvas);
+    processedCanvas = this.smoothForOCR(processedCanvas);
+
+    return { processedCanvas, boundingRect, binarizedCanvas };
+  }
+}
+
 /**
  * Preprocesses cropped images to detect text bounding boxes and optionally remove furigana
  */
@@ -10,6 +481,7 @@ export class PreProcess {
     this.verticalText = false;
     this.removeFurigana = false;
     this.japNumTextLines = 0;
+    this.canvasPreProcessor = new CanvasPreProcessor(this.scaleFactor, this.darkBgThreshold);
   }
 
   setVerticalOrientation(value) {
@@ -25,10 +497,11 @@ export class PreProcess {
   * @param {HTMLCanvasElement} canvas - Input canvas to copy and binarize
   * @param {Object} background - {color: 'oscuro' | 'claro', rgb: {r, g, b}}
   * @param {Object} text - {color: 'oscuro' | 'claro', rgb: {r, g, b}}
+  * @param {boolean} dilate - Whether to apply dilation to connect text
   * @returns {HTMLCanvasElement} Binarized canvas copy
   */
-  binarizeCanvas(canvas, background, text) {
-    const copyCanvas = document.createElement('canvas');
+  binarizeCanvas(canvas, background, text, dilate = true) {
+    let copyCanvas = document.createElement('canvas'); // Cambiado de const a let
     copyCanvas.width = canvas.width;
     copyCanvas.height = canvas.height;
     const ctx = copyCanvas.getContext('2d');
@@ -73,199 +546,65 @@ export class PreProcess {
 
     ctx.putImageData(imageData, 0, 0);
 
-    // Apply multiple iterations of dilation to connect text
-    let tempData = new Uint8ClampedArray(data);
-    const dilationRadius = 2; // 5x5 window (radius 2)
-    const dilationIterations = 2; // As adjusted
+    if (dilate) {
+      copyCanvas = this.dilateCanvas(copyCanvas);
+    }
 
-    for (let iter = 0; iter < dilationIterations; iter++) {
-      const newData = new Uint8ClampedArray(tempData.length);
-      for (let i = 0; i < tempData.length; i += 4) {
+    return copyCanvas;
+  }
+
+  /**
+ * Applies dilation to a binarized canvas copy
+ * @param {HTMLCanvasElement} canvas - Input canvas to dilate
+ * @param {number} iterations - Number of dilation iterations
+ * @returns {HTMLCanvasElement} Dilated canvas copy
+ */
+  dilateCanvas(canvas, iterations = 2) {
+    const copyCanvas = document.createElement('canvas');
+    copyCanvas.width = canvas.width;
+    copyCanvas.height = canvas.height;
+    const ctx = copyCanvas.getContext('2d');
+    ctx.drawImage(canvas, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, copyCanvas.width, copyCanvas.height);
+    let currentData = imageData.data;
+
+    const dilationRadius = 2; // 5x5 window (radius 2)
+
+    for (let iter = 0; iter < iterations; iter++) {
+      const newData = new Uint8ClampedArray(currentData.length);
+      for (let i = 0; i < currentData.length; i += 4) {
         const x = (i / 4) % copyCanvas.width;
         const y = Math.floor((i / 4) / copyCanvas.width);
-        let isForeground = tempData[i] === textValue;
-        if (!isForeground) {
+        let isBackground = currentData[i] === 0; // Check for black (background)
+        if (!isBackground) { // If pixel is not black, check neighbors
           for (let dy = -dilationRadius; dy <= dilationRadius; dy++) {
             for (let dx = -dilationRadius; dx <= dilationRadius; dx++) {
               const nx = x + dx;
               const ny = y + dy;
               if (nx >= 0 && nx < copyCanvas.width && ny >= 0 && ny < copyCanvas.height) {
                 const nIdx = (ny * copyCanvas.width + nx) * 4;
-                if (tempData[nIdx] === textValue) {
-                  isForeground = true;
+                if (currentData[nIdx] === 0) { // If neighbor is black
+                  isBackground = true;
                   break;
                 }
               }
             }
-            if (isForeground) break;
+            if (isBackground) break;
           }
         }
-        newData[i] = newData[i + 1] = newData[i + 2] = isForeground ? textValue : backgroundValue;
-        newData[i + 3] = 255;
+        newData[i] = newData[i + 1] = newData[i + 2] = isBackground ? 0 : 255; // Black if background, white otherwise
+        newData[i + 3] = 255; // Opaque
       }
-      tempData = newData;
+      currentData = newData;
     }
 
-    ctx.putImageData(new ImageData(tempData, copyCanvas.width, copyCanvas.height), 0, 0);
+    const outputImageData = new ImageData(currentData, copyCanvas.width, copyCanvas.height);
+    ctx.putImageData(outputImageData, 0, 0);
+
     return copyCanvas;
   }
 
-  /**
-   * Otsu's method for finding optimal threshold
-   * @param {Array<number>} luminances - Array of luminance values
-   * @returns {number} Threshold value
-   */
-  otsuThreshold(luminances) {
-    const histogram = new Array(256).fill(0);
-    for (const lum of luminances) {
-      histogram[Math.round(lum)]++;
-    }
-
-    const total = luminances.length;
-    let sum = 0;
-    for (let i = 0; i < 256; i++) sum += i * histogram[i];
-
-    let sumB = 0, wB = 0, maxVariance = 0, threshold = 0;
-
-    for (let t = 0; t < 256; t++) {
-      wB += histogram[t];
-      if (wB === 0) continue;
-
-      const wF = total - wB;
-      if (wF === 0) break;
-
-      sumB += t * histogram[t];
-      const mB = sumB / wB;
-      const mF = (sum - sumB) / wF;
-      const variance = wB * wF * (mB - mF) * (mB - mF);
-
-      if (variance > maxVariance) {
-        maxVariance = variance;
-        threshold = t;
-      }
-    }
-
-    return threshold;
-  }
-
-  /**
-   * Processes cropped images to detect text bounding boxes and generates annotated images
-   * @param {Array} analysisResults - Output from getBackgroundColor.js
-   * @param {string} selectedLanguage - Language code (e.g., 'jap', 'eng')
-   * @returns {Array} Processed results with bounding boxes, updated canvases, and annotated images
-   */
-  processImages(analysisResults, selectedLanguage) {
-    const textColor = "#FFFF00";
-    const furiganaProcessor = new Furigana();
-    this.setRemoveFurigana(selectedLanguage === 'jap');
-
-    // Agrupar los resultados por canvasIndex
-    const groupedResults = {};
-    analysisResults.forEach(result => {
-      if (!groupedResults[result.canvasIndex]) {
-        groupedResults[result.canvasIndex] = [];
-      }
-      const { canvas, id, coords, color, image, canvasIndex, background, text, binarizedThreshold } = result;
-
-      if (result.error) {
-        groupedResults[result.canvasIndex].push({ ...result, boundingRect: null, numTextLines: 0, annotatedImage: null });
-        return;
-      }
-
-      const pt_x = Math.floor(background.position.x);
-      const pt_y = Math.floor(background.position.y);
-      
-      // Create a binarized copy of the canvas
-      const binarizedCanvas = this.binarizeCanvas(canvas, background, text);
-      // If result color matches text color, return full canvas bounding box
-      if (result.color === textColor) {
-        groupedResults[result.canvasIndex].push({
-          id,
-          coords,
-          color,
-          image,
-          canvas,
-          canvasIndex,
-          background,
-          text,
-          binarizedThreshold,
-          boundingRect: {
-            x: 0,
-            y: 0,
-            w: canvas.width,
-            h: canvas.height
-          },
-          numTextLines: 0,
-          annotatedImage: null
-        });
-        return;
-      }
-
-      const backgroundValue = background.color === 'oscuro' ? 0 : 255;
-      const textValue = background.color === 'oscuro' ? 255 : 0;
-      const cleanedCanvas = this.removeBorderText(binarizedCanvas, backgroundValue, textValue);
-      const boundingRect = this.extractTextBlock(cleanedCanvas, background, pt_x, pt_y);
-
-      let processedCanvas = canvas; // Preserve original color canvas
-      let numTextLines = 0;
-      if (this.removeFurigana) {
-        const { canvas: updatedCanvas, numTextLines: lines } = this.verticalText
-          ? furiganaProcessor.eraseFuriganaVertical(canvas, this.scaleFactor)
-          : furiganaProcessor.eraseFuriganaHorizontal(canvas, this.scaleFactor);
-        processedCanvas = updatedCanvas;
-        numTextLines = lines;
-        this.japNumTextLines = lines;
-      }
-
-      const updatedImage = processedCanvas.toDataURL('image/png');
-
-      // Create annotated image with bounding rectangle on the bordered canvas
-      let annotatedImage = null;
-      if (boundingRect) {
-        const annotatedCanvas = document.createElement('canvas');
-        annotatedCanvas.width = processedCanvas.width;
-        annotatedCanvas.height = processedCanvas.height;
-        const ctx = annotatedCanvas.getContext('2d');
-        ctx.drawImage(processedCanvas, 0, 0);
-        ctx.strokeStyle = 'red';
-        ctx.lineWidth = 2;
-
-        ctx.strokeRect(
-          boundingRect.x,
-          boundingRect.y,
-          boundingRect.w,
-          boundingRect.h
-        );
-        annotatedImage = annotatedCanvas.toDataURL('image/png');
-      }
-
-      groupedResults[result.canvasIndex].push({
-        id,
-        coords,
-        color,
-        image: updatedImage,
-        canvas: processedCanvas,
-        canvasIndex,
-        background,
-        text,
-        binarizedThreshold,
-        boundingRect,
-        numTextLines,
-        annotatedImage
-      });
-    });
-
-    // Convertir el objeto de grupos en un array de arrays
-    return Object.values(groupedResults);
-  }
-
-  /**
-   * Removes text regions touching the borders by inverting them to background color
-   * @param {HTMLCanvasElement} canvas - Binarized canvas
-   * @param {number} backgroundValue - Value of background (0 or 255)
-   * @param {number} textValue - Value of text (0 or 255)
-   * @returns {HTMLCanvasElement} Canvas with border text removed
-   */
   removeBorderText(canvas, backgroundValue, textValue) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -273,11 +612,9 @@ export class PreProcess {
     const width = canvas.width;
     const height = canvas.height;
 
-    // Create a visited array to track pixels during flood fill
     const visited = new Array(height).fill().map(() => new Array(width).fill(false));
-    const toInvert = new Set(); // Set to store indices of pixels to invert
+    const toInvert = new Set();
 
-    // Function to perform flood fill from a border pixel
     const floodFill = (x, y) => {
       const stack = [[x, y]];
       while (stack.length > 0) {
@@ -287,8 +624,7 @@ export class PreProcess {
           continue;
         }
         visited[cy][cx] = true;
-        toInvert.add(idx / 4); // Store the pixel index
-        // Check 4-connected neighbors
+        toInvert.add(idx / 4);
         stack.push([cx + 1, cy]);
         stack.push([cx - 1, cy]);
         stack.push([cx, cy + 1]);
@@ -296,7 +632,6 @@ export class PreProcess {
       }
     };
 
-    // Scan borders for text pixels
     for (let x = 0; x < width; x++) {
       const topIdx = (0 * width + x) * 4;
       const bottomIdx = ((height - 1) * width + x) * 4;
@@ -318,7 +653,6 @@ export class PreProcess {
       }
     }
 
-    // Invert all connected pixels to background color
     for (const idx of toInvert) {
       const dataIdx = idx * 4;
       data[dataIdx] = data[dataIdx + 1] = data[dataIdx + 2] = backgroundValue;
@@ -329,61 +663,46 @@ export class PreProcess {
     return canvas;
   }
 
-  /**
-   * Detects the bounding box around text in a cleaned binarized canvas
-   * @param {HTMLCanvasElement} canvas - Binarized canvas
-   * @param {Object} background - Background properties from getBackgroundColor
-   * @param {number} pt_x - X coordinate of the starting point
-   * @param {number} pt_y - Y coordinate of the starting point
-   * @returns {Object|null} Bounding box {x, y, w, h} or null if no text found
-   */
   extractTextBlock(canvas, background, pt_x, pt_y) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
+
     const backgroundValue = background.color === 'oscuro' ? 0 : 255;
     const textValue = background.color === 'oscuro' ? 255 : 0;
 
-    // Validate backgroundValue to ensure it is used
     if (backgroundValue !== 0 && backgroundValue !== 255) {
       console.warn(`Invalid backgroundValue: ${backgroundValue}. Expected 0 or 255.`);
     }
 
-    // Ensure starting point is within canvas bounds
     pt_x = Math.max(0, Math.min(pt_x, canvas.width - 1));
     pt_y = Math.max(0, Math.min(pt_y, canvas.height - 1));
 
-    // Initialize bounding rectangle at the starting point
     let left = pt_x;
     let top = pt_y;
     let right = pt_x;
     let bottom = pt_y;
 
-    // Calculate maxNoTextIterations dynamically
     const baseIterations = Math.min(canvas.width, canvas.height) / 10;
     const maxNoTextIterations = Math.min(Math.round(baseIterations * this.scaleFactor), 100);
 
-    // Track consecutive iterations without finding text for each side
     let leftNoTextCount = 0;
     let topNoTextCount = 0;
     let rightNoTextCount = 0;
     let bottomNoTextCount = 0;
 
-    // Flags to stop expansion for each side
     let expandLeft = true;
     let expandTop = true;
     let expandRight = true;
     let expandBottom = true;
 
-    // Continue expanding until all sides stop
     while (expandLeft || expandTop || expandRight || expandBottom) {
       let foundTextThisIteration = false;
 
-      // Expand Left
       if (expandLeft && left > 0) {
         let foundText = false;
         const xStart = Math.max(0, left - 1);
-        const xEnd = Math.max(0, left - 3); // Check a range of columns
+        const xEnd = Math.max(0, left - 3);
         for (let x = xStart; x >= xEnd; x--) {
           for (let y = top; y <= bottom; y++) {
             const idx = (y * canvas.width + x) * 4;
@@ -408,11 +727,10 @@ export class PreProcess {
         expandLeft = false;
       }
 
-      // Expand Top
       if (expandTop && top > 0) {
         let foundText = false;
         const yStart = Math.max(0, top - 1);
-        const yEnd = Math.max(0, top - 3); // Check a range of rows
+        const yEnd = Math.max(0, top - 3);
         for (let y = yStart; y >= yEnd; y--) {
           for (let x = left; x <= right; x++) {
             const idx = (y * canvas.width + x) * 4;
@@ -437,11 +755,10 @@ export class PreProcess {
         expandTop = false;
       }
 
-      // Expand Right
       if (expandRight && right < canvas.width - 1) {
         let foundText = false;
         const xStart = Math.min(canvas.width - 1, right + 1);
-        const xEnd = Math.min(canvas.width - 1, right + 3); // Check a range of columns
+        const xEnd = Math.min(canvas.width - 1, right + 3);
         for (let x = xStart; x <= xEnd; x++) {
           for (let y = top; y <= bottom; y++) {
             const idx = (y * canvas.width + x) * 4;
@@ -466,11 +783,10 @@ export class PreProcess {
         expandRight = false;
       }
 
-      // Expand Bottom
       if (expandBottom && bottom < canvas.height - 1) {
         let foundText = false;
         const yStart = Math.min(canvas.height - 1, bottom + 1);
-        const yEnd = Math.min(canvas.height - 1, bottom + 3); // Check a range of rows
+        const yEnd = Math.min(canvas.height - 1, bottom + 3);
         for (let y = yStart; y <= yEnd; y++) {
           for (let x = left; x <= right; x++) {
             const idx = (y * canvas.width + x) * 4;
@@ -495,21 +811,68 @@ export class PreProcess {
         expandBottom = false;
       }
 
-      // If no text was found in this iteration and all sides have stopped, break
       if (!foundTextThisIteration && !expandLeft && !expandTop && !expandRight && !expandBottom) {
         break;
       }
     }
 
-    // Calculate width and height
     const w = right - left + 1;
     const h = bottom - top + 1;
-
-    // Ensure minimum size
     if (w < 3 || h < 3) {
       return null;
     }
     return { x: left, y: top, w, h };
   }
 
+  processImages(analysisResults, selectedLanguage) {
+    const textColor = "#FFFF00";
+    this.setRemoveFurigana(selectedLanguage === 'jap');
+
+    const groupedResults = {};
+    analysisResults.forEach(result => {
+      if (!groupedResults[result.canvasIndex]) {
+        groupedResults[result.canvasIndex] = [];
+      }
+      const { canvas, id, coords, color, image, canvasIndex, background, text } = result;
+
+      if (result.error) {
+        groupedResults[result.canvasIndex].push({ ...result, boundingRect: null, numTextLines: 0, annotatedImage: null, ocrCanvas: null });
+        return;
+      }
+
+      const { processedCanvas, boundingRect, binarizedCanvas } = this.canvasPreProcessor.processForOCR(
+        canvas,
+        background,
+        text,
+        textColor,
+        color,
+        this.verticalText,
+        this.removeFurigana,
+        this.binarizeCanvas.bind(this),
+        this.dilateCanvas.bind(this),
+        this.removeBorderText.bind(this),
+        this.extractTextBlock.bind(this)
+      );
+
+      groupedResults[result.canvasIndex].push({
+        id,
+        coords,
+        color,
+        image,
+        canvas,
+        canvasIndex,
+        ocrCanvas: processedCanvas,
+        boundingRect,
+        binarizedCanvas,
+        //background,
+        //text,
+        //binarizedThreshold,
+        //numTextLines,
+        //annotatedImage,
+
+      });
+    });
+
+    return Object.values(groupedResults);
+  }
 }

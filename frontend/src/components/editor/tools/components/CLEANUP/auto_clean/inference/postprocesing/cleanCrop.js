@@ -14,18 +14,7 @@ export const colorToTypeMap = {
   "#FFFF00": "text",
 };
 
-/**
- * Valida si el canvas del recorte está definido
- * @param {Object} crop - Objeto que representa el recorte
- * @returns {boolean} Verdadero si el canvas está definido, falso en caso contrario
- */
-const validateCanvas = (crop) => {
-  if (!crop.canvas) {
-    console.error("Canvas no definido para el recorte:", crop.id);
-    return false;
-  }
-  return true;
-};
+
 
 /**
  * Extiende las coordenadas y el canvas para recortes de tipo "text"
@@ -266,26 +255,25 @@ const fillSolidBackground = (crop, canvas, coords, fillColor) => {
  * Limpia un recorte de imagen basado en los resultados de Tesseract OCR
  * @async
  * @param {Object} crop - Objeto que representa el recorte a limpiar
- * @param {Object} tesseractResult - Resultados del OCR de Tesseract
- * @param {string} selectedLanguage - Idioma seleccionado para el OCR
  * @returns {Promise<Object>} Objeto con imagen limpia, máscara, coordenadas y estado
  */
-export const cleanCrop = async (crop, tesseractResult, selectedLanguage) => {
-  if (!validateCanvas(crop)) {
+export const cleanCrop = async (crop) => {
+  let { canvas, boundingRect, color, binarizedCanvas } = crop;
+  if (!canvas) {
+    console.error(`Error validando canvas para recorte ${crop.id}`);
     return crop;
   }
 
-  const rectType = colorToTypeMap[crop.color.toUpperCase()] || "normal";
+  const rectType = colorToTypeMap[color.toUpperCase()] || "normal";
   const extended = extendRectangleForText(crop, rectType);
   if (!extended) {
+    console.error(`Error extendiendo rectángulo para recorte ${crop.id}`);
     return crop;
   }
-
-  // Para rectángulos no "text" (globos), siempre usar máscara
   if (rectType !== "text") {
-    const maskCanvas = createMaskFromBoundingBoxes(tesseractResult, selectedLanguage);
+    const maskCanvas = createMaskFromBoundingBoxes(boundingRect, binarizedCanvas, canvas);
     if (!maskCanvas) {
-      return { ...crop, coords: extended.coords };
+      console.error(`Error creando máscara para recorte ${crop.id}`);
     }
 
     const { sortedColors, percentage, uniqueColors, totalPixels } = analyzeMaskedColors(
@@ -307,7 +295,7 @@ export const cleanCrop = async (crop, tesseractResult, selectedLanguage) => {
 
   // Para rectángulos "text" (recortes ajustados)
   let colorStats = getDominantColorAndCount(extended.canvas);
-  const maskCanvas = createMaskFromBoundingBoxes(tesseractResult, selectedLanguage);
+  const maskCanvas = createMaskFromBoundingBoxes(boundingRect, binarizedCanvas, canvas);
   if (maskCanvas) {
     colorStats = getDominantColorAndCount(extended.canvas, maskCanvas);
   }

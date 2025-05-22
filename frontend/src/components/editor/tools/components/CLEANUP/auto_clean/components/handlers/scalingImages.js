@@ -78,145 +78,55 @@ export const upscaleImage = (canvas, scaleFactor) => {
 };
 
 /**
-    Calcula el factor de escala óptimo para una imagen, de modo que la altura estimada del texto
-    esté en el rango ideal para Tesseract (30-50 píxeles).
-    @param {HTMLCanvasElement} canvas - Canvas con la imagen recortada
-    @param {number} minTextHeight - Altura mínima deseada del texto en píxeles (default: 30)
-    @param {number} maxTextHeight - Altura máxima deseada del texto en píxeles (default: 50)
-    @param {number} textHeightRatio - Proporción estimada del alto del canvas que ocupa el texto (default: 0.4)
-    @returns {number} - Factor de escala óptimo
-*/
-export const calculateOptimalScaleFactor = (
-    canvas,
-    minTextHeight = 30,
-    maxTextHeight = 50,
-    textHeightRatio = 0.4
-) => {
-    // Validar que el canvas sea válido
-    if (!(canvas instanceof HTMLCanvasElement) || canvas.width === 0 || canvas.height === 0) {
-        return 1; // Factor por defecto si el canvas no es válido
-    }
-
-    // Estimar la altura del texto como una proporción del alto del canvas
-    const estimatedTextHeight = canvas.height * textHeightRatio;
-
-    // Si la altura estimada ya está dentro del rango ideal, no necesitamos escalar
-    if (estimatedTextHeight >= minTextHeight && estimatedTextHeight <= maxTextHeight) {
-        return 1;
-    }
-
-    // Calcular el factor de escala necesario para que la altura del texto esté dentro del rango
-    let scaleFactor;
-    if (estimatedTextHeight < minTextHeight) {
-        // Si el texto es demasiado pequeño, escalar hacia arriba
-        scaleFactor = minTextHeight / estimatedTextHeight;
-    } else {
-        // Si el texto es demasiado grande, escalar hacia abajo
-        scaleFactor = maxTextHeight / estimatedTextHeight;
-    }
-
-    // Asegurar que el factor de escala no sea menor que 1 (no queremos reducir demasiado)
-    return Math.max(1, scaleFactor);
-};
-
-/**
     Escala un array de imágenes recortadas aplicando binarización para una versión y manteniendo la original para otra,
     y retorna los factores de escala usados.
     @param {Array<Array<Object>>} croppedImages - Array de arrays de objetos con imágenes
-    @param {number} [defaultScaleFactor=3] - Factor de escalado por defecto (usado si no se calcula uno óptimo)
-    @returns {Object} - Objeto con las imágenes escaladas (binarizadas y originales) y los factores de escala
-    @returns {Array<Array<Object>>} return.scaledBinarizedImages - Array de arrays con imágenes binarizadas escaladas
-    @returns {Array<Array<Object>>} return.scaledOriginalImages - Array de arrays con imágenes originales escaladas
-    @returns {Array<Array<number>>} return.scaleFactors - Array de arrays con los factores de escala usados
+    @returns {Object} - Objeto con las imágenes escaladas (binarizadas y originales)
+    @returns {Array<Array<Object>>} return.ocrImages - Array de arrays con imágenes binarizadas escaladas
+    @returns {Array<Array<Object>>} return.originalImages - Array de arrays con imágenes originales escaladas
 */
-export const upscaleCroppedImages = (croppedImages, defaultScaleFactor = 3) => {
-    // Array para almacenar los factores de escala de cada imagen
-    const scaleFactors = [];
-
-    const scaledBinarizedImages = [];
-    const scaledOriginalImages = [];
+export const upscaleCroppedImages = (croppedImages) => {
+    const ocrImages = [];
+    const originalImages = [];
 
     croppedImages.forEach((canvasImages) => {
         if (!canvasImages.length) {
-            scaleFactors.push([]);
-            scaledBinarizedImages.push([]);
-            scaledOriginalImages.push([]);
+            ocrImages.push([]);
+            originalImages.push([]);
             return;
         }
 
-        // Arrays para los factores de escala y las imágenes de este grupo
-        const groupScaleFactors = [];
-        const binarizedGroup = [];
+        const ocrGroup = [];
         const originalGroup = [];
 
         canvasImages.forEach((imageData) => {
-            const { canvas, ...rest } = imageData;
+            const {ocrCanvas, ...rest } = imageData;
             try {
-                // Calcular el factor de escala óptimo para esta imagen
-                const scaleFactor = calculateOptimalScaleFactor(canvas) || defaultScaleFactor;
-                groupScaleFactors.push(scaleFactor);
-
-                // Procesar versión binarizada
-                const binarizedCanvas = binarizeCanvas(canvas);
-                const upscaledBinarizedImage = upscaleImage(binarizedCanvas, scaleFactor);
-
-                // Procesar versión original
-                const upscaledOriginalImage = upscaleImage(canvas, scaleFactor);
-
-                binarizedGroup.push({
+                ocrGroup.push({
                     ...rest,
-                    canvas: binarizedCanvas,
-                    image: upscaledBinarizedImage,
+                    canvas: ocrCanvas,
+                    image: ocrCanvas.toDataURL("image/png"),
                 });
 
-                originalGroup.push({
-                    ...rest,
-                    canvas: canvas,
-                    image: upscaledOriginalImage,
-                });
+                originalGroup.push({ocrCanvas, ...rest});
             } catch (error) {
                 console.error(`Error al hacer upscaling de la imagen ${imageData.id}:`, error);
-                groupScaleFactors.push(1);
-                binarizedGroup.push({
+                ocrGroup.push({
                     ...rest,
-                    canvas: canvas,
-                    image: imageData.image,
+                    canvas: ocrCanvas,
+                    image: ocrCanvas.toDataURL("image/png"),
                 });
-                originalGroup.push({
-                    ...rest,
-                    canvas: canvas,
-                    image: imageData.image,
-                });
+                originalGroup.push({ocrCanvas, ...rest});
             }
         });
 
-        scaleFactors.push(groupScaleFactors);
-        scaledBinarizedImages.push(binarizedGroup);
-        scaledOriginalImages.push(originalGroup);
+        ocrImages.push(ocrGroup);
+        originalImages.push(originalGroup);
     });
 
     return {
-        scaledBinarizedImages,
-        scaledOriginalImages,
-        scaleFactors,
+        ocrImages,
+        originalImages,
     };
 };
 
-/**
-    Reduce el tamaño de las bounding boxes dividiendo por el factor de escala
-    @param {Array<Object>} boundingBoxes - Array de objetos con bounding boxes
-    @param {number} scaleFactor - Factor por el cual dividir las coordenadas
-    @returns {Array<Object>} - Array de bounding boxes con coordenadas reducidas
-*/
-export const downScaleBoundingBoxes = (boundingBoxes, scaleFactor) => {
-    if (scaleFactor === 1) return boundingBoxes;
-    return boundingBoxes.map((boundingBox) => ({
-        ...boundingBox,
-        bbox: {
-            x0: boundingBox.bbox.x0 / scaleFactor,
-            x1: boundingBox.bbox.x1 / scaleFactor,
-            y0: boundingBox.bbox.y0 / scaleFactor,
-            y1: boundingBox.bbox.y1 / scaleFactor,
-        },
-    }));
-};
