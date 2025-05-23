@@ -18,20 +18,6 @@ class CanvasPreProcessor {
   }
 
   /**
-   * Crea una copia del canvas
-   * @param {HTMLCanvasElement} canvas - Canvas original
-   * @returns {HTMLCanvasElement} Copia del canvas
-   */
-  createCanvasCopy(canvas) {
-    const copyCanvas = document.createElement('canvas');
-    copyCanvas.width = canvas.width;
-    copyCanvas.height = canvas.height;
-    const ctx = copyCanvas.getContext('2d');
-    ctx.drawImage(canvas, 0, 0);
-    return copyCanvas;
-  }
-
-  /**
    * Convierte el canvas a escala de grises
    * @param {HTMLCanvasElement} canvas - Canvas a procesar
    * @returns {HTMLCanvasElement} Canvas en escala de grises
@@ -428,8 +414,7 @@ class CanvasPreProcessor {
    * @returns {Object{HTMLCanvasElement, Object}} Canvas procesado y coordenadas del texto
    */
   processForOCR(canvas, background, text, textColor, color, verticalText, removeFurigana, binarizeCanvas, dilateCanvas, removeBorderText, extractTextBlock) {
-    let processedCanvas = this.createCanvasCopy(canvas);
-    processedCanvas = this.convertToGrayscale(processedCanvas);
+    let processedCanvas = this.convertToGrayscale(canvas);
     processedCanvas = binarizeCanvas(processedCanvas, background, text, false);
     const backgroundValue = background.color === 'oscuro' ? 0 : 255;
     const textValue = background.color === 'oscuro' ? 255 : 0;
@@ -440,7 +425,7 @@ class CanvasPreProcessor {
     if (color !== textColor) {
       processedCanvas = removeBorderText(processedCanvas, finalBackgroundValue, finalTextValue);
     }
-    
+    processedCanvas = binarizeCanvas(processedCanvas, background, text, false);
     const letterSize = this.detectLetterSize(processedCanvas, finalTextValue);
 
     processedCanvas = this.unsharpMask(processedCanvas);
@@ -451,7 +436,9 @@ class CanvasPreProcessor {
     const center_x = dilatedCanvas.width / 2;
     const center_y = dilatedCanvas.height / 2;
     const boundingRect = extractTextBlock(dilatedCanvas, background, center_x, center_y, true);
-
+    if (!boundingRect) {
+      console.error("No se pudo detectar el texto en el canvas");
+    }
     const furiganaProcessor = new Furigana();
     if (removeFurigana) {
       const { canvas: updatedCanvas, numTextLines } = verticalText
@@ -461,11 +448,12 @@ class CanvasPreProcessor {
     }
 
     processedCanvas = this.clipToForeground(processedCanvas, boundingRect);
-    
+
     const scaledCanvas = this.scale(processedCanvas, letterSize);
     processedCanvas = scaledCanvas;
     processedCanvas = this.addBorder(processedCanvas);
     processedCanvas = this.smoothForOCR(processedCanvas);
+
 
     return { processedCanvas, boundingRect, binarizedCanvas };
   }
@@ -501,13 +489,8 @@ export class PreProcess {
   * @returns {HTMLCanvasElement} Binarized canvas copy
   */
   binarizeCanvas(canvas, background, text, dilate = true) {
-    let copyCanvas = document.createElement('canvas'); // Cambiado de const a let
-    copyCanvas.width = canvas.width;
-    copyCanvas.height = canvas.height;
-    const ctx = copyCanvas.getContext('2d');
-    ctx.drawImage(canvas, 0, 0);
-
-    const imageData = ctx.getImageData(0, 0, copyCanvas.width, copyCanvas.height);
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
 
     // Define tolerance for color matching
@@ -547,10 +530,10 @@ export class PreProcess {
     ctx.putImageData(imageData, 0, 0);
 
     if (dilate) {
-      copyCanvas = this.dilateCanvas(copyCanvas);
+      canvas = this.dilateCanvas(canvas);
     }
 
-    return copyCanvas;
+    return canvas;
   }
 
   /**
@@ -668,6 +651,20 @@ export class PreProcess {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
 
+    console.log(canvas.toDataURL());
+    // Contar colores diferentes en el lienzo
+    let colors = {};
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const key = `${r},${g},${b}`;
+      colors[key] = (colors[key] || 0) + 1;
+    }
+    console.log(`Cantidad de colores diferentes en el bloque de texto:`);
+    Object.entries(colors).forEach(([color, count]) => console.log(`  ${color}: ${count}`));
+    console.log(colors);
+
     const backgroundValue = background.color === 'oscuro' ? 0 : 255;
     const textValue = background.color === 'oscuro' ? 255 : 0;
 
@@ -675,16 +672,67 @@ export class PreProcess {
       console.warn(`Invalid backgroundValue: ${backgroundValue}. Expected 0 or 255.`);
     }
 
+    // Redondear coordenadas fraccionarias
+    pt_x = Math.round(pt_x);
+    pt_y = Math.round(pt_y);
     pt_x = Math.max(0, Math.min(pt_x, canvas.width - 1));
     pt_y = Math.max(0, Math.min(pt_y, canvas.height - 1));
+
+    console.log(`Punto inicial: (${pt_x}, ${pt_y})`);
+
+    // Verificar el color del píxel inicial
+    const initialIdx = (pt_y * canvas.width + pt_x) * 4;
+    console.log(`Color del píxel inicial (${pt_x}, ${pt_y}): ${data[initialIdx]}, ${data[initialIdx + 1]}, ${data[initialIdx + 2]}`);
+
+    // Si el píxel inicial no es texto, buscar el píxel negro más cercano
+    if (data[initialIdx] !== textValue || data[initialIdx + 1] !== textValue || data[initialIdx + 2] !== textValue) {
+      console.log(`Punto inicial no es texto. Buscando píxel negro cercano...`);
+      let foundTextPixel = false;
+      const searchRadius = 5; // Radio de búsqueda
+      for (let dy = -searchRadius; dy <= searchRadius && !foundTextPixel; dy++) {
+        for (let dx = -searchRadius; dx <= searchRadius && !foundTextPixel; dx++) {
+          const newX = pt_x + dx;
+          const newY = pt_y + dy;
+          if (newX >= 0 && newX < canvas.width && newY >= 0 && newY < canvas.height) {
+            const idx = (newY * canvas.width + newX) * 4;
+            if (data[idx] === textValue && data[idx + 1] === textValue && data[idx + 2] === textValue) {
+              pt_x = newX;
+              pt_y = newY;
+              console.log(`Nuevo punto inicial encontrado: (${pt_x}, ${pt_y})`);
+              foundTextPixel = true;
+            }
+          }
+        }
+      }
+      if (!foundTextPixel) {
+        console.log(`No se encontró píxel de texto en el radio de búsqueda. Retornando null.`);
+        return null;
+      }
+    }
+
+    // Imprimir colores circundantes del punto inicial
+    console.log(`Colores circundantes hasta maxNoTextIterations del punto inicial:`);
+    const maxNoTextIterations = Math.min(Math.round((Math.min(canvas.width, canvas.height) / 10) * this.scaleFactor), 100);
+    for (let i = -maxNoTextIterations; i <= maxNoTextIterations; i++) {
+      for (let j = -maxNoTextIterations; j <= maxNoTextIterations; j++) {
+        const newX = pt_x + j;
+        const newY = pt_y + i;
+        if (newX >= 0 && newX < canvas.width && newY >= 0 && newY < canvas.height) {
+          const idx = (newY * canvas.width + newX) * 4;
+          const r = data[idx];
+          const g = data[idx + 1];
+          const b = data[idx + 2];
+          if (r === 0 && g === 0 && b === 0) {
+            console.log(`  (${newX}, ${newY}): ${r}, ${g}, ${b}`);
+          }
+        }
+      }
+    }
 
     let left = pt_x;
     let top = pt_y;
     let right = pt_x;
     let bottom = pt_y;
-
-    const baseIterations = Math.min(canvas.width, canvas.height) / 10;
-    const maxNoTextIterations = Math.min(Math.round(baseIterations * this.scaleFactor), 100);
 
     let leftNoTextCount = 0;
     let topNoTextCount = 0;
@@ -702,11 +750,11 @@ export class PreProcess {
       if (expandLeft && left > 0) {
         let foundText = false;
         const xStart = Math.max(0, left - 1);
-        const xEnd = Math.max(0, left - 3);
+        const xEnd = Math.max(0, left - 5); // Aumentar rango de búsqueda
         for (let x = xStart; x >= xEnd; x--) {
           for (let y = top; y <= bottom; y++) {
             const idx = (y * canvas.width + x) * 4;
-            if (data[idx] === textValue) {
+            if (data[idx] !== backgroundValue || data[idx + 1] !== backgroundValue || data[idx + 2] !== backgroundValue) {
               foundText = true;
               break;
             }
@@ -730,11 +778,11 @@ export class PreProcess {
       if (expandTop && top > 0) {
         let foundText = false;
         const yStart = Math.max(0, top - 1);
-        const yEnd = Math.max(0, top - 3);
+        const yEnd = Math.max(0, top - 5); // Aumentar rango de búsqueda
         for (let y = yStart; y >= yEnd; y--) {
           for (let x = left; x <= right; x++) {
             const idx = (y * canvas.width + x) * 4;
-            if (data[idx] === textValue) {
+            if (data[idx] !== backgroundValue || data[idx + 1] !== backgroundValue || data[idx + 2] !== backgroundValue) {
               foundText = true;
               break;
             }
@@ -742,6 +790,7 @@ export class PreProcess {
           if (foundText) break;
         }
         if (foundText) {
+          console.log("Encontrado texto en la parte superior");
           top--;
           topNoTextCount = 0;
           foundTextThisIteration = true;
@@ -758,11 +807,11 @@ export class PreProcess {
       if (expandRight && right < canvas.width - 1) {
         let foundText = false;
         const xStart = Math.min(canvas.width - 1, right + 1);
-        const xEnd = Math.min(canvas.width - 1, right + 3);
+        const xEnd = Math.min(canvas.width - 1, right + 5); // Aumentar rango de búsqueda
         for (let x = xStart; x <= xEnd; x++) {
           for (let y = top; y <= bottom; y++) {
             const idx = (y * canvas.width + x) * 4;
-            if (data[idx] === textValue) {
+            if (data[idx] !== backgroundValue || data[idx + 1] !== backgroundValue || data[idx + 2] !== backgroundValue) {
               foundText = true;
               break;
             }
@@ -770,6 +819,7 @@ export class PreProcess {
           if (foundText) break;
         }
         if (foundText) {
+          console.log("Encontrado texto en la parte derecha");
           right++;
           rightNoTextCount = 0;
           foundTextThisIteration = true;
@@ -786,11 +836,11 @@ export class PreProcess {
       if (expandBottom && bottom < canvas.height - 1) {
         let foundText = false;
         const yStart = Math.min(canvas.height - 1, bottom + 1);
-        const yEnd = Math.min(canvas.height - 1, bottom + 3);
+        const yEnd = Math.min(canvas.height - 1, bottom + 5); // Aumentar rango de búsqueda
         for (let y = yStart; y <= yEnd; y++) {
           for (let x = left; x <= right; x++) {
             const idx = (y * canvas.width + x) * 4;
-            if (data[idx] === textValue) {
+            if (data[idx] !== backgroundValue || data[idx + 1] !== backgroundValue || data[idx + 2] !== backgroundValue) {
               foundText = true;
               break;
             }
@@ -798,6 +848,7 @@ export class PreProcess {
           if (foundText) break;
         }
         if (foundText) {
+          console.log("Encontrado texto en la parte inferior");
           bottom++;
           bottomNoTextCount = 0;
           foundTextThisIteration = true;
@@ -818,6 +869,7 @@ export class PreProcess {
 
     const w = right - left + 1;
     const h = bottom - top + 1;
+    console.log(`Rectangulo detectado: (${left}, ${top}, ${w}, ${h})`);
     if (w < 3 || h < 3) {
       return null;
     }
