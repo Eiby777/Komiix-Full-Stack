@@ -12,6 +12,26 @@ import { getUser } from '../../../hooks/useAuth';
 
 export default function Header() {
   const headerRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState('75px');
+
+  useEffect(() => {
+    const calculateHeaderHeight = () => {
+      const windowHeight = window.innerHeight;
+      const referenceHeight = 976;
+      const referenceHeaderHeight = 75;
+      
+      const height = Math.min(
+        Math.round((windowHeight / referenceHeight) * referenceHeaderHeight),
+        100
+      );
+      
+      setHeaderHeight(`${height}px`);
+    };
+
+    calculateHeaderHeight();
+    window.addEventListener('resize', calculateHeaderHeight);
+    return () => window.removeEventListener('resize', calculateHeaderHeight);
+  }, []);
   const { 
     imagesLoaded, 
     setCanvasObjectStatus, 
@@ -138,7 +158,7 @@ export default function Header() {
   };
 
   return (
-    <div ref={headerRef} className="w-full bg-[#1a1a1a] border-b border-white/20 fixed top-0 right-0 z-[100] ml-[60px] h-[75px] overflow-hidden">
+    <div ref={headerRef} className="w-full bg-[#1a1a1a] border-b border-white/20 fixed top-0 right-0 z-[100] ml-[60px] overflow-hidden" style={{ height: headerHeight }}>
       <div className="w-full px-8 flex items-center justify-between h-full">
         <ProgressBar
           activeImageIndex={activeImageIndex}
