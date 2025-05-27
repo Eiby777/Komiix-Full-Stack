@@ -21,16 +21,7 @@ export default function SettingsPanel() {
 
   if (activeToolsWithSettings.length === 0) return null;
 
-  let toolsToRender = [...activeToolsWithSettings];
-  if (toolsToRender.length === 2) {
-    const twoTextTools =
-      (toolsToRender[0].id === TOOLS.TEXT.id && toolsToRender[1].id === TOOLS.TEXT_BOX.id) ||
-      (toolsToRender[0].id === TOOLS.TEXT_BOX.id && toolsToRender[1].id === TOOLS.TEXT.id);
-
-    if (twoTextTools && toolsToRender[0].id === TOOLS.TEXT.id) {
-      toolsToRender = [toolsToRender[1], toolsToRender[0]];
-    }
-  }
+  const toolsToRender = [...activeToolsWithSettings];
 
   return (
     <div

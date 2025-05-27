@@ -6,10 +6,8 @@ export default function useSeparatorDrag(panelRef, activeTools, heights, setHeig
   const { setToolsHeights } = useEditorStore();
 
   useEffect(() => {
-    // Allow dragging if both text and text-box are active, regardless of original-view
-    const hasText = activeTools.includes(TOOLS.TEXT.id);
-    const hasTextBox = activeTools.includes(TOOLS.TEXT_BOX.id);
-    if (!(hasText && hasTextBox) || !panelRef.current) return;
+    // Allow dragging if there are exactly 2 active tools
+    if (activeTools.length !== 2 || !panelRef.current) return;
 
     let startY;
     let startHeight0;

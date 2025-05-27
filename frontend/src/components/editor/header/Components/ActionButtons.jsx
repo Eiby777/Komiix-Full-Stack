@@ -111,11 +111,18 @@ export default function ActionButtons({ navigate, handleExport, handleSaveLocal,
           >
             <ChevronDown style={{ width: chevronSize, height: chevronSize }} className="text-white" />
           </button>
-
           {showMenu && (
+
             <div
-              className="absolute right-0 bg-gray-800 border border-gray-600 rounded-md shadow-lg z-[1000]"
-              style={{ marginTop: menuMarginTop, width: menuWidth }}
+              className="bg-gray-800 border border-gray-600 rounded-md shadow-lg"
+              style={{
+                position: 'fixed',
+                right: '32px',
+                top: `${headerHeight}px`,
+                width: parseInt(menuWidth.replace('rem', '')) + 'rem',
+                zIndex: 2147483647,
+                pointerEvents: 'all'
+              }}
               onMouseLeave={() => setShowMenu(false)}
             >
               <button
@@ -124,12 +131,7 @@ export default function ActionButtons({ navigate, handleExport, handleSaveLocal,
                   setShowMenu(false);
                 }}
                 className="flex items-center space-x-2 w-full px-4 py-2 text-white hover:bg-gray-700 rounded-md transition-colors duration-200"
-                style={{
-                  paddingLeft: buttonPaddingX,
-                  paddingRight: buttonPaddingX,
-                  paddingTop: buttonPaddingY,
-                  paddingBottom: buttonPaddingY,
-                }}
+
               >
                 <Upload style={{ width: iconSize, height: iconSize }} className="text-gray-300" />
                 <span className="text-gray-300" style={{ fontSize }}>
