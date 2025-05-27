@@ -45,7 +45,11 @@ export default function DrawTextSettings() {
         />
       </div>
 
-      <TextDisplay predictedText={predictedText} setPredictedText={setPredictedText} />
+      <TextDisplay 
+      predictedText={predictedText} 
+      setPredictedText={setPredictedText}
+      fabricCanvasRef={fabricCanvasRef}
+       />
     </div>
   );
 }

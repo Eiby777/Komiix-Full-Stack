@@ -8,11 +8,12 @@ import { useCanvasHandlers } from './handlers/canvasHandlers';
  * @param {Object} props
  * @param {string} props.predictedText - Text detected by OCR
  * @param {function} props.setPredictedText - Function to update the detected text
+ * @param {React.RefObject} props.fabricCanvasRef - Reference to the Fabric.js canvas instance
  * @returns {JSX.Element} Text display area with reset button
  */
 
-export default function TextDisplay({ predictedText, setPredictedText }) {
-  const { resetCanvas } = useCanvasHandlers();
+export default function TextDisplay({ predictedText, setPredictedText, fabricCanvasRef }) {
+  const { resetCanvas } = useCanvasHandlers(fabricCanvasRef);
   const textareaRef = useRef(null);
 
   const adjustTextareaHeight = () => {
