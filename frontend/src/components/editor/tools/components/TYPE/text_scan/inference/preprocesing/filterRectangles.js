@@ -1,17 +1,11 @@
 /**
  * Filtra rectángulos eliminando aquellos que están completamente dentro de otros
- * @param {Array<Array<Object>>} rectangles - Array de arrays de rectángulos a filtrar
- * @returns {Object} - Objeto con:
- *   - filteredRectangles: Array<Array<Object>> Rectángulos filtrados
- *   - counts: Array<number> Cantidad de rectángulos por canvas
+ * @param {Array} rectangles - Array de rectángulos agrupados por canvas
+ * @returns {Object} Objeto con:
+ *   - filteredRectangles: Array de rectángulos filtrados
+ *   - counts: Array con conteos de rectángulos por canvas
  */
 export const filterRectangles = (rectangles) => {
-    /**
-     * Determina si un rectángulo está completamente dentro de otro
-     * @param {Object} rect1 - Primer rectángulo
-     * @param {Object} rect2 - Segundo rectángulo
-     * @returns {boolean} - True si rect1 está dentro de rect2
-     */
     const isRectangleInside = (rect1, rect2) => {
       const rect1Left = rect1.coords.left;
       const rect1Right = rect1.coords.left + rect1.coords.width;

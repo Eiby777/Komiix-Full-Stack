@@ -1,14 +1,16 @@
 import processWithTesseract from "../../../../handlers/useTesseract";
-import { filterRectangles } from "./filterRectangles";
-import { croppImages } from "./croppImages";
-import detectTextOrientation from "./detectTextOrientation";
-import reorderTextByOrientation from "./reorderTextByOrientation";
-import { upscaleCroppedImages } from "./scalingImages";
-import { supabase } from "../../../../../../../lib/supabaseClient";
+import { filterRectangles } from "./preprocesing/filterRectangles";
+import { croppImages } from "./preprocesing/croppImages";
+import detectTextOrientation from "./postprocesing/detectTextOrientation";
+import reorderTextByOrientation from "./postprocesing/reorderTextByOrientation";
+import { upscaleCroppedImages } from "./preprocesing/scalingImages";
+import getBackgroundColor from "./preprocesing/getBackgroundColor";
+import { PreProcess } from "./preprocesing/getBoundingBoxes";
+import { prepareRecorteGroups, processOCRResults } from "./postprocesing/sortFinalData";
 /**
- * Procesa imágenes recortadas para detectar y reordenar texto utilizando Tesseract.js.
- * Filtra rectángulos, recorta imágenes, escala las imágenes, realiza OCR, detecta la orientación del texto
- * y reordena el texto según la orientación detectada.
+    Procesa imágenes recortadas para detectar y reordenar texto utilizando Tesseract.js.
+    Filtra rectángulos, recorta imágenes, escala las imágenes, realiza OCR, detecta la orientación del texto
+    y reordena el texto según la orientación detectada.
  *
  * @async
  * @function cleanImages
@@ -38,42 +40,25 @@ const cleanImages = async (
   try {
     const filteredData = filterRectangles(rectangles);
     const croppedImages = croppImages(filteredData.filteredRectangles, images);
-    const { scaledImages, scaleFactors } = upscaleCroppedImages(croppedImages);
+    const backgroundColors = getBackgroundColor(croppedImages);
+
+    // Preprocess to detect bounding boxes and remove furigana (if Japanese)
+    const preprocessor = new PreProcess();
+    preprocessor.setVerticalOrientation(false); // Set if vertical text is known
+    const processedResults = preprocessor.processImages(backgroundColors, selectedLanguage);
+    
+    const { ocrImages, originalImages } = upscaleCroppedImages(processedResults);
 
     const counts = filteredData.counts;
-    const totalRecortes = counts.reduce((sum, count) => sum + count, 0);
     const validCanvases = counts.reduce((sum, count) => sum + (count > 0 ? 1 : 0), 0);
     let processedRectangles = 0;
-
-    const LANGUAGE = selectedLanguage;
-
     const GROUP_SIZE = 2;
-    const recorteGroups = [];
-    const recorteMapping = [];
-    let flatRecortes = [];
 
-    scaledImages.forEach((canvasCrops, canvasIndex) => {
-      if (counts[canvasIndex] === 0) return;
-      canvasCrops.forEach((crop, cropIndex) => {
-        flatRecortes.push({
-          image: crop.image,
-          id: crop.id,
-          coords: crop.coords,
-          color: crop.color,
-          canvasIndex,
-          cropIndex,
-        });
-        recorteMapping.push({ canvasIndex, cropIndex });
-      });
-    });
+    const { recorteGroups, recorteMapping, totalRecortes } = prepareRecorteGroups(ocrImages, counts, GROUP_SIZE);
 
-    for (let i = 0; i < flatRecortes.length; i += GROUP_SIZE) {
-      recorteGroups.push(flatRecortes.slice(i, i + GROUP_SIZE));
-    }
-    
     const tesseractResultsFlat = await processWithTesseract(
       recorteGroups,
-      LANGUAGE,
+      selectedLanguage,
       (m) => {
         if (m.status === "recognizing text" && m.progress === 1) {
           processedRectangles += 1;
@@ -91,22 +76,9 @@ const cleanImages = async (
       onDownloadProgress
     );
 
-    const tesseractResults = Array(scaledImages.length).fill().map(() => []);
-    const downscaledResults = Array(scaledImages.length).fill().map(() => []);
-    tesseractResultsFlat.forEach((group, groupIndex) => {
-      group.forEach((result, resultIndex) => {
-        const flatIndex = groupIndex * GROUP_SIZE + resultIndex;
-        const { canvasIndex, cropIndex } = recorteMapping[flatIndex] || {};
-        if (canvasIndex !== undefined && cropIndex !== undefined) {
-          tesseractResults[canvasIndex][cropIndex] = result;
-          downscaledResults[canvasIndex][cropIndex] = {
-            ...result
-          };
-        }
-      });
-    });
+    const downscaledResults = processOCRResults(tesseractResultsFlat, recorteMapping, ocrImages, GROUP_SIZE);
 
-    const orientations = detectTextOrientation(downscaledResults, LANGUAGE);
+    const orientations = detectTextOrientation(downscaledResults, selectedLanguage);
     const reorderedResults = reorderTextByOrientation(downscaledResults, orientations);
 
     const results = reorderedResults.map((canvasResults, canvasIndex) => {

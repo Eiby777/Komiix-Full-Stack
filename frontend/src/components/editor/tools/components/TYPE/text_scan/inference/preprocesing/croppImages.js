@@ -1,9 +1,8 @@
 /**
- * Recorta imágenes basándose en rectángulos filtrados
- * @param {Array<Array<Object>>} filteredRectangles - Array de arrays de rectángulos con coordenadas
- * @param {Array<HTMLCanvasElement>} images - Array de canvases fuente
- * @returns {Array<Array<Object>>} - Array de arrays con imágenes recortadas y metadatos
- * @throws {Error} - Si no se encuentra un canvas para algún índice
+ * Recorta imágenes basadas en rectángulos filtrados
+ * @param {Array} filteredRectangles - Array de rectángulos filtrados por canvas
+ * @param {Array} images - Array de imágenes fuente
+ * @returns {Array} Array de imágenes recortadas con sus metadatos
  */
 export const croppImages = (filteredRectangles, images) => {
     const croppedImages = filteredRectangles.map(
