@@ -12,7 +12,7 @@ import { getUser } from '../../../hooks/useAuth';
 
 export default function Header() {
   const headerRef = useRef(null);
-  const [headerHeight, setHeaderHeight] = useState('75px');
+  
 
   useEffect(() => {
     const calculateHeaderHeight = () => {
@@ -39,7 +39,9 @@ export default function Header() {
     setActiveImageIndex, 
     images, 
     canvasInstances, 
-    activeLayer
+    activeLayer,
+    setHeaderHeight,
+    headerHeight
   } = useEditorStore();
   const [isLoadingImage, _] = useState(false);
   const navigate = useNavigate();
@@ -169,12 +171,14 @@ export default function Header() {
           inputValue={inputValue}
           setInputValue={setInputValue}
           handleJump={handleJump}
+          headerHeight={headerHeight}
         />
         <ActionButtons
           navigate={navigate}
           handleExport={handleExport}
           handleSaveLocal={handleSaveLocal}
           setShowLoadModal={setShowLoadModal}
+          headerHeight={headerHeight}
         />
       </div>
       <LoadModal

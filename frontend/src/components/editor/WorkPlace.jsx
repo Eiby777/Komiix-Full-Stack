@@ -1,7 +1,7 @@
 import { PanTool } from './tools/components'
 import { useEditorStore } from '../../stores/editorStore'
 import { TOOLS } from '../../constants/tools'
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { LAYERS } from '../../constants/layers';
 import { FaCog } from 'react-icons/fa';
 
@@ -13,9 +13,25 @@ export default function EditorLayout({
   layerPanel,
   undoRedoMenu
 }) {
-  const { activeTools, activeLayer, toggleTool, configIconsPositions, setConfigIconsPositions, isSettingsVisible, setIsSettingsVisible, isLayerCarouselVisible } = useEditorStore()
+  const {
+    activeTools,
+    activeLayer,
+    toggleTool,
+    configIconsPositions,
+    setConfigIconsPositions,
+    isSettingsVisible,
+    setIsSettingsVisible,
+    isLayerCarouselVisible,
+    headerHeight
+  } = useEditorStore()
+
   const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
   const [topPositionIcons, setTopPositionIcons] = useState("");
+  const toolsHeight = useRef("75px");
+
+  useEffect(() => {
+    console.log(toolsHeight.current.offsetWidth)
+  }, []);
 
   useEffect(() => {
     const handleKeyPress = (e) => {
@@ -56,26 +72,26 @@ export default function EditorLayout({
   }, [isLayerCarouselVisible, configIconsPositions]);
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      {header}
-      <div className="flex pt-[4.5rem] relative" style={{ height: 'calc(100vh)' }}>
+    <div className="min-h-screen bg-[var(--background)] flex flex-col">
+      <div className="flex-shrink-0 flex">
+        {header}
+      </div>
+      <div className="flex-1 flex relative" style={{ paddingTop: headerHeight }}>
         {layerPanel}
-        <div className="border-r border-[var(--muted)] bg-[#1a1a1a]" style={{ minWidth: '50px', maxWidth: '3%' }}>
+        <div ref={toolsHeight} className="border-r border-[var(--muted)] bg-[#1a1a1a]" style={{ width: "50px" }}>
           {toolbar}
         </div>
         <div
-          className={`${
-            isSettingsVisible ? 'w-[80%]' : 'w-full'
-          } overflow-auto transition-all duration-300`}
+          className={`${isSettingsVisible ? 'w-[80%]' : 'w-full'
+            } overflow-auto transition-all duration-300`}
           id="div_editor"
         >
           {canvas}
         </div>
         {isCanvasLoaded && undoRedoMenu}
         <div
-          className={`flex w-[20%] min-w-[230px] transition-all duration-300 ${
-            isSettingsVisible ? 'block' : 'hidden'
-          }`}
+          className={`flex w-[20%] min-w-[230px] transition-all duration-300 ${isSettingsVisible ? 'block' : 'hidden'
+            }`}
         >
           <div className="border-l border-[var(--muted)] bg-[var(--muted)] w-[100%]">
             {settingsPanel}

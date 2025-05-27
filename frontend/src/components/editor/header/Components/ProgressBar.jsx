@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function ProgressBar({
+  headerHeight,
   activeImageIndex,
   totalItems,
   isLoadingImage,
@@ -13,28 +14,59 @@ export default function ProgressBar({
 }) {
   const progress = ((activeImageIndex + 1) / (totalItems || 1)) * 100;
 
+  // Calculate scaling factor based on headerHeight relative to 75px, with a minimum scale of 0.7
+  const referenceHeight = 75;
+  const scale = Math.max(parseInt(headerHeight) / referenceHeight, 0.7);
+
+  // Base sizes when headerHeight is 75px
+  const baseButtonSize = 2; // rem (32px at default font size)
+  const baseButtonPadding = 0.5; // rem (8px)
+  const baseInputWidth = 4; // rem (64px)
+  const baseInputPaddingX = 0.75; // rem (12px)
+  const baseInputPaddingY = 0.5; // rem (8px)
+  const baseFontSize = 0.875; // rem (14px)
+  const baseProgressBarWidth = 18.75; // rem (300px)
+
+  // Scaled sizes
+  const buttonSize = `${baseButtonSize * scale}rem`;
+  const buttonPadding = `${baseButtonPadding * scale}rem`;
+  const inputWidth = `${baseInputWidth * scale}rem`;
+  const inputPaddingX = `${baseInputPaddingX * scale}rem`;
+  const inputPaddingY = `${baseInputPaddingY * scale}rem`;
+  const fontSize = `${baseFontSize * scale}rem`;
+  const progressBarWidth = `${baseProgressBarWidth * scale}rem`;
+  const iconSize = `${1.5 * scale}rem`; // Base icon size is 1.5rem (24px)
+
   return (
     <div className="flex items-center">
       <button
         onClick={handlePrevious}
         disabled={activeImageIndex === 0 || isLoadingImage}
-        className={`mr-4 p-2 rounded-full
+        className={`mr-4 rounded-full
           ${activeImageIndex === 0
             ? 'bg-gray-700/50 cursor-not-allowed'
             : 'bg-[#4a90e2] hover:bg-[#357abd] active:bg-[#2d6aa6]'
           }
-          transition-all duration-200 ease-in-out`}
+          transition-all duration-200 ease-in-out flex justify-center items-center`}
+        style={{
+          width: buttonSize,
+          height: buttonSize,
+          padding: buttonPadding,
+        }}
         aria-label="Previous"
       >
-        <ChevronLeft className="w-6 h-6 text-white" />
+        <ChevronLeft style={{ width: iconSize, height: iconSize }} className="text-white" />
       </button>
 
       <div className="flex-1">
-        <div className="flex items-center justify-between w-[300px] mb-2">
-          <span className="text-white/90 text-sm font-medium">
+        <div
+          className="flex items-center justify-between mb-2"
+          style={{ width: progressBarWidth }}
+        >
+          <span className="text-white/90 font-medium" style={{ fontSize }}>
             Image {activeImageIndex + 1} of {totalItems}
           </span>
-          <span className="text-white/75 text-sm">
+          <span className="text-white/75" style={{ fontSize }}>
             {Math.round(progress)}% Complete
           </span>
         </div>
@@ -49,15 +81,20 @@ export default function ProgressBar({
       <button
         onClick={handleNext}
         disabled={activeImageIndex === totalItems - 1 || isLoadingImage}
-        className={`mx-4 p-2 rounded-full
+        className={`mx-4 rounded-full
           ${activeImageIndex === totalItems - 1
             ? 'bg-gray-700/50 cursor-not-allowed'
             : 'bg-[#4a90e2] hover:bg-[#357abd] active:bg-[#2d6aa6]'
           }
-          transition-all duration-200 ease-in-out`}
+          transition-all duration-200 ease-in-out flex justify-center items-center`}
+        style={{
+          width: buttonSize,
+          height: buttonSize,
+          padding: buttonPadding,
+        }}
         aria-label="Next"
       >
-        <ChevronRight className="w-6 h-6 text-white" />
+        <ChevronRight style={{ width: iconSize, height: iconSize }} className="text-white" />
       </button>
       <input
         type="text"
@@ -82,7 +119,15 @@ export default function ProgressBar({
             e.target.blur();
           }
         }}
-        className="w-16 px-3 py-2 bg-[#2a2a2a] border border-gray-700 rounded-md text-white text-sm focus:border-[#4a90e2] focus:outline-none"
+        className="px-3 py-2 bg-[#2a2a2a] border border-gray-700 rounded-md text-white focus:border-[#4a90e2] focus:outline-none"
+        style={{
+          width: inputWidth,
+          paddingLeft: inputPaddingX,
+          paddingRight: inputPaddingX,
+          paddingTop: inputPaddingY,
+          paddingBottom: inputPaddingY,
+          fontSize,
+        }}
         aria-label="Go to image number"
       />
     </div>
