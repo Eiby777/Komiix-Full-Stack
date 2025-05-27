@@ -34,10 +34,6 @@ export default function ZoomControls({
   }, [imagesLoaded, activeImageIndex, currentZoom]);
 
   useEffect(() => {
-    console.log(window.innerWidth, window.innerHeight);
-  }, []);
-
-  useEffect(() => {
     if (imagesLoaded) {
       const targetHeight = Math.round(window.innerHeight * 0.8138);
       dimensionImages.forEach((image, index) => {

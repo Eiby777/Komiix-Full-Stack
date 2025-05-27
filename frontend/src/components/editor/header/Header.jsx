@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEditorStore } from '../../../stores/editorStore';
 import ProgressBar from './Components/ProgressBar';
@@ -11,6 +11,7 @@ import { getUser } from '../../../hooks/useAuth';
 
 
 export default function Header() {
+  const headerRef = useRef(null);
   const { 
     imagesLoaded, 
     setCanvasObjectStatus, 
@@ -137,8 +138,8 @@ export default function Header() {
   };
 
   return (
-    <div className="w-full bg-[#1a1a1a] border-b border-white/20 p-4 fixed top-0 right-0 z-[100] ml-[60px]">
-      <div className="w-full px-8 flex items-center justify-between">
+    <div ref={headerRef} className="w-full bg-[#1a1a1a] border-b border-white/20 fixed top-0 right-0 z-[100] ml-[60px] h-[75px] overflow-hidden">
+      <div className="w-full px-8 flex items-center justify-between h-full">
         <ProgressBar
           activeImageIndex={activeImageIndex}
           totalItems={totalItems}
