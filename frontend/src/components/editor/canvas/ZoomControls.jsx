@@ -20,12 +20,12 @@ export default function ZoomControls({
     isSettingsVisible,
     setConfigIconsPositions
   } = useEditorStore();
-  const [zoomLevel, setZoomLevel] = useState(1); // Usar estado para zoomLevel
+  const [zoomLevel, setZoomLevel] = useState(1);
   const zoomPercentage = Math.round(zoomLevel * 100);
   const [isVisible, setIsVisible] = useState(true);
   let currentZoom = getZoomLevel(activeImageIndex);
   const [resetValue, setResetValue] = useState(1);
-  const [currentMinZoom, setCurrentMinZoom] = useState(minZoom); // Estado local para minZoom actual
+  const [currentMinZoom, setCurrentMinZoom] = useState(minZoom);
 
   useEffect(() => {
     if (imagesLoaded) {
@@ -34,16 +34,20 @@ export default function ZoomControls({
   }, [imagesLoaded, activeImageIndex, currentZoom]);
 
   useEffect(() => {
+    console.log(window.innerWidth, window.innerHeight);
+  }, []);
+
+  useEffect(() => {
     if (imagesLoaded) {
+      const targetHeight = Math.round(window.innerHeight * 0.8138);
       dimensionImages.forEach((image, index) => {
         const imageHeight = image.height;
         let zoomReset = 1;
 
-        if (imageHeight > 777) {
-          zoomReset = 777 / imageHeight;
+        if (imageHeight > targetHeight) {
+          zoomReset = targetHeight / imageHeight;
         }
 
-        // Actualizar el minZoom para cada imagen
         setMinZoom(index, zoomReset);
         resetZoom(zoomReset, index);
       });
@@ -53,35 +57,36 @@ export default function ZoomControls({
   useEffect(() => {
     if (imagesLoaded && activeImageIndex !== null) {
       const imageHeight = dimensionImages[activeImageIndex].height;
+      const targetHeight = Math.round(window.innerHeight * 0.8138);
       let zoomReset = 1;
 
-      if (imageHeight > 777) {
-        zoomReset = 777 / imageHeight;
+      if (imageHeight > targetHeight) {
+        zoomReset = targetHeight / imageHeight;
       }
 
       setResetValue(zoomReset);
-      setCurrentMinZoom(zoomReset); // Actualizar el minZoom actual
+      setCurrentMinZoom(zoomReset);
     }
   }, [imagesLoaded, activeImageIndex, dimensionImages]);
 
   const handleResetZoom = () => {
+    const targetHeight = Math.round(window.innerHeight * 0.8138);
     let zoomReset = 1;
     const imageHeight = dimensionImages[activeImageIndex].height;
 
-    if (imageHeight > 777) {
-      zoomReset = 777 / imageHeight;
+    if (imageHeight > targetHeight) {
+      zoomReset = targetHeight / imageHeight;
     }
 
     resetZoom(zoomReset, activeImageIndex);
-
     setZoomLevel(zoomReset);
     setResetValue(zoomReset);
   };
 
   useEffect(() => {
     setConfigIconsPositions('zoomIcon', 
-      { ...configIconsPositions.zoomIcon, active: !isVisible })
-  }, [isVisible])
+      { ...configIconsPositions.zoomIcon, active: !isVisible });
+  }, [isVisible]);
 
   if (!isVisible) {
     return (
@@ -139,7 +144,7 @@ export default function ZoomControls({
       <div className="flex items-center space-x-4">
         <button
           onClick={zoomOut}
-          disabled={zoomLevel <= currentMinZoom} // Usar currentMinZoom en vez de minZoom
+          disabled={zoomLevel <= currentMinZoom}
           className={`p-1.5 rounded-md transition-colors duration-200 ${
             zoomLevel <= currentMinZoom
               ? "bg-gray-700/50 cursor-not-allowed"
@@ -152,14 +157,14 @@ export default function ZoomControls({
         <div className="flex items-center space-x-3">
           <input
             type="range"
-            min={currentMinZoom} // Usar currentMinZoom en vez de minZoom
+            min={currentMinZoom}
             max={maxZoom}
             step="0.1"
             value={zoomLevel}
             onChange={(e) => {
               const newZoom = parseFloat(e.target.value);
-              setZoomLevel(newZoom); // Actualizar el estado localmente
-              updateZoomManually(newZoom); // Propagarlo al editor
+              setZoomLevel(newZoom);
+              updateZoomManually(newZoom);
             }}
             className="w-32 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:transition-all hover:[&::-webkit-slider-thumb]:w-4 hover:[&::-webkit-slider-thumb]:h-4"
           />
