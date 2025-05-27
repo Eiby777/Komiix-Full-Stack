@@ -2,6 +2,19 @@ import { useEffect, useRef } from 'react';
 import fabric from '../../../../../../../../constants/fabricInstance';
 import { useOcrHandlers } from './ocrHandlers';
 
+const isValidBase64Image = (base64String) => {
+  if (typeof base64String !== "string" || !base64String.startsWith("data:image/")) {
+      return false;
+  }
+  try {
+      const img = new Image();
+      img.src = base64String;
+      return true;
+  } catch (error) {
+      return false;
+  }
+};
+
 /**
  * Escala una imagen manteniendo su relación de aspecto
  * @param {HTMLCanvasElement} canvas - Canvas con la imagen original

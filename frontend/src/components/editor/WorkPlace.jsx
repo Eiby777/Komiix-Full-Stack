@@ -27,10 +27,30 @@ export default function EditorLayout({
 
   const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
   const [topPositionIcons, setTopPositionIcons] = useState("");
-  const toolsHeight = useRef("75px");
+  const [toolbarWidth, setToolbarWidth] = useState(50);
+  const toolbarRef = useRef(null);
 
   useEffect(() => {
-    console.log(toolsHeight.current.offsetWidth)
+    const calculateWidth = () => {
+      if (window.innerWidth === 1452) {
+        return 50;
+      }
+      // Calculate width proportionally to window width
+      const baseWidth = 50;
+      const minWidth = 30;
+      const maxWidth = 60;
+      const widthPercentage = (window.innerWidth / 1452) * 100;
+      const calculatedWidth = baseWidth * (widthPercentage / 100);
+      return Math.max(minWidth, Math.min(maxWidth, calculatedWidth));
+    };
+
+    const updateWidth = () => {
+      setToolbarWidth(calculateWidth());
+    };
+
+    updateWidth(); // Initial width
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
   useEffect(() => {
@@ -78,7 +98,7 @@ export default function EditorLayout({
       </div>
       <div className="flex-1 flex relative" style={{ paddingTop: headerHeight }}>
         {layerPanel}
-        <div ref={toolsHeight} className="border-r border-[var(--muted)] bg-[#1a1a1a]" style={{ width: "50px" }}>
+        <div ref={toolbarRef} className="border-r border-[var(--muted)] bg-[#1a1a1a]" style={{ width: `${toolbarWidth}px` }}>
           {toolbar}
         </div>
         <div

@@ -151,7 +151,7 @@ export const TOOLS = {
     icon: FA_OriginalViewIcon,
     layer: LAYERS.TEXT.id,
     hasSettings: false,
-    compatibleWith: ["text", "text-box"],
+    compatibleWith: ["text", "text-box", "draw-text"],
   },
   ADJUST_TEXT: {
     id: "adjust-text",
@@ -160,7 +160,7 @@ export const TOOLS = {
     layer: LAYERS.TEXT.id,
     hasSettings: false,
     compatibleWith: ["text", "text-box", "plus"],
-    shortcut: "T",
+    shortcut: "Control + Click",
   },
   EXPORT: {
     id: "export",

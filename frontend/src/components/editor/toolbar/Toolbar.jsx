@@ -1,9 +1,31 @@
 import { useEditorStore } from '../../../stores/editorStore';
 import { TOOL_GROUPS } from '../../../constants/tools';
 import { LAYERS } from '../../../constants/layers';
+import { useState, useEffect } from 'react';
 
 export default function ToolsSideBar() {
   const { activeTools, toggleTool, activeLayer } = useEditorStore();
+  const [toolbarWidth, setToolbarWidth] = useState(50); // Default to 50px
+
+  // Calculate toolbar width based on window width
+  useEffect(() => {
+    const updateToolbarWidth = () => {
+      const windowWidth = window.innerWidth;
+      // Linearly map window width to toolbar width: 1452px -> 50px, clamped between 30px and 60px
+      const calculatedWidth = Math.min(60, Math.max(30, (windowWidth / 1452) * 50));
+      setToolbarWidth(calculatedWidth);
+    };
+
+    updateToolbarWidth(); // Initial calculation
+    window.addEventListener('resize', updateToolbarWidth);
+    return () => window.removeEventListener('resize', updateToolbarWidth);
+  }, []);
+
+  // Calculate icon size: scale proportionally with toolbar width (24px at 50px toolbar width)
+  const iconSize = Math.round((toolbarWidth / 50) * 24);
+  // Calculate padding: scale proportionally (8px at 50px toolbar width)
+  const containerPadding = Math.round((toolbarWidth / 50) * 8);
+  const buttonPadding = Math.round((toolbarWidth / 50) * 4);
 
   const getToolsForLayer = (layerId) => {
     const layer = LAYERS[layerId.toUpperCase()];
@@ -30,29 +52,34 @@ export default function ToolsSideBar() {
       <div key={tool.id} className="relative group">
         <button
           onClick={() => toggleTool(tool.id)}
-          className={`p-2 rounded-lg transition-all w-full ${
+          className={`rounded-lg transition-all w-full ${
             isActive
               ? 'bg-[#4a90e2] text-white'
               : isCompatibleActive
               ? 'bg-[#2d5c8a] text-white'
               : 'bg-[#1a1a1a] hover:bg-[#333333]'
           }`}
+          style={{ width: `${toolbarWidth - containerPadding * 2}px`, padding: `${buttonPadding}px` }}
         >
           <div className="flex justify-center">
-            <tool.icon className="w-6 h-6 text-white" />
+            <tool.icon style={{ width: `${iconSize}px`, height: `${iconSize}px` }} />
           </div>
         </button>
         <div
-  className="absolute left-[50px] top-1/2 -translate-y-1/2 bg-[#1a1a1a] text-white text-sm px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10"
->
-  {tool.label} {tool.shortcut && `(${tool.shortcut})`} {isActive && '(Active)'}
-</div>
+          className="absolute top-1/2 -translate-y-1/2 bg-[#1a1a1a] text-white text-sm px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[1000]"
+          style={{ left: `${toolbarWidth}px` }}
+        >
+          {tool.label} {tool.shortcut && `(${tool.shortcut})`} {isActive && '(Active)'}
+        </div>
       </div>
     );
   };
 
   return (
-    <div className="flex flex-col space-y-2 p-2 border-r border-t border-white/10">
+    <div
+      className="flex flex-col space-y-2 border-r border-t border-white/10"
+      style={{ width: `${toolbarWidth}px`, padding: `${containerPadding}px` }}
+    >
       {toolsToShow.map(renderToolButton)}
     </div>
   );
