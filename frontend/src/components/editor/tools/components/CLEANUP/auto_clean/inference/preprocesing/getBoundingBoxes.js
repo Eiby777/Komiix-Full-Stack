@@ -1,14 +1,5 @@
 import { Furigana } from './furigana.js';
 
-const calcularTiempoEjecucion = (func, texto) => {
-  const inicio = performance.now();
-  const resultado = func();
-  const fin = performance.now();
-  const tiempoEjecucion = fin - inicio;
-  console.log(`${texto} - Tiempo de ejecución: ${tiempoEjecucion} ms`);
-  return resultado;
-}
-
 class CanvasPreProcessor {
   constructor(scaleFactor = 3.5, darkBgThreshold = 0.6) {
     this.scaleFactor = scaleFactor;
@@ -651,20 +642,6 @@ export class PreProcess {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
 
-    console.log(canvas.toDataURL());
-    // Contar colores diferentes en el lienzo
-    let colors = {};
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      const key = `${r},${g},${b}`;
-      colors[key] = (colors[key] || 0) + 1;
-    }
-    console.log(`Cantidad de colores diferentes en el bloque de texto:`);
-    Object.entries(colors).forEach(([color, count]) => console.log(`  ${color}: ${count}`));
-    console.log(colors);
-
     const backgroundValue = background.color === 'oscuro' ? 0 : 255;
     const textValue = background.color === 'oscuro' ? 255 : 0;
 
@@ -672,23 +649,16 @@ export class PreProcess {
       console.warn(`Invalid backgroundValue: ${backgroundValue}. Expected 0 or 255.`);
     }
 
-    // Redondear coordenadas fraccionarias
     pt_x = Math.round(pt_x);
     pt_y = Math.round(pt_y);
     pt_x = Math.max(0, Math.min(pt_x, canvas.width - 1));
     pt_y = Math.max(0, Math.min(pt_y, canvas.height - 1));
 
-    console.log(`Punto inicial: (${pt_x}, ${pt_y})`);
-
-    // Verificar el color del píxel inicial
     const initialIdx = (pt_y * canvas.width + pt_x) * 4;
-    console.log(`Color del píxel inicial (${pt_x}, ${pt_y}): ${data[initialIdx]}, ${data[initialIdx + 1]}, ${data[initialIdx + 2]}`);
 
-    // Si el píxel inicial no es texto, buscar el píxel negro más cercano
     if (data[initialIdx] !== textValue || data[initialIdx + 1] !== textValue || data[initialIdx + 2] !== textValue) {
-      console.log(`Punto inicial no es texto. Buscando píxel negro cercano...`);
       let foundTextPixel = false;
-      const searchRadius = 5; // Radio de búsqueda
+      const searchRadius = 5;
       for (let dy = -searchRadius; dy <= searchRadius && !foundTextPixel; dy++) {
         for (let dx = -searchRadius; dx <= searchRadius && !foundTextPixel; dx++) {
           const newX = pt_x + dx;
@@ -698,20 +668,17 @@ export class PreProcess {
             if (data[idx] === textValue && data[idx + 1] === textValue && data[idx + 2] === textValue) {
               pt_x = newX;
               pt_y = newY;
-              console.log(`Nuevo punto inicial encontrado: (${pt_x}, ${pt_y})`);
               foundTextPixel = true;
             }
           }
         }
       }
       if (!foundTextPixel) {
-        console.log(`No se encontró píxel de texto en el radio de búsqueda. Retornando null.`);
+        console.error(`No se encontró píxel de texto en el radio de búsqueda. Retornando null.`);
         return null;
       }
     }
 
-    // Imprimir colores circundantes del punto inicial
-    console.log(`Colores circundantes hasta maxNoTextIterations del punto inicial:`);
     const maxNoTextIterations = Math.min(Math.round((Math.min(canvas.width, canvas.height) / 10) * this.scaleFactor), 100);
     for (let i = -maxNoTextIterations; i <= maxNoTextIterations; i++) {
       for (let j = -maxNoTextIterations; j <= maxNoTextIterations; j++) {
@@ -722,9 +689,6 @@ export class PreProcess {
           const r = data[idx];
           const g = data[idx + 1];
           const b = data[idx + 2];
-          if (r === 0 && g === 0 && b === 0) {
-            console.log(`  (${newX}, ${newY}): ${r}, ${g}, ${b}`);
-          }
         }
       }
     }
@@ -790,7 +754,6 @@ export class PreProcess {
           if (foundText) break;
         }
         if (foundText) {
-          console.log("Encontrado texto en la parte superior");
           top--;
           topNoTextCount = 0;
           foundTextThisIteration = true;
@@ -819,7 +782,6 @@ export class PreProcess {
           if (foundText) break;
         }
         if (foundText) {
-          console.log("Encontrado texto en la parte derecha");
           right++;
           rightNoTextCount = 0;
           foundTextThisIteration = true;
@@ -848,7 +810,6 @@ export class PreProcess {
           if (foundText) break;
         }
         if (foundText) {
-          console.log("Encontrado texto en la parte inferior");
           bottom++;
           bottomNoTextCount = 0;
           foundTextThisIteration = true;
@@ -869,7 +830,6 @@ export class PreProcess {
 
     const w = right - left + 1;
     const h = bottom - top + 1;
-    console.log(`Rectangulo detectado: (${left}, ${top}, ${w}, ${h})`);
     if (w < 3 || h < 3) {
       return null;
     }
