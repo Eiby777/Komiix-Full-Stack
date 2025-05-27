@@ -61,6 +61,7 @@ export const useFabricCanvas = (images) => {
       selection: false,
       preserveObjectStacking: true,
       enableRetinaScaling: false,
+      imageSmoothingEnabled: false
     });
 
     const img = new Image();
