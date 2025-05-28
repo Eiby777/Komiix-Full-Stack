@@ -24,8 +24,11 @@ export default function Header() {
         Math.round((windowHeight / referenceHeight) * referenceHeaderHeight),
         100
       );
-      
-      setHeaderHeight(`${height}px`);
+      if (height < 46) {
+        setHeaderHeight('46px');
+      } else {
+        setHeaderHeight(`${height}px`);
+      }
     };
 
     calculateHeaderHeight();

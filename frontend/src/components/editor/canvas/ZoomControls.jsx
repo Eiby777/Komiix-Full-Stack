@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Minus, Plus, RotateCcw, X } from "lucide-react";
-import { useEditorStore } from '../../../stores/editorStore'
+import React, { useEffect, useState, useRef } from "react";
+import minusIcon from './icons/minus.png';
+import plusIcon from './icons/plus.png';
+import resetIcon from './icons/reset.png';
+import crossIcon from './icons/cross.png';
+import { useEditorStore } from '../../../stores/editorStore';
 
 export default function ZoomControls({
   zoomIn,
@@ -26,6 +29,25 @@ export default function ZoomControls({
   let currentZoom = getZoomLevel(activeImageIndex);
   const [resetValue, setResetValue] = useState(1);
   const [currentMinZoom, setCurrentMinZoom] = useState(minZoom);
+
+  // Refs for measuring components
+  const containerRef = useRef(null);
+  const zoomOutButtonRef = useRef(null);
+  const sliderRef = useRef(null);
+  const percentageRef = useRef(null);
+  const zoomInButtonRef = useRef(null);
+  const resetButtonRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const hiddenButtonRef = useRef(null);
+
+  // Calculate scaling factor
+  const referenceHeight = 46; // Main container height at 952px viewport
+  const scaleFactor = Math.max(0.75, Math.min(1, window.innerHeight / 952 * (referenceHeight / referenceHeight)));
+  const scaledPadding = Math.max(4, 8 * scaleFactor); // Min 4px padding (original ~8px)
+  const scaledButtonSize = Math.max(20, 28 * scaleFactor); // Min 20px (original 28px)
+  const scaledSliderWidth = Math.max(90, 128 * scaleFactor); // Min 90px (original 128px)
+  const scaledTextHeight = Math.max(14, 20 * scaleFactor); // Min 14px (original 20px)
+  const scaledIconSize = Math.min(16, scaledButtonSize * 0.9); // Max 16px, scales with 90% of button size
 
   useEffect(() => {
     if (imagesLoaded) {
@@ -87,15 +109,16 @@ export default function ZoomControls({
   if (!isVisible) {
     return (
       <button
+        ref={hiddenButtonRef}
         onClick={() => setIsVisible(true)}
         style={{
           position: 'fixed',
           top: configIconsPositions.zoomIcon.top,
           right: isSettingsVisible ? configIconsPositions.zoomIcon.right : '10%',
           zIndex: 50,
-          padding: '0.5rem',
+          padding: `${scaledPadding}px`,
           backgroundColor: '#2a2a2a',
-          borderRadius: '0.375rem',
+          borderRadius: '6px',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           border: '1px solid rgba(55, 65, 81, 0.5)',
           color: 'white',
@@ -103,55 +126,56 @@ export default function ZoomControls({
         }}
         title="Show zoom controls"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-4 h-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          <line x1="11" y1="8" x2="11" y2="14"></line>
-          <line x1="8" y1="11" x2="14" y2="11"></line>
-        </svg>
+        <img src={plusIcon} alt="Zoom in" style={{ width: `${scaledIconSize}px`, height: `${scaledIconSize}px`, color: 'white' }} />
       </button>
     );
   }
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: configIconsPositions.zoomIcon.top,
-      right: isSettingsVisible ? configIconsPositions.zoomIcon.right : '10%',
-      zIndex: 50,
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      backgroundColor: '#2a2a2a',
-      padding: '0.5rem',
-      borderRadius: '0.375rem',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      border: '1px solid rgba(55, 65, 81, 0.5)'
-    }}>
-      <div className="flex items-center space-x-4">
+    <div
+      ref={containerRef}
+      style={{
+        position: 'fixed',
+        top: configIconsPositions.zoomIcon.top,
+        right: isSettingsVisible ? configIconsPositions.zoomIcon.right : '10%',
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        gap: `${scaledPadding}px`,
+        backgroundColor: '#2a2a2a',
+        padding: `${scaledPadding}px`,
+        borderRadius: '6px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid rgba(55, 65, 81, 0.5)'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: `${scaledPadding}px` }}>
         <button
+          ref={zoomOutButtonRef}
           onClick={zoomOut}
           disabled={zoomLevel <= currentMinZoom}
-          className={`p-1.5 rounded-md transition-colors duration-200 ${
-            zoomLevel <= currentMinZoom
-              ? "bg-gray-700/50 cursor-not-allowed"
-              : "bg-[#4a90e2] hover:bg-[#357abd] active:bg-[#2d6aa6]"
-          }`}
+          style={{
+            padding: `${scaledPadding}px`,
+            width: `${scaledButtonSize}px`,
+            height: `${scaledButtonSize}px`,
+            borderRadius: '4px',
+            transition: 'background-color 200ms',
+            backgroundColor: zoomLevel <= currentMinZoom ? 'rgba(55, 65, 81, 0.5)' : '#4a90e2',
+            cursor: zoomLevel <= currentMinZoom ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+          onMouseOver={(e) => { if (zoomLevel > currentMinZoom) e.currentTarget.style.backgroundColor = '#357abd'; }}
+          onMouseOut={(e) => { if (zoomLevel > currentMinZoom) e.currentTarget.style.backgroundColor = '#4a90e2'; }}
+          onMouseDown={(e) => { if (zoomLevel > currentMinZoom) e.currentTarget.style.backgroundColor = '#2d6aa6'; }}
           title="Zoom out"
         >
-          <Minus className="w-4 h-4 text-white" />
+          <img src={minusIcon} alt="Zoom out" style={{ width: `${scaledIconSize}px`, height: `${scaledIconSize}px`, color: 'white' }} />
         </button>
-        <div className="flex items-center space-x-3">
+        <div style={{ display: 'flex', alignItems: 'center', gap: `${scaledPadding / 2}px` }}>
           <input
+            ref={sliderRef}
             type="range"
             min={currentMinZoom}
             max={maxZoom}
@@ -162,46 +186,94 @@ export default function ZoomControls({
               setZoomLevel(newZoom);
               updateZoomManually(newZoom);
             }}
-            className="w-32 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:transition-all hover:[&::-webkit-slider-thumb]:w-4 hover:[&::-webkit-slider-thumb]:h-4"
+            style={{
+              width: `${scaledSliderWidth}px`,
+              height: '8px',
+              backgroundColor: '#4b5563',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
           />
-          <span className="text-white text-sm min-w-[3rem]">
+          <span
+            ref={percentageRef}
+            style={{
+              color: 'white',
+              fontSize: '0.875rem',
+              minWidth: '48px',
+              height: `${scaledTextHeight}px`,
+              lineHeight: `${scaledTextHeight}px`
+            }}
+          >
             {zoomPercentage}%
           </span>
         </div>
-
         <button
+          ref={zoomInButtonRef}
           onClick={zoomIn}
           disabled={zoomLevel >= maxZoom}
-          className={`p-1.5 rounded-md transition-colors duration-200 ${
-            zoomLevel >= maxZoom
-              ? "bg-gray-700/50 cursor-not-allowed"
-              : "bg-[#4a90e2] hover:bg-[#357abd] active:bg-[#2d6aa6]"
-          }`}
+          style={{
+            padding: `${scaledPadding}px`,
+            width: `${scaledButtonSize}px`,
+            height: `${scaledButtonSize}px`,
+            borderRadius: '4px',
+            transition: 'background-color 200ms',
+            backgroundColor: zoomLevel >= maxZoom ? 'rgba(55, 65, 81, 0.5)' : '#4a90e2',
+            cursor: zoomLevel >= maxZoom ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+          onMouseOver={(e) => { if (zoomLevel < maxZoom) e.currentTarget.style.backgroundColor = '#357abd'; }}
+          onMouseOut={(e) => { if (zoomLevel < maxZoom) e.currentTarget.style.backgroundColor = '#4a90e2'; }}
+          onMouseDown={(e) => { if (zoomLevel < maxZoom) e.currentTarget.style.backgroundColor = '#2d6aa6'; }}
           title="Zoom in"
         >
-          <Plus className="w-4 h-4 text-white" />
+          <img src={plusIcon} alt="Zoom in" style={{ width: `${scaledIconSize}px`, height: `${scaledIconSize}px`, color: 'white' }} />
         </button>
-
         <button
+          ref={resetButtonRef}
           onClick={handleResetZoom}
           disabled={zoomLevel === resetValue}
-          className={`p-1.5 rounded-md transition-colors duration-200 ${
-            zoomLevel === resetValue
-              ? "bg-gray-700/50 cursor-not-allowed"
-              : "bg-[#4a90e2] hover:bg-[#357abd] active:bg-[#2d6aa6]"
-          }`}
+          style={{
+            padding: `${scaledPadding}px`,
+            width: `${scaledButtonSize}px`,
+            height: `${scaledButtonSize}px`,
+            borderRadius: '4px',
+            transition: 'background-color 200ms',
+            backgroundColor: zoomLevel === resetValue ? 'rgba(55, 65, 81, 0.5)' : '#4a90e2',
+            cursor: zoomLevel === resetValue ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+          onMouseOver={(e) => { if (zoomLevel !== resetValue) e.currentTarget.style.backgroundColor = '#357abd'; }}
+          onMouseOut={(e) => { if (zoomLevel !== resetValue) e.currentTarget.style.backgroundColor = '#4a90e2'; }}
+          onMouseDown={(e) => { if (zoomLevel !== resetValue) e.currentTarget.style.backgroundColor = '#2d6aa6'; }}
           title="Reset zoom"
         >
-          <RotateCcw className="w-4 h-4 text-white" />
+          <img src={resetIcon} alt="Reset zoom" style={{ width: `${scaledIconSize}px`, height: `auto`, color: 'white' }} />
         </button>
       </div>
-      <div className="border-l border-gray-700/50 ml-2 pl-2">
+      <div style={{ borderLeft: '1px solid rgba(55, 65, 81, 0.5)', marginLeft: `${scaledPadding}px`, paddingLeft: `${scaledPadding}px` }}>
         <button
+          ref={closeButtonRef}
           onClick={() => setIsVisible(false)}
-          className="p-1.5 rounded-md hover:bg-gray-700/50 transition-colors duration-200"
+          style={{
+            padding: `${scaledPadding}px`,
+            width: `${scaledButtonSize}px`,
+            height: `${scaledButtonSize}px`,
+            borderRadius: '4px',
+            transition: 'background-color 200ms',
+            backgroundColor: 'transparent',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'rgba(55, 65, 81, 0.5)')}
+          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
           title="Close zoom controls"
         >
-          <X className="w-4 h-4 text-white" />
+          <img src={crossIcon} alt="Close" style={{ width: `${scaledIconSize-7}px`, height: `${scaledIconSize-7}px`, color: 'white' }} />
         </button>
       </div>
     </div>

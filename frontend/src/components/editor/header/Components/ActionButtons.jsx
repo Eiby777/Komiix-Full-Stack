@@ -7,7 +7,7 @@ export default function ActionButtons({ navigate, handleExport, handleSaveLocal,
 
   // Calculate scaling factor based on headerHeight relative to 75px, with a minimum scale of 0.7
   const referenceHeight = 75;
-  const scale = Math.max(parseInt(headerHeight) / referenceHeight, 0.7);
+  const scale = Math.max(parseInt(headerHeight) / referenceHeight, 0.75);
 
   // Base sizes when headerHeight is 75px
   const baseButtonHeight = 2.5; // rem (40px at default font size)
