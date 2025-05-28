@@ -1,6 +1,6 @@
-import { PanTool } from './tools/components'
-import { useEditorStore } from '../../stores/editorStore'
-import { TOOLS } from '../../constants/tools'
+import { PanTool } from './tools/components';
+import { useEditorStore } from '../../stores/editorStore';
+import { TOOLS } from '../../constants/tools';
 import { useEffect, useState, useRef } from 'react';
 import { LAYERS } from '../../constants/layers';
 import { FaCog } from 'react-icons/fa';
@@ -23,19 +23,19 @@ export default function EditorLayout({
     setIsSettingsVisible,
     isLayerCarouselVisible,
     headerHeight
-  } = useEditorStore()
+  } = useEditorStore();
 
   const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
   const [topPositionIcons, setTopPositionIcons] = useState("");
   const [toolbarWidth, setToolbarWidth] = useState(50);
   const toolbarRef = useRef(null);
+  const settingsButtonRef = useRef(null);
 
   useEffect(() => {
     const calculateWidth = () => {
       if (window.innerWidth === 1452) {
         return 50;
       }
-      // Calculate width proportionally to window width
       const baseWidth = 50;
       const minWidth = 30;
       const maxWidth = 60;
@@ -48,15 +48,37 @@ export default function EditorLayout({
       setToolbarWidth(calculateWidth());
     };
 
-    updateWidth(); // Initial width
+    updateWidth();
     window.addEventListener('resize', updateWidth);
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
+  // Calculate settings button size based on height
+  const calculateButtonSize = () => {
+    const baseSize = 34; // Size at 952px height
+    const minSize = 30;
+    const maxSize = 34;
+    const scaleFactor = Math.max(0.7, Math.min(1, window.innerHeight / 952));
+    const calculatedSize = baseSize * scaleFactor;
+    return Math.max(minSize, Math.min(maxSize, calculatedSize));
+  };
+
+  const [settingsButtonSize, setSettingsButtonSize] = useState(calculateButtonSize());
+
+  useEffect(() => {
+    const updateSize = () => {
+      setSettingsButtonSize(calculateButtonSize());
+    };
+
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (e.key.toLowerCase() != "n") return
-      if (LAYERS.ANNOTATION.id != activeLayer) return
+      if (e.key.toLowerCase() !== "n") return;
+      if (LAYERS.ANNOTATION.id !== activeLayer) return;
 
       toggleTool(TOOLS.PLUS.id);
     };
@@ -119,24 +141,29 @@ export default function EditorLayout({
         </div>
         {/* Botón de configuración */}
         <button
+          ref={settingsButtonRef}
           onClick={toggleSettingsPanel}
           style={{
             position: 'fixed',
             top: topPositionIcons,
             right: configIconsPositions.settingsIcon.right,
             zIndex: 50,
-            padding: '0.5rem',
+            width: `${settingsButtonSize}px`,
+            height: `${settingsButtonSize}px`,
             backgroundColor: '#2a2a2a',
             borderRadius: '0.375rem',
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
             border: '1px solid rgba(55, 65, 81, 0.5)',
             color: 'white',
-            transition: 'background-color 600ms'
+            transition: 'background-color 600ms',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
           className="hover:bg-[#357abd]"
           title="Toggle settings panel"
         >
-          <FaCog className="w-4 h-4" />
+          <FaCog className="w-[16px] h-[16px]" />
         </button>
       </div>
       {activeTools.includes(TOOLS.PAN.id) && <PanTool />}
