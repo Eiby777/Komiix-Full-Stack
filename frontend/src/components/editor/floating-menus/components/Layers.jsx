@@ -26,11 +26,7 @@ export default function LayersPanel() {
     getCanvasInstance, 
     activeImageIndex, 
     setCanvasObjectStatus,
-    isSettingsVisible,
-    configIconsPositions
   } = useEditorStore()
-
-  const { active: isZoomIconActive } = configIconsPositions.zoomIcon
 
   if (!isLayerCarouselVisible) {
     return (
@@ -38,8 +34,6 @@ export default function LayersPanel() {
         onClick={() => setLayerCarouselVisible(true)}
         style={{
           position: 'fixed',
-          top: isZoomIconActive ? configIconsPositions.layerIcon.top : "9.4rem",
-          right: isSettingsVisible ? configIconsPositions.layerIcon.right : '10%',
           zIndex: 50,
           padding: '0.5rem',
           backgroundColor: '#2a2a2a',
@@ -76,14 +70,11 @@ export default function LayersPanel() {
   return (
     <div style={{
       position: 'fixed',
-      top: isZoomIconActive ? configIconsPositions.layerIcon.top : "9.3rem",
-      right: isSettingsVisible ? configIconsPositions.layerIcon.right : '10%',
       zIndex: 50,
       display: 'flex',
       alignItems: 'center',
       gap: '0.5rem',
       backgroundColor: '#2a2a2a',
-      //padding: '0.5rem',
       borderRadius: '0.375rem',
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
       border: '1px solid rgba(55, 65, 81, 0.5)',

@@ -19,9 +19,6 @@ export default function ZoomControls({
     activeImageIndex,
     dimensionImages,
     setMinZoom,
-    configIconsPositions,
-    isSettingsVisible,
-    setConfigIconsPositions
   } = useEditorStore();
   const [zoomLevel, setZoomLevel] = useState(1);
   const zoomPercentage = Math.round(zoomLevel * 100);
@@ -30,7 +27,6 @@ export default function ZoomControls({
   const [resetValue, setResetValue] = useState(1);
   const [currentMinZoom, setCurrentMinZoom] = useState(minZoom);
 
-  // Refs for measuring components
   const containerRef = useRef(null);
   const zoomOutButtonRef = useRef(null);
   const sliderRef = useRef(null);
@@ -40,14 +36,13 @@ export default function ZoomControls({
   const closeButtonRef = useRef(null);
   const hiddenButtonRef = useRef(null);
 
-  // Calculate scaling factor
-  const referenceHeight = 46; // Main container height at 952px viewport
+  const referenceHeight = 46;
   const scaleFactor = Math.max(0.75, Math.min(1, window.innerHeight / 952 * (referenceHeight / referenceHeight)));
-  const scaledPadding = Math.max(4, 8 * scaleFactor); // Min 4px padding (original ~8px)
-  const scaledButtonSize = Math.max(20, 28 * scaleFactor); // Min 20px (original 28px)
-  const scaledSliderWidth = Math.max(90, 128 * scaleFactor); // Min 90px (original 128px)
-  const scaledTextHeight = Math.max(14, 20 * scaleFactor); // Min 14px (original 20px)
-  const scaledIconSize = Math.min(16, scaledButtonSize * 0.9); // Max 16px, scales with 90% of button size
+  const scaledPadding = Math.max(4, 8 * scaleFactor);
+  const scaledButtonSize = Math.max(20, 28 * scaleFactor);
+  const scaledSliderWidth = Math.max(90, 128 * scaleFactor);
+  const scaledTextHeight = Math.max(14, 20 * scaleFactor);
+  const scaledIconSize = Math.min(16, scaledButtonSize * 0.9);
 
   useEffect(() => {
     if (imagesLoaded) {
@@ -101,11 +96,6 @@ export default function ZoomControls({
     setResetValue(zoomReset);
   };
 
-  useEffect(() => {
-    setConfigIconsPositions('zoomIcon', 
-      { ...configIconsPositions.zoomIcon, active: !isVisible });
-  }, [isVisible]);
-
   if (!isVisible) {
     return (
       <button
@@ -113,8 +103,6 @@ export default function ZoomControls({
         onClick={() => setIsVisible(true)}
         style={{
           position: 'fixed',
-          top: configIconsPositions.zoomIcon.top,
-          right: isSettingsVisible ? configIconsPositions.zoomIcon.right : '10%',
           zIndex: 50,
           padding: `${scaledPadding}px`,
           backgroundColor: '#2a2a2a',
@@ -136,8 +124,6 @@ export default function ZoomControls({
       ref={containerRef}
       style={{
         position: 'fixed',
-        top: configIconsPositions.zoomIcon.top,
-        right: isSettingsVisible ? configIconsPositions.zoomIcon.right : '10%',
         zIndex: 50,
         display: 'flex',
         alignItems: 'center',

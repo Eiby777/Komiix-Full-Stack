@@ -3,14 +3,13 @@ import { useEditorStore } from '../../stores/editorStore';
 import { TOOLS } from '../../constants/tools';
 import { useEffect } from 'react';
 import { LAYERS } from '../../constants/layers';
-import ToggleConfigButton from './floating-menus/components/ToggleConfigButton';
+import FloatingMenus from './floating-menus/FloatingMenus';
+import Header from './header/Header';
+import Toolbar from './toolbar/Toolbar';
+import EditorCanvas from './canvas/EditorCanvas';
+import SettingsPanel from './settings/SettingsPanel';
 
-export default function EditorLayout({
-  header,
-  toolbar,
-  canvas,
-  settingsPanel
-}) {
+export default function EditorLayout() {
   const {
     activeTools,
     activeLayer,
@@ -32,12 +31,12 @@ export default function EditorLayout({
 
   return (
     <div className="min-h-screen bg-[var(--background)] flex flex-col">
-      {header}
+      <Header />
       <div className="flex-1 flex relative" style={{ paddingTop: headerHeight }}>
-        {toolbar}
-        {canvas}
-        {settingsPanel}
-        <ToggleConfigButton />
+        <Toolbar />
+        <EditorCanvas />
+        <SettingsPanel />
+        <FloatingMenus />
       </div>
       {activeTools.includes(TOOLS.PAN.id) && <PanTool />}
     </div>

@@ -2,10 +2,6 @@ import WorkPlace from "../components/editor/WorkPlace";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useEditorStore } from "../stores/editorStore";
-import EditorCanvas from "../components/editor/canvas/EditorCanvas";
-import SettingsPanel from "../components/editor/settings/SettingsPanel";
-import Header from "../components/editor/header/Header";
-import ToolsSideBar from "../components/editor/toolbar/Toolbar";
 import { useProjectHandler } from "../hooks/getProjects";
 
 export default function Editor() {
@@ -49,12 +45,7 @@ export default function Editor() {
   
   return (
     <>
-      <WorkPlace
-        header={<Header />}
-        toolbar={<ToolsSideBar />}
-        canvas={<EditorCanvas />}
-        settingsPanel={<SettingsPanel />}
-      />
+      <WorkPlace />
     </>
   );
 }
