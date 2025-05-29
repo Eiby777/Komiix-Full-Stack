@@ -5,8 +5,8 @@ import { TOOLS } from "../../../../../../constants/tools";
 import { LAYERS } from "../../../../../../constants/layers";
 import { v4 as uuidv4 } from "uuid";
 import createRectangleObject from "./createRectangleObject";
-import useLayerHistory from "../../../../floating-menus/UndoRedoMenu/handlers/fabricHistoryManager";
-import ObjectStatus from "../../../../floating-menus/UndoRedoMenu/handlers/enumObjectRequests";
+import useLayerHistory from "../../../../floating-menus/components/UndoRedoMenu/handlers/fabricHistoryManager";
+import ObjectStatus from "../../../../floating-menus/components/UndoRedoMenu/handlers/enumObjectRequests";
 
 const debounce = (func, wait) => {
   let timeout;

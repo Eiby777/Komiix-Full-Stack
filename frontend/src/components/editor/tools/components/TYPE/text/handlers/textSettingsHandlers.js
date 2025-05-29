@@ -1,6 +1,6 @@
 
 import { useEditorStore } from "../../../../../../../stores/editorStore";
-import ObjectStatus from "../../../../../floating-menus/UndoRedoMenu/handlers/enumObjectRequests";
+import ObjectStatus from "../../../../../floating-menus/components/UndoRedoMenu/handlers/enumObjectRequests";
 const { getState } = useEditorStore;
 
 

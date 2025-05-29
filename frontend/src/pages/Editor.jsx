@@ -3,18 +3,14 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useEditorStore } from "../stores/editorStore";
 import EditorCanvas from "../components/editor/canvas/EditorCanvas";
-import LayersPanel from "../components/editor/floating-menus/Layers";
 import SettingsPanel from "../components/editor/settings/SettingsPanel";
 import Header from "../components/editor/header/Header";
-import ZoomControls from "../components/editor/floating-menus/ZoomControls";
 import ToolsSideBar from "../components/editor/toolbar/Toolbar";
-import UndoRedoMenu from "../components/editor/floating-menus/UndoRedoMenu/UndoRedoMenu";
 import { useProjectHandler } from "../hooks/getProjects";
 
 export default function Editor() {
   const {
     setActiveImageIndex,
-    imagesLoaded,
     images,
     setImages
   } = useEditorStore();
@@ -58,9 +54,6 @@ export default function Editor() {
         toolbar={<ToolsSideBar />}
         canvas={<EditorCanvas />}
         settingsPanel={<SettingsPanel />}
-        zoomControls={imagesLoaded && <ZoomControls />}
-        layerPanel={imagesLoaded && <LayersPanel/>}
-        undoRedoMenu={imagesLoaded && <UndoRedoMenu />}
       />
     </>
   );

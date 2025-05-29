@@ -1,15 +1,12 @@
 import { useEditorStore } from "../../../stores/editorStore";
 import { CanvasContainer, CanvasEffects, ToolsContainer, CanvasResizeHandler } from "./components";
-import ZoomControls from "../floating-menus/ZoomControls";
 import { useFabricCanvas } from "./handlers/useFabricCanvas";
-import { useCanvasZoom } from "./handlers/useCanvasZoom";
+import FloatingMenus from "../floating-menus/FloatingMenus";
 
 export default function EditorCanvas() {
   const { imagesLoaded, activeImageIndex, isSettingsVisible, images } = useEditorStore();
 
   useFabricCanvas(images);
-
-  const zoomControls = useCanvasZoom();
 
   return (
     <div
@@ -19,9 +16,9 @@ export default function EditorCanvas() {
     >
       <CanvasContainer images={images} isLoading={!imagesLoaded} />
       <ToolsContainer currentImageIndex={activeImageIndex} />
-      <ZoomControls {...zoomControls} />
       <CanvasEffects />
       <CanvasResizeHandler />
+      <FloatingMenus />
     </div>
   );
 }

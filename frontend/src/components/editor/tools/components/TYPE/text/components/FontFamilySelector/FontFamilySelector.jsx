@@ -4,7 +4,7 @@ import Select from 'react-select';
 import { handleFontChange } from '../../handlers/textSettingsHandlers';
 import { fetchFontList, fetchFontFile } from '../../../../../../../../hooks/fontApi';
 import { saveFonts, getFontList } from '../../../../../../../../lib/localDB/fontDB';
-import useLayerHistory from '../../../../../../floating-menus/UndoRedoMenu/handlers/fabricHistoryManager';
+import useLayerHistory from '../../../../../../floating-menus/components/UndoRedoMenu/handlers/fabricHistoryManager';
 
 const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanvas }) => {
   const [fontOptions, setFontOptions] = useState([]);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaPalette, FaChevronUp, FaChevronDown } from 'react-icons/fa';
-import useLayerHistory from '../../../../../floating-menus/UndoRedoMenu/handlers/fabricHistoryManager';
+import useLayerHistory from '../../../../../floating-menus/components/UndoRedoMenu/handlers/fabricHistoryManager';
 
 const ColorControls = ({
   fillColor, setFillColor, strokeColor, setStrokeColor, strokeWidth, setStrokeWidth,

@@ -1,28 +1,18 @@
-import { useState, useEffect } from 'react';
-import { useEditorStore } from '../../../../stores/editorStore';
+import { useState } from 'react';
 import useInitializeLayerStates from './handlers/useInitializeLayerStates';
 import useLayerHistory from './handlers/fabricHistoryManager';
 
 export default function UndoRedoMenu() {
   const [isVisible, setIsVisible] = useState(true);
-  const { isLayerCarouselVisible, configIconsPositions, setConfigIconsPositions, isSettingsVisible } = useEditorStore();
   useInitializeLayerStates();
   
   const { undo, redo } = useLayerHistory();
-
-  // Calculate scaling factor
-  const referenceHeight = 48; // Menu container height at 952px viewport
   const scaleFactor = Math.max(0.75, Math.min(1, window.innerHeight / 952));
-  const scaledPadding = Math.max(4, 8 * scaleFactor); // Min 4px (original ~8px)
-  const scaledButtonSize = Math.max(20, 32 * scaleFactor); // Min 20px (original 32px)
-  const scaledCloseButtonSize = Math.max(20, 28 * scaleFactor); // Min 20px (original 28px)
-  const scaledIconSize = scaledButtonSize * 0.9; // 90% of button size, ~25px at 952px
-  const scaledHiddenButtonSize = Math.min(34, Math.max(30, 34 * scaleFactor)); // Min 30px, max 34px
-
-  useEffect(() => {
-    setConfigIconsPositions('undoRedoIcon', 
-      { ...configIconsPositions.undoRedoIcon, active: !isVisible });
-  }, [isVisible]);
+  const scaledPadding = Math.max(4, 8 * scaleFactor);
+  const scaledButtonSize = Math.max(20, 32 * scaleFactor);
+  const scaledCloseButtonSize = Math.max(20, 28 * scaleFactor);
+  const scaledIconSize = scaledButtonSize * 0.9;
+  const scaledHiddenButtonSize = Math.min(34, Math.max(30, 34 * scaleFactor));
 
   return (
     <>
@@ -32,8 +22,7 @@ export default function UndoRedoMenu() {
           id="show-undo-redo"
           style={{
             position: 'fixed',
-            top: isLayerCarouselVisible ? configIconsPositions.undoRedoIcon.top : '12rem',
-            right: isSettingsVisible ? configIconsPositions.undoRedoIcon.right : '10%',
+
             zIndex: 50,
             width: `${scaledHiddenButtonSize}px`,
             height: `${scaledHiddenButtonSize}px`,
@@ -70,14 +59,12 @@ export default function UndoRedoMenu() {
           id="undo-redo-menu"
           style={{
             position: 'fixed',
-            right: isSettingsVisible ? configIconsPositions.undoRedoIcon.right : '10%',
             zIndex: 50,
             backgroundColor: '#2a2a2a',
             borderRadius: '6px',
             boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
             padding: `${scaledPadding}px`,
-            top: isLayerCarouselVisible ? configIconsPositions.undoRedoIcon.top : '12rem',
             display: 'flex',
             alignItems: 'center',
             gap: `${scaledPadding}px`,

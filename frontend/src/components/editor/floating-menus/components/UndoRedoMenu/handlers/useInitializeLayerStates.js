@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useEditorStore } from '../../../../../stores/editorStore';
+import { useEditorStore } from '../../../../../../stores/editorStore';
 
 const useInitializeLayerStates = () => {
   const { canvasInstances, setLayerState, setLayerRedoState, layersToInitialize } = useEditorStore();

@@ -3,7 +3,7 @@ import minusIcon from './icons/minus.png';
 import plusIcon from './icons/plus.png';
 import resetIcon from './icons/reset.png';
 import crossIcon from './icons/cross.png';
-import { useEditorStore } from '../../../stores/editorStore';
+import { useEditorStore } from "../../../../stores/editorStore";
 
 export default function ZoomControls({
   zoomIn,

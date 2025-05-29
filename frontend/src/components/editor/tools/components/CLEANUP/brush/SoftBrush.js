@@ -1,7 +1,7 @@
 import fabric from "../../../../../../constants/fabricInstance";
 import { LAYERS } from "../../../../../../constants/layers";
 import { v4 as uuid } from "uuid";
-import ObjectStatus from "../../../../floating-menus/UndoRedoMenu/handlers/enumObjectRequests";
+import ObjectStatus from "../../../../floating-menus/components/UndoRedoMenu/handlers/enumObjectRequests";
 
 class CustomHardnessBrush extends fabric.BaseBrush {
   constructor(canvas, options, saveState) {

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { useEditorStore } from "../../../../../../stores/editorStore";
 import { TOOLS } from "../../../../../../constants/tools";
 import CustomEraserBrush from "./CustomEraserBrush";
-import useLayerHistory from "../../../../floating-menus/UndoRedoMenu/handlers/fabricHistoryManager";
+import useLayerHistory from "../../../../floating-menus/components/UndoRedoMenu/handlers/fabricHistoryManager";
 
 const createEraserCursor = (size) => {
   const maxCanvasSize = 128;

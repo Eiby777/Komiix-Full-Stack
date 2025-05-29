@@ -1,17 +1,17 @@
 import { useEditorStore } from '../../../stores/editorStore';
 import { TOOL_GROUPS } from '../../../constants/tools';
 import { LAYERS } from '../../../constants/layers';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function ToolsSideBar() {
   const { activeTools, toggleTool, activeLayer } = useEditorStore();
-  const [toolbarWidth, setToolbarWidth] = useState(50); // Default to 50px
+  const [toolbarWidth, setToolbarWidth] = useState(50);
+  const toolbarRef = useRef(null);
 
-  // Calculate toolbar width based on window width
+
   useEffect(() => {
     const updateToolbarWidth = () => {
       const windowWidth = window.innerWidth;
-      // Linearly map window width to toolbar width: 1452px -> 50px, clamped between 30px and 60px
       const calculatedWidth = Math.min(60, Math.max(30, (windowWidth / 1452) * 50));
       setToolbarWidth(calculatedWidth);
     };
@@ -21,9 +21,7 @@ export default function ToolsSideBar() {
     return () => window.removeEventListener('resize', updateToolbarWidth);
   }, []);
 
-  // Calculate icon size: scale proportionally with toolbar width (24px at 50px toolbar width)
   const iconSize = Math.round((toolbarWidth / 50) * 24);
-  // Calculate padding: scale proportionally (8px at 50px toolbar width)
   const containerPadding = Math.round((toolbarWidth / 50) * 8);
   const buttonPadding = Math.round((toolbarWidth / 50) * 4);
 
@@ -52,13 +50,12 @@ export default function ToolsSideBar() {
       <div key={tool.id} className="relative group">
         <button
           onClick={() => toggleTool(tool.id)}
-          className={`rounded-lg transition-all w-full ${
-            isActive
+          className={`rounded-lg transition-all w-full ${isActive
               ? 'bg-[#4a90e2] text-white'
               : isCompatibleActive
-              ? 'bg-[#2d5c8a] text-white'
-              : 'bg-[#1a1a1a] hover:bg-[#333333]'
-          }`}
+                ? 'bg-[#2d5c8a] text-white'
+                : 'bg-[#1a1a1a] hover:bg-[#333333]'
+            }`}
           style={{ width: `${toolbarWidth - containerPadding * 2}px`, padding: `${buttonPadding}px` }}
         >
           <div className="flex justify-center">
@@ -75,12 +72,36 @@ export default function ToolsSideBar() {
     );
   };
 
+  useEffect(() => {
+    const calculateWidth = () => {
+      if (window.innerWidth === 1452) {
+        return 50;
+      }
+      const baseWidth = 50;
+      const minWidth = 30;
+      const maxWidth = 60;
+      const widthPercentage = (window.innerWidth / 1452) * 100;
+      const calculatedWidth = baseWidth * (widthPercentage / 100);
+      return Math.max(minWidth, Math.min(maxWidth, calculatedWidth));
+    };
+
+    const updateWidth = () => {
+      setToolbarWidth(calculateWidth());
+    };
+
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
   return (
-    <div
-      className="flex flex-col space-y-2 border-r border-t border-white/10"
-      style={{ width: `${toolbarWidth}px`, padding: `${containerPadding}px` }}
-    >
-      {toolsToShow.map(renderToolButton)}
+    <div ref={toolbarRef} className="border-r border-[var(--muted)] bg-[#1a1a1a]" style={{ width: `${toolbarWidth}px` }}>
+      <div
+        className="flex flex-col space-y-2 border-r border-t border-white/10"
+        style={{ width: `${toolbarWidth}px`, padding: `${containerPadding}px` }}
+      >
+        {toolsToShow.map(renderToolButton)}
+      </div>
     </div>
   );
 }

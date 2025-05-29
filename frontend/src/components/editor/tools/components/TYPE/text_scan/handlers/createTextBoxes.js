@@ -1,7 +1,7 @@
 import { configTextObject } from "../../text/handlers/textObjectHandlers";
 import { cleanText as handleCleanText } from "../../../../handlers/calculateTextCoordinates";
 import { v4 as uuidv4 } from "uuid";
-import ObjectStatus from "../../../../../floating-menus/UndoRedoMenu/handlers/enumObjectRequests";
+import ObjectStatus from "../../../../../floating-menus/components/UndoRedoMenu/handlers/enumObjectRequests";
 
 const createTextBoxes = (result, canvasInstances, colorToTypeTextMap, saveState) => {
   const idArrays = Array(result.length).fill().map(() => []);

@@ -1,5 +1,5 @@
-import { useEditorStore } from '../../../stores/editorStore'
-import { LAYERS } from '../../../constants/layers'
+import { useEditorStore } from '../../../../stores/editorStore'
+import { LAYERS } from '../../../../constants/layers'
 import {
   InboxIcon,
   AnnotationIcon,

@@ -12,14 +12,14 @@ import { getUser } from '../../../hooks/useAuth';
 
 export default function Header() {
   const headerRef = useRef(null);
-  
+
 
   useEffect(() => {
     const calculateHeaderHeight = () => {
       const windowHeight = window.innerHeight;
       const referenceHeight = 976;
       const referenceHeaderHeight = 75;
-      
+
       const height = Math.min(
         Math.round((windowHeight / referenceHeight) * referenceHeaderHeight),
         100
@@ -35,13 +35,13 @@ export default function Header() {
     window.addEventListener('resize', calculateHeaderHeight);
     return () => window.removeEventListener('resize', calculateHeaderHeight);
   }, []);
-  const { 
-    imagesLoaded, 
-    setCanvasObjectStatus, 
-    activeImageIndex, 
-    setActiveImageIndex, 
-    images, 
-    canvasInstances, 
+  const {
+    imagesLoaded,
+    setCanvasObjectStatus,
+    activeImageIndex,
+    setActiveImageIndex,
+    images,
+    canvasInstances,
     activeLayer,
     setHeaderHeight,
     headerHeight
@@ -163,32 +163,34 @@ export default function Header() {
   };
 
   return (
-    <div ref={headerRef} className="w-full bg-[#1a1a1a] border-b border-white/20 fixed top-0 right-0 z-[100] ml-[60px] overflow-hidden" style={{ height: headerHeight }}>
-      <div className="w-full px-8 flex items-center justify-between h-full">
-        <ProgressBar
-          activeImageIndex={activeImageIndex}
-          totalItems={totalItems}
-          isLoadingImage={isLoadingImage}
-          handlePrevious={handlePrevious}
-          handleNext={handleNext}
-          inputValue={inputValue}
-          setInputValue={setInputValue}
-          handleJump={handleJump}
-          headerHeight={headerHeight}
-        />
-        <ActionButtons
-          navigate={navigate}
-          handleExport={handleExport}
-          handleSaveLocal={handleSaveLocal}
+    <div className="flex-shrink-0 flex">
+      <div ref={headerRef} className="w-full bg-[#1a1a1a] border-b border-white/20 fixed top-0 right-0 z-[100] ml-[60px] overflow-hidden" style={{ height: headerHeight }}>
+        <div className="w-full px-8 flex items-center justify-between h-full">
+          <ProgressBar
+            activeImageIndex={activeImageIndex}
+            totalItems={totalItems}
+            isLoadingImage={isLoadingImage}
+            handlePrevious={handlePrevious}
+            handleNext={handleNext}
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+            handleJump={handleJump}
+            headerHeight={headerHeight}
+          />
+          <ActionButtons
+            navigate={navigate}
+            handleExport={handleExport}
+            handleSaveLocal={handleSaveLocal}
+            setShowLoadModal={setShowLoadModal}
+            headerHeight={headerHeight}
+          />
+        </div>
+        <LoadModal
+          showLoadModal={showLoadModal}
           setShowLoadModal={setShowLoadModal}
-          headerHeight={headerHeight}
+          handleLoad={handleLoad}
         />
       </div>
-      <LoadModal
-        showLoadModal={showLoadModal}
-        setShowLoadModal={setShowLoadModal}
-        handleLoad={handleLoad}
-      />
     </div>
   );
 }

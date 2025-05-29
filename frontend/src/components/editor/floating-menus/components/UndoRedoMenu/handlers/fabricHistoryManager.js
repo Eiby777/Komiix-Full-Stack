@@ -1,10 +1,10 @@
-import { LAYERS } from "../../../../../constants/layers";
-import { useEditorStore } from "../../../../../stores/editorStore";
-import { createImageObject } from "../../../tools/components/CLEANUP/brush/TemplateBrush";
-import { configTextObject } from "../../../tools/components/TYPE/text/handlers/textObjectHandlers";
-import { TOOLS } from "../../../../../constants/tools";
+import { LAYERS } from "../../../../../../constants/layers";
+import { useEditorStore } from "../../../../../../stores/editorStore";
+import { createImageObject } from "../../../../tools/components/CLEANUP/brush/TemplateBrush";
+import { configTextObject } from "../../../../tools/components/TYPE/text/handlers/textObjectHandlers";
+import { TOOLS } from "../../../../../../constants/tools";
 import ObjectStatus from "./enumObjectRequests";
-import createRectangleObject from "../../../tools/components/ANNOTATION/rectangle/createRectangleObject";
+import createRectangleObject from "../../../../tools/components/ANNOTATION/rectangle/createRectangleObject";
 import lzString from 'lz-string';
 
 
