@@ -4,9 +4,11 @@ import ZoomControls from "../floating-menus/ZoomControls";
 import { useFabricCanvas } from "./handlers/useFabricCanvas";
 import { useCanvasZoom } from "./handlers/useCanvasZoom";
 
-export default function EditorCanvas({ images }) {
-  const { imagesLoaded, activeImageIndex, isSettingsVisible } = useEditorStore();
+export default function EditorCanvas() {
+  const { imagesLoaded, activeImageIndex, isSettingsVisible, images } = useEditorStore();
+
   useFabricCanvas(images);
+
   const zoomControls = useCanvasZoom();
 
   return (

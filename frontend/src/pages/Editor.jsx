@@ -56,7 +56,7 @@ export default function Editor() {
       <WorkPlace
         header={<Header />}
         toolbar={<ToolsSideBar />}
-        canvas={<EditorCanvas images={images} />}
+        canvas={<EditorCanvas />}
         settingsPanel={<SettingsPanel />}
         zoomControls={imagesLoaded && <ZoomControls />}
         layerPanel={imagesLoaded && <LayersPanel/>}
