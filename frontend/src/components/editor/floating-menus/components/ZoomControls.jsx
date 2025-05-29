@@ -268,7 +268,7 @@ export default function ZoomControls({
           onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
           title="Close zoom controls"
         >
-          <img src={crossIcon} alt="Close" style={{ width: `${scaledIconSize-7}px`, height: `${scaledIconSize-7}px`, color: 'white' }} />
+          <img src={crossIcon} alt="Close" style={{ width: `${scaledIconSize-6}px`, height: `${scaledIconSize-6}px`, color: 'white' }} />
         </button>
       </div>
     </div>

@@ -169,7 +169,7 @@ export default function UndoRedoMenu() {
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
-                                style={{ width: `${scaledCloseButtonSize * 0.9}px`, height: `${scaledCloseButtonSize * 0.9}px` }}
+                                style={{ width: `16px`, height: `16px` }}
                                 fill="none"
                                 stroke="white"
                                 strokeWidth="2"
