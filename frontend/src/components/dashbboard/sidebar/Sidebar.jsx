@@ -6,10 +6,22 @@ export default function Sidebar({ darkMode, setActiveSection }) {
   const navigate = useNavigate();
   const { toggleSidebar, isSidebarCollapsed } = useDashboard();
 
+  // Calculate sidebar width based on screen height
+  const referenceScreenHeight = 952;
+  const referenceSidebarWidth = 288;
+  const minSidebarWidth = 240;
+  const maxSidebarWidth = 288;
+  const sidebarWidth = isSidebarCollapsed 
+    ? 20 
+    : Math.min(Math.max((window.innerHeight / referenceScreenHeight) * referenceSidebarWidth, minSidebarWidth), maxSidebarWidth);
+
+  // Calculate logo width based on sidebar width
+  const logoWidth = isSidebarCollapsed ? 16 : Math.min(sidebarWidth * 0.4167, 120); // 0.4167 = 120/288 to hit 120px at 288px sidebar width
+
   return (
     <aside
-      className={`md:relative z-20 min-h-screen text-white transition-all duration-300 ease-in-out transform shadow-2xl ${isSidebarCollapsed ? '-translate-x-full md:translate-x-0 md:w-20' : 'translate-x-0 w-72'
-        } ${darkMode ? 'bg-gradient-to-b from-gray-900 to-black' : 'bg-gradient-to-b from-blue-800 to-indigo-900'}`}
+      className={`md:relative z-20 min-h-screen text-white transition-all duration-300 ease-in-out transform shadow-2xl ${isSidebarCollapsed ? '-translate-x-full md:translate-x-0 md:w-20' : 'translate-x-0'} ${darkMode ? 'bg-gradient-to-b from-gray-900 to-black' : 'bg-gradient-to-b from-blue-800 to-indigo-900'}`}
+      style={{ width: `${sidebarWidth}px` }}
     >
       {/* Toggle Button */}
       <button
@@ -35,12 +47,11 @@ export default function Sidebar({ darkMode, setActiveSection }) {
       {/* Header */}
       <div className="p-3 pb-3 border-b border-white/10">
         <h2
-          className={`text-2xl font-extrabold tracking-tight transition-all duration-300 ${isSidebarCollapsed ? 'text-center text-lg md:opacity-0' : 'text-left'
-            }`}
+          className={`text-2xl font-extrabold tracking-tight transition-all duration-300 ${isSidebarCollapsed ? 'text-center text-lg md:opacity-0' : 'text-left'}`}
         >
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">
             <div className="flex justify-center">
-              <img src="/logo.png" alt="Komiix" className="w-[150px] h-auto" />
+              <img src="/logo.png" alt="Komiix" className="h-auto" style={{ width: `${logoWidth}px` }} />
             </div>
           </span>
         </h2>
@@ -56,8 +67,7 @@ export default function Sidebar({ darkMode, setActiveSection }) {
                 e.preventDefault();
                 navigate('/');
               }}
-              className={`flex items-center p-3 rounded-lg transition-all duration-200 group ${isSidebarCollapsed ? 'justify-center' : 'space-x-3 hover:bg-white/10'
-                }`}
+              className={`flex items-center p-3 rounded-lg transition-all duration-200 group ${isSidebarCollapsed ? 'justify-center' : 'space-x-3 hover:bg-white/10'}`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -88,8 +98,7 @@ export default function Sidebar({ darkMode, setActiveSection }) {
                 e.preventDefault();
                 setActiveSection('projects');
               }}
-              className={`flex items-center p-3 rounded-lg transition-all duration-200 group ${isSidebarCollapsed ? 'justify-center' : 'space-x-3 hover:bg-white/10'
-                }`}
+              className={`flex items-center p-3 rounded-lg transition-all duration-200 group ${isSidebarCollapsed ? 'justify-center' : 'space-x-3 hover:bg-white/10'}`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -119,8 +128,7 @@ export default function Sidebar({ darkMode, setActiveSection }) {
                 e.preventDefault();
                 setActiveSection('mergeImages');
               }}
-              className={`flex items-center p-3 rounded-lg transition-all duration-200 group ${isSidebarCollapsed ? 'justify-center' : 'space-x-3 hover:bg-white/10'
-                }`}
+              className={`flex items-center p-3 rounded-lg transition-all duration-200 group ${isSidebarCollapsed ? 'justify-center' : 'space-x-3 hover:bg-white/10'}`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -149,8 +157,7 @@ export default function Sidebar({ darkMode, setActiveSection }) {
       {/* Footer */}
       <div className="absolute bottom-0 w-full p-4">
         <p
-          className={`text-xs text-white/60 transition-opacity duration-300 ${isSidebarCollapsed ? 'opacity-0 md:opacity-100 text-center' : 'opacity-100'
-            }`}
+          className={`text-xs text-white/60 transition-opacity duration-300 ${isSidebarCollapsed ? 'opacity-0 md:opacity-100 text-center' : 'opacity-100'}`}
         >
           © 2025 Komiix
         </p>
