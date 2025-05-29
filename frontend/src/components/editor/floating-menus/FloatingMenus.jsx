@@ -3,16 +3,14 @@ import UndoRedoMenu from "./components/UndoRedoMenu/UndoRedoMenu";
 import Layers from "./components/Layers";
 import ZoomControls from "./components/ZoomControls";
 import ToggleConfigButton from "./components/ToggleConfigButton";
-import { useCanvasZoom } from "../canvas/handlers/useCanvasZoom";
 import { useEditorStore } from "../../../stores/editorStore";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import enumFloatingMenus from "./handlers/enumFloatingMenus";
 
 const FloatingMenus = () => {
-    const zoomControls = useCanvasZoom();
     const [toolbarWidth, setToolbarWidth] = useState(50);
     const [canvasWidth, setCanvasWidth] = useState(window.innerWidth - toolbarWidth);
-    const { headerHeight, floatingMenusSizes } = useEditorStore();
+    const { _, floatingMenusSizes } = useEditorStore();
     
     // Estado para rastrear altura del header
     const [headerHeightValue, setHeaderHeightValue] = useState(80);
@@ -20,9 +18,7 @@ const FloatingMenus = () => {
     const menuList = useMemo(() => [
         { id: enumFloatingMenus.UndoRedoMenu, Component: UndoRedoMenu },
         { id: enumFloatingMenus.Layers, Component: Layers },
-        { id: enumFloatingMenus.ZoomControls, 
-            Component: ({ top }) => <ZoomControls {...zoomControls} /> 
-        },
+        { id: enumFloatingMenus.ZoomControls, Component: ZoomControls },
         { id: enumFloatingMenus.ToggleConfigButton, Component: ToggleConfigButton }
     ], []);
 

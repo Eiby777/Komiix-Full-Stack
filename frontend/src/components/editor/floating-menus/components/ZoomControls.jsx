@@ -6,15 +6,10 @@ import crossIcon from './icons/cross.png';
 import { useEditorStore } from "../../../../stores/editorStore";
 import enumFloatingMenus from "../handlers/enumFloatingMenus";
 import useMeasureFloatingMenu from "./useMeasureFloatingMenu";
+import {useCanvasZoom} from "../../canvas/handlers/useCanvasZoom";
 
-export default function ZoomControls({
-  zoomIn,
-  zoomOut,
-  resetZoom,
-  minZoom,
-  maxZoom,
-  updateZoomManually,
-}) {
+export default function ZoomControls() {
+  const { zoomIn, zoomOut, resetZoom, minZoom, maxZoom, updateZoomManually } = useCanvasZoom();
   const {
     getZoomLevel,
     imagesLoaded,
