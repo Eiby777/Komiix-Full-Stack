@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useEditorStore } from '../../../stores/editorStore';
 import { TOOLS } from '../../../constants/tools';
 import useHeightCalculation from './handlers/useHeightCalculation';
@@ -7,7 +7,10 @@ import ToolSettings from './components/ToolSettings';
 
 export default function SettingsPanel() {
   const { activeTools, isSettingsVisible } = useEditorStore();
+  const settingsPanelRef = useRef(null);
   const panelRef = useRef(null);
+
+
 
   // Get heights and setters from useHeightCalculation
   const { heights, setHeights, lastHeightPercentage, setLastHeightPercentage } = useHeightCalculation(panelRef);
@@ -23,8 +26,13 @@ export default function SettingsPanel() {
 
   const toolsToRender = [...activeToolsWithSettings];
 
+
+
+
   return (
     <div
+      id="settings-panel"
+      ref={settingsPanelRef}
       className={`flex w-[20%] min-w-[230px] transition-all duration-300 ${isSettingsVisible ? 'block' : 'hidden'
         }`}
     >

@@ -1,13 +1,16 @@
-import { useEditorStore } from '../../../../stores/editorStore'
-import { LAYERS } from '../../../../constants/layers'
+import { useRef } from 'react';
+import { useEditorStore } from '../../../../stores/editorStore';
+import { LAYERS } from '../../../../constants/layers';
 import {
   InboxIcon,
   AnnotationIcon,
   BanIcon,
   TranslateIcon,
   ExternalLinkIcon
-} from '@heroicons/react/outline'
-import { X, Layers } from 'lucide-react'
+} from '@heroicons/react/outline';
+import { X, Layers } from 'lucide-react';
+import enumFloatingMenus from '../handlers/enumFloatingMenus';
+import useMeasureFloatingMenu from './useMeasureFloatingMenu';
 
 const iconMap = {
   InboxIcon: InboxIcon,
@@ -15,7 +18,7 @@ const iconMap = {
   BanIcon: BanIcon,
   TranslateIcon: TranslateIcon,
   ExternalLinkIcon: ExternalLinkIcon
-}
+};
 
 export default function LayersPanel() {
   const { 
@@ -25,15 +28,24 @@ export default function LayersPanel() {
     setLayerCarouselVisible, 
     getCanvasInstance, 
     activeImageIndex, 
-    setCanvasObjectStatus,
-  } = useEditorStore()
+    setCanvasObjectStatus
+  } = useEditorStore();
+
+  const buttonRef = useRef(null);
+  const panelRef = useRef(null);
+
+  useMeasureFloatingMenu(
+    isLayerCarouselVisible ? panelRef : buttonRef, 
+    enumFloatingMenus.Layers
+  );
 
   if (!isLayerCarouselVisible) {
     return (
       <button
+        ref={buttonRef}
         onClick={() => setLayerCarouselVisible(true)}
         style={{
-          position: 'fixed',
+          /* REMOVIDO: top */
           zIndex: 50,
           padding: '0.5rem',
           backgroundColor: '#2a2a2a',
@@ -48,43 +60,46 @@ export default function LayersPanel() {
       >
         <Layers className="w-4 h-4" />
       </button>
-    )
+    );
   }
 
   const handleLayerChange = (layerId) => {
-    const canvas = getCanvasInstance(activeImageIndex)
-    const objects = canvas.getObjects()
+    const canvas = getCanvasInstance(activeImageIndex);
+    const objects = canvas.getObjects();
 
-    const imageObjects = objects.filter(object => object.type === 'image')
-    const rectObjects = objects.filter(object => object.type === 'rect')
-    const textObjects = objects.filter(object => object.type === 'textbox')
+    const imageObjects = objects.filter(object => object.type === 'image');
+    const rectObjects = objects.filter(object => object.type === 'rect');
+    const textObjects = objects.filter(object => object.type === 'textbox');
     if (imageObjects.length > 1 || rectObjects.length > 0 || textObjects.length > 0) {
-      setCanvasObjectStatus(activeImageIndex, true)
-    }
-    else {
-      setCanvasObjectStatus(activeImageIndex, false)
+      setCanvasObjectStatus(activeImageIndex, true);
+    } else {
+      setCanvasObjectStatus(activeImageIndex, false);
     }
     
     setActiveLayer(layerId);
   };
+
   return (
-    <div style={{
-      position: 'fixed',
-      zIndex: 50,
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      backgroundColor: '#2a2a2a',
-      borderRadius: '0.375rem',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      border: '1px solid rgba(55, 65, 81, 0.5)',
-      color: 'white',
-      transition: 'background-color 600ms'
-    }}>
+    <div
+      ref={panelRef}
+      style={{
+        /* REMOVIDO: top */
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        backgroundColor: '#2a2a2a',
+        borderRadius: '0.375rem',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid rgba(55, 65, 81, 0.5)',
+        color: 'white',
+        transition: 'background-color 600ms'
+      }}
+    >
       <div className="flex items-center space-x-2 p-2 bg-[#2a2a2a] rounded-md shadow-lg border border-gray-700/50">
         <div className="flex space-x-2">
           {Object.values(LAYERS).map(layer => {
-            const IconComponent = iconMap[layer.icon]
+            const IconComponent = iconMap[layer.icon];
             return (
               <button
                 key={layer.id}
@@ -99,7 +114,7 @@ export default function LayersPanel() {
                   <span className="text-xs">{layer.label}</span>
                 </div>
               </button>
-            )
+            );
           })}
         </div>
 
@@ -114,5 +129,5 @@ export default function LayersPanel() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,35 +1,37 @@
 import { FaCog } from 'react-icons/fa';
 import { useRef, useState, useEffect } from 'react';
+import useMeasureFloatingMenu from './useMeasureFloatingMenu';
+import enumFloatingMenus from '../handlers/enumFloatingMenus';
 
 export default function ToggleConfigButton() {
     const settingsButtonRef = useRef(null);
+    const [settingsButtonSize, setSettingsButtonSize] = useState(34);
 
-    const toggleSettingsPanel = () => {
-        console.log('Toggle settings panel');
-    };
-    
+    useMeasureFloatingMenu(
+        settingsButtonRef,
+        enumFloatingMenus.ToggleConfigButton
+    );
+
     const calculateButtonSize = () => {
-        const baseSize = 34; // Size at 952px height
+        const baseSize = 34;
         const minSize = 30;
-        const maxSize = 34;
         const scaleFactor = Math.max(0.7, Math.min(1, window.innerHeight / 952));
-        const calculatedSize = baseSize * scaleFactor;
-        return Math.max(minSize, Math.min(maxSize, calculatedSize));
+        return Math.max(minSize, baseSize * scaleFactor);
     };
-
-    const [settingsButtonSize, setSettingsButtonSize] = useState(calculateButtonSize());
 
     useEffect(() => {
-        const updateSize = () => {
-            setSettingsButtonSize(calculateButtonSize());
-        };
-
+        const updateSize = () => setSettingsButtonSize(calculateButtonSize());
         updateSize();
         window.addEventListener('resize', updateSize);
         return () => window.removeEventListener('resize', updateSize);
     }, []);
 
+    const toggleSettingsPanel = () => {
+        console.log("Toggle settings panel");
+    }
+
     return (
+
         <button
             ref={settingsButtonRef}
             onClick={toggleSettingsPanel}

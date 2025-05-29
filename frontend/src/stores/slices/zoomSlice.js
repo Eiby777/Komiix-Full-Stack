@@ -55,9 +55,4 @@ export const createZoomSlice = (set, get) => ({
   getZoomLevels: () => get().zoomLevel,
   getZoomLevel: (index) => get().zoomLevel[index],
   getMinZoom: (index) => get().minZoom[index] !== undefined ? get().minZoom[index] : 0.25,
-
-  headerHeight: "75px",
-  setHeaderHeight: (height) => set((state) => {
-    state.headerHeight = height;
-  })
 });

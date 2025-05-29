@@ -4,6 +4,8 @@ import plusIcon from './icons/plus.png';
 import resetIcon from './icons/reset.png';
 import crossIcon from './icons/cross.png';
 import { useEditorStore } from "../../../../stores/editorStore";
+import enumFloatingMenus from "../handlers/enumFloatingMenus";
+import useMeasureFloatingMenu from "./useMeasureFloatingMenu";
 
 export default function ZoomControls({
   zoomIn,
@@ -36,6 +38,11 @@ export default function ZoomControls({
   const closeButtonRef = useRef(null);
   const hiddenButtonRef = useRef(null);
 
+  useMeasureFloatingMenu(
+    isVisible ? containerRef : hiddenButtonRef, 
+    enumFloatingMenus.ZoomControls
+  );
+
   const referenceHeight = 46;
   const scaleFactor = Math.max(0.75, Math.min(1, window.innerHeight / 952 * (referenceHeight / referenceHeight)));
   const scaledPadding = Math.max(4, 8 * scaleFactor);
@@ -43,6 +50,7 @@ export default function ZoomControls({
   const scaledSliderWidth = Math.max(90, 128 * scaleFactor);
   const scaledTextHeight = Math.max(14, 20 * scaleFactor);
   const scaledIconSize = Math.min(16, scaledButtonSize * 0.9);
+  const scaledMinButtonSize = Math.max(30, 34 * scaleFactor);
 
   useEffect(() => {
     if (imagesLoaded) {
@@ -102,8 +110,9 @@ export default function ZoomControls({
         ref={hiddenButtonRef}
         onClick={() => setIsVisible(true)}
         style={{
-          position: 'fixed',
           zIndex: 50,
+          width: `${scaledMinButtonSize}px`,
+          height: `${scaledMinButtonSize}px`,
           padding: `${scaledPadding}px`,
           backgroundColor: '#2a2a2a',
           borderRadius: '6px',
@@ -123,7 +132,6 @@ export default function ZoomControls({
     <div
       ref={containerRef}
       style={{
-        position: 'fixed',
         zIndex: 50,
         display: 'flex',
         alignItems: 'center',

@@ -1,12 +1,11 @@
 import { useEditorStore } from '../../../stores/editorStore';
 import { TOOL_GROUPS } from '../../../constants/tools';
 import { LAYERS } from '../../../constants/layers';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function ToolsSideBar() {
-  const { activeTools, toggleTool, activeLayer } = useEditorStore();
-  const [toolbarWidth, setToolbarWidth] = useState(50);
-  const toolbarRef = useRef(null);
+  const { activeTools, toggleTool, activeLayer, toolbarWidth, setToolbarWidth } = useEditorStore();
+  const toolbarRef = useRef(null); 
 
 
   useEffect(() => {
@@ -95,7 +94,7 @@ export default function ToolsSideBar() {
   }, []);
 
   return (
-    <div ref={toolbarRef} className="border-r border-[var(--muted)] bg-[#1a1a1a]" style={{ width: `${toolbarWidth}px` }}>
+    <div id="toolbar" ref={toolbarRef} className="border-r border-[var(--muted)] bg-[#1a1a1a]" style={{ width: `${toolbarWidth}px` }}>
       <div
         className="flex flex-col space-y-2 border-r border-t border-white/10"
         style={{ width: `${toolbarWidth}px`, padding: `${containerPadding}px` }}
