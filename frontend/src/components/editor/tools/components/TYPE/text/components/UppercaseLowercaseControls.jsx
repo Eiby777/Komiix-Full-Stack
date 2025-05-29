@@ -1,5 +1,5 @@
 import { handleUppercase, handleLowercase } from '../handlers/textSettingsHandlers';
-import useLayerHistory from '../../../../../canvas/UndoRedoMenu/handlers/fabricHistoryManager';
+import useLayerHistory from '../../../../../floating-menus/UndoRedoMenu/handlers/fabricHistoryManager';
 
 const UppercaseLowercaseControls = ({
     uppercase, setUppercase, lowercase, setLowercase, textObject, fabricCanvas, buttonBaseStyle, buttonInactiveStyle, buttonActiveStyle

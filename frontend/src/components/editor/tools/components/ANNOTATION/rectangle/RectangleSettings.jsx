@@ -6,8 +6,8 @@ import touchedIcon from './icons/touched.svg';
 import thinkIcon from './icons/think.svg';
 import sentenceIcon from './icons/sentence.svg';
 import { useEditorStore } from '../../../../../../stores/editorStore';
-import useLayerHistory from '../../../../canvas/UndoRedoMenu/handlers/fabricHistoryManager';
-import ObjectStatus from '../../../../canvas/UndoRedoMenu/handlers/enumObjectRequests';
+import useLayerHistory from '../../../../floating-menus/UndoRedoMenu/handlers/fabricHistoryManager';
+import ObjectStatus from '../../../../floating-menus/UndoRedoMenu/handlers/enumObjectRequests';
 
 const BubbleButton = ({ icon, label, color, onClick, isActive }) => {
   

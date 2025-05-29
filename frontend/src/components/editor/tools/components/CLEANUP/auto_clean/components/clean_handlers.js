@@ -1,7 +1,7 @@
 import fabric from "../../../../../../../constants/fabricInstance";
 import { LAYERS } from "../../../../../../../constants/layers";
 import { v4 as uuidv4 } from "uuid";
-import ObjectStatus from "../../../../../canvas/UndoRedoMenu/handlers/enumObjectRequests";
+import ObjectStatus from "../../../../../floating-menus/UndoRedoMenu/handlers/enumObjectRequests";
 
 /**
  * Obtiene las imágenes de fondo de todos los canvas instances

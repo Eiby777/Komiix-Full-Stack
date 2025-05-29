@@ -1,5 +1,5 @@
 import LoadingOverlay from "./Components/LoadingOverlay";
-import { useEditorStore } from "../../../../../../stores/editorStore";
+import { useEditorStore } from "../../../../../stores/editorStore";
 import { useEffect, useRef } from "react";
 
 export default function CanvasContainer({ images, isLoading }) {

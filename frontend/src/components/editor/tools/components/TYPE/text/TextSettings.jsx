@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useEditorStore } from '../../../../../../stores/editorStore';
-import useLayerHistory from '../../../../canvas/UndoRedoMenu/handlers/fabricHistoryManager';
+import useLayerHistory from '../../../../floating-menus/UndoRedoMenu/handlers/fabricHistoryManager';
 import FontFamilySelector from './components/FontFamilySelector/FontFamilySelector';
 import SizeLineHeightControls from './components/SizeLineHeightControls';
 import ColorControls from './components/ColorControls';

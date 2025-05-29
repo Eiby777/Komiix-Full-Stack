@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useEditorStore } from "../../../../../stores/editorStore";
-import fabric from "../../../../../constants/fabricInstance";
+import { useEditorStore } from "../../../../stores/editorStore";
+import fabric from "../../../../constants/fabricInstance";
 
 export const useCanvasZoom = () => {
   const {
@@ -10,7 +10,7 @@ export const useCanvasZoom = () => {
     setZoomLevel,
     activeImageIndex,
     getCanvasInstance,
-    getMinZoom, // Añadimos esta función
+    getMinZoom,
   } = useEditorStore();
 
   const containerRef = document.getElementById("div_editor");

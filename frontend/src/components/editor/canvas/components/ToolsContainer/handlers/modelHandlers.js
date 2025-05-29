@@ -1,8 +1,8 @@
-import { checkModel, updateModel } from "../../../../../../../lib/localDB/modelDB";
-import { TOOLS } from "../../../../../../../constants/tools";
+import { checkModel, updateModel } from "../../../../../../lib/localDB/modelDB";
+import { TOOLS } from "../../../../../../constants/tools";
 import { v4 as uuidv4 } from 'uuid';
-import { supabase } from "../../../../../../../lib/supabaseClient";
-import domain from "../../../../../../../hooks/domain";
+import { supabase } from "../../../../../../lib/supabaseClient";
+import domain from "../../../../../../hooks/domain";
 
 const TOOL_MODELS = {
   [TOOLS.SCAN.id]: ['globes', 'text'],

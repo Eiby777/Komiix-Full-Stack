@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useEditorStore } from "../../../../../../stores/editorStore";
-import { TOOLS } from "../../../../../../constants/tools";
+import { useEditorStore } from "../../../../../stores/editorStore";
+import { TOOLS } from "../../../../../constants/tools";
 
 export default function CanvasEffects() {
   const { activeTools, imagesLoaded, dimensionImages, activeImageIndex } =

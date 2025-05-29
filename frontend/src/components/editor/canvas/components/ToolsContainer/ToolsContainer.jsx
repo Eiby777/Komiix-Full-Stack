@@ -1,5 +1,5 @@
-import { useEditorStore } from "../../../../../../stores/editorStore";
-import { TOOLS } from "../../../../../../constants/tools";
+import { useEditorStore } from "../../../../../stores/editorStore";
+import { TOOLS } from "../../../../../constants/tools";
 import {
   RectangleTool,
   PlusTool,
@@ -14,11 +14,11 @@ import {
   AdjustTextTool,
   TextScanTool,
   ExportTool
-} from "../../../../tools/components";
-import { supabase } from "../../../../../../lib/supabaseClient";
+} from "../../../tools/components";
+import { supabase } from "../../../../../lib/supabaseClient";
 import { memo, useState, useEffect } from "react";
-import { checkModel, deleteAllModels } from "../../../../../../lib/localDB/modelDB";
-import ModelDownloader from "../../../../../../pages/ModelDownloader/ModelDownloader";
+import { checkModel, deleteAllModels } from "../../../../../lib/localDB/modelDB";
+import ModelDownloader from "../../../../../pages/ModelDownloader/ModelDownloader";
 import { getRequiredModels, areToolModelsReady, handleModelComplete, checkIfModelIsUpdated, handleCheckModel, handleUpdateModelStatus } from "./handlers/modelHandlers";
 
 //deleteAllModels();

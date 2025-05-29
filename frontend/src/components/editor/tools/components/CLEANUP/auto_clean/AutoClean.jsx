@@ -6,7 +6,7 @@ import WarningModal from "./components/WarningModal";
 import ProgressBar from "./components/ProgressBar";
 import LoadingModal from "./components/LoadingModal";
 import { getImages, getRectangles, addCleanedObjects, nonSolidBackgroundRects } from "./components/clean_handlers";
-import useLayerHistory from "../../../../canvas/UndoRedoMenu/handlers/fabricHistoryManager";
+import useLayerHistory from "../../../../floating-menus/UndoRedoMenu/handlers/fabricHistoryManager";
 
 const AutoClean = () => {
   const { canvasInstances, MASK, getCanvasInstance, setCanvasObjectStatus, resetActiveTools, activeImageIndex } = useEditorStore();

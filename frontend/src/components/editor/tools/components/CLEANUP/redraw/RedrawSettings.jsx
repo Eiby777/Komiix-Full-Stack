@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useEditorStore } from '../../../../../../stores/editorStore';
-import useLayerHistory from '../../../../canvas/UndoRedoMenu/handlers/fabricHistoryManager';
-import ObjectStatus from '../../../../canvas/UndoRedoMenu/handlers/enumObjectRequests';
 import { LAYERS } from '../../../../../../constants/layers';
 
 const ConfirmationModal = ({ message, onConfirm, onCancel }) => {

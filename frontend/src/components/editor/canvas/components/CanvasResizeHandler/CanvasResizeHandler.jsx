@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from "react";
-import { useEditorStore } from "../../../../../../stores/editorStore";
+import { useEditorStore } from "../../../../../stores/editorStore";
 import { useCanvasZoom } from "../../handlers/useCanvasZoom";
-import { TOOLS } from "../../../../../../constants/tools";
+import { TOOLS } from "../../../../../constants/tools";
 
 export default function CanvasResizeHandler() {
   const { canvasInstances, imagesLoaded, getZoomLevel, isSettingsVisible, activeTools } = useEditorStore();

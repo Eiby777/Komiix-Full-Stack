@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaUndo, FaRedo } from 'react-icons/fa';
 import { handleRotate } from '../handlers/textSettingsHandlers';
-import useLayerHistory from '../../../../../canvas/UndoRedoMenu/handlers/fabricHistoryManager';
+import useLayerHistory from '../../../../../floating-menus/UndoRedoMenu/handlers/fabricHistoryManager';
 
 const RotationControls = ({ textObject, fabricCanvas, buttonBaseStyle, buttonInactiveStyle }) => {
   const { saveState } = useLayerHistory();

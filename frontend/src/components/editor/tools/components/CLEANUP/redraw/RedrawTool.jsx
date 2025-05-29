@@ -12,7 +12,7 @@ import { getAllModels, getModel } from "../../../../../../lib/localDB/modelDB";
 import runInpainting from "./inference/runInpainting";
 import { getUser } from "../../../../../../hooks/useAuth";
 import createMaskOverlay from "./handlers/createMaskOverlay";
-import useLayerHistory from "../../../../canvas/UndoRedoMenu/handlers/fabricHistoryManager";
+import useLayerHistory from "../../../../floating-menus/UndoRedoMenu/handlers/fabricHistoryManager";
 import { useParams } from "react-router-dom";
 
 // Constants for canvas configuration

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import { useEditorStore } from "../../../../../stores/editorStore";
-import fabric from "../../../../../constants/fabricInstance";
+import { useEditorStore } from "../../../../stores/editorStore";
+import fabric from "../../../../constants/fabricInstance";
 
 const CANVAS_CONFIG = {
   backgroundColor: "#1a1a1a",

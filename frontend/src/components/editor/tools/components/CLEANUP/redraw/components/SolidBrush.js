@@ -1,5 +1,5 @@
 import fabric from "../../../../../../../constants/fabricInstance";
-import ObjectStatus from "../../../../../canvas/UndoRedoMenu/handlers/enumObjectRequests";
+import ObjectStatus from "../../../../../floating-menus/UndoRedoMenu/handlers/enumObjectRequests";
 import { v4 as uuidv4 } from "uuid";
 
 class SolidBrush extends fabric.BaseBrush {

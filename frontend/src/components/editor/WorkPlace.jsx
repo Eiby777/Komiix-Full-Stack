@@ -3,7 +3,7 @@ import { useEditorStore } from '../../stores/editorStore';
 import { TOOLS } from '../../constants/tools';
 import { useEffect, useState, useRef } from 'react';
 import { LAYERS } from '../../constants/layers';
-import { FaCog } from 'react-icons/fa';
+import ToggleConfigButton from './floating-menus/ToggleConfigButton';
 
 export default function EditorLayout({
   header,
@@ -123,48 +123,21 @@ export default function EditorLayout({
         <div ref={toolbarRef} className="border-r border-[var(--muted)] bg-[#1a1a1a]" style={{ width: `${toolbarWidth}px` }}>
           {toolbar}
         </div>
-        <div
-          className={`${isSettingsVisible ? 'w-[80%]' : 'w-full'
-            } overflow-auto transition-all duration-300`}
-          id="div_editor"
-        >
-          {canvas}
-        </div>
+
+        {canvas}
+
         {isCanvasLoaded && undoRedoMenu}
-        <div
-          className={`flex w-[20%] min-w-[230px] transition-all duration-300 ${isSettingsVisible ? 'block' : 'hidden'
-            }`}
-        >
-          <div className="border-l border-[var(--muted)] bg-[var(--muted)] w-[100%]">
-            {settingsPanel}
-          </div>
-        </div>
+
+        {settingsPanel}
+
         {/* Botón de configuración */}
-        <button
-          ref={settingsButtonRef}
-          onClick={toggleSettingsPanel}
-          style={{
-            position: 'fixed',
-            top: topPositionIcons,
-            right: configIconsPositions.settingsIcon.right,
-            zIndex: 50,
-            width: `${settingsButtonSize}px`,
-            height: `${settingsButtonSize}px`,
-            backgroundColor: '#2a2a2a',
-            borderRadius: '0.375rem',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            border: '1px solid rgba(55, 65, 81, 0.5)',
-            color: 'white',
-            transition: 'background-color 600ms',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-          className="hover:bg-[#357abd]"
-          title="Toggle settings panel"
-        >
-          <FaCog className="w-[16px] h-[16px]" />
-        </button>
+        <ToggleConfigButton
+          settingsButtonRef={settingsButtonRef}
+          toggleSettingsPanel={toggleSettingsPanel}
+          topPositionIcons={topPositionIcons}
+          configIconsPositions={configIconsPositions}
+          settingsButtonSize={settingsButtonSize}
+        />
       </div>
       {activeTools.includes(TOOLS.PAN.id) && <PanTool />}
     </div>

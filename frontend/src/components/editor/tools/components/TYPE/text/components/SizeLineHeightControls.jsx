@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaTextHeight, FaChevronUp, FaChevronDown } from 'react-icons/fa';
-import useLayerHistory from '../../../../../canvas/UndoRedoMenu/handlers/fabricHistoryManager';
+import useLayerHistory from '../../../../../floating-menus/UndoRedoMenu/handlers/fabricHistoryManager';
 
 const SizeLineHeightControls = ({
   fontSize, setFontSize, lineHeight, setLineHeight, textObject, fabricCanvas,
