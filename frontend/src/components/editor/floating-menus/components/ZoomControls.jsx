@@ -21,10 +21,11 @@ export default function ZoomControls({
     activeImageIndex,
     dimensionImages,
     setMinZoom,
+    isZoomControlsVisible,
+    setZoomControlsVisible,
   } = useEditorStore();
   const [zoomLevel, setZoomLevel] = useState(1);
   const zoomPercentage = Math.round(zoomLevel * 100);
-  const [isVisible, setIsVisible] = useState(true);
   let currentZoom = getZoomLevel(activeImageIndex);
   const [resetValue, setResetValue] = useState(1);
   const [currentMinZoom, setCurrentMinZoom] = useState(minZoom);
@@ -39,7 +40,7 @@ export default function ZoomControls({
   const hiddenButtonRef = useRef(null);
 
   useMeasureFloatingMenu(
-    isVisible ? containerRef : hiddenButtonRef, 
+    isZoomControlsVisible ? containerRef : hiddenButtonRef, 
     enumFloatingMenus.ZoomControls
   );
 
@@ -104,11 +105,11 @@ export default function ZoomControls({
     setResetValue(zoomReset);
   };
 
-  if (!isVisible) {
+  if (!isZoomControlsVisible) {
     return (
       <button
         ref={hiddenButtonRef}
-        onClick={() => setIsVisible(true)}
+        onClick={() => setZoomControlsVisible(true)}
         style={{
           zIndex: 50,
           width: `${scaledMinButtonSize}px`,
@@ -251,7 +252,7 @@ export default function ZoomControls({
       <div style={{ borderLeft: '1px solid rgba(55, 65, 81, 0.5)', marginLeft: `${scaledPadding}px`, paddingLeft: `${scaledPadding}px` }}>
         <button
           ref={closeButtonRef}
-          onClick={() => setIsVisible(false)}
+          onClick={() => setZoomControlsVisible(false)}
           style={{
             padding: `${scaledPadding}px`,
             width: `${scaledButtonSize}px`,

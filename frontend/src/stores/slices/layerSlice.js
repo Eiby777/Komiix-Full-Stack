@@ -172,10 +172,7 @@ export const createLayerSlice = (set, get) => ({
       state.layerStates[layer] = objects;
     }),
 
-  isLayerCarouselVisible: true,
-
-  setLayerCarouselVisible: (isVisible) =>
-    set({ isLayerCarouselVisible: isVisible }),
+  
 
   setLayerState: (layer, index, newHistory) =>
     set((state) => {

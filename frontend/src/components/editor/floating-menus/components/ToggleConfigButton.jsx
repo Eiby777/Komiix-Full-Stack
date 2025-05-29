@@ -2,10 +2,12 @@ import { FaCog } from 'react-icons/fa';
 import { useRef, useState, useEffect } from 'react';
 import useMeasureFloatingMenu from './useMeasureFloatingMenu';
 import enumFloatingMenus from '../handlers/enumFloatingMenus';
+import { useEditorStore } from '../../../../stores/editorStore';
 
 export default function ToggleConfigButton() {
     const settingsButtonRef = useRef(null);
     const [settingsButtonSize, setSettingsButtonSize] = useState(34);
+    const { isSettingsVisible, setIsSettingsVisible } = useEditorStore();
 
     useMeasureFloatingMenu(
         settingsButtonRef,
@@ -27,7 +29,7 @@ export default function ToggleConfigButton() {
     }, []);
 
     const toggleSettingsPanel = () => {
-        console.log("Toggle settings panel");
+        setIsSettingsVisible(!isSettingsVisible);
     }
 
     return (

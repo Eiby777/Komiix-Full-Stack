@@ -16,6 +16,20 @@ export const createScreenSlice = (set, get) => ({
             ...state.floatingMenusSizes,
             [menuType]: size
         }
-    }))
+    })),
+    isLayerCarouselVisible: true,
+
+    setLayerCarouselVisible: (isVisible) =>
+        set({ isLayerCarouselVisible: isVisible }),
+
+    isZoomControlsVisible: true,
+
+    setZoomControlsVisible: (isVisible) =>
+        set({ isZoomControlsVisible: isVisible }),
+
+    isUndoRedoMenuVisible: true,
+
+    setUndoRedoMenuVisible: (isVisible) =>
+        set({ isUndoRedoMenuVisible: isVisible }),
 
 });

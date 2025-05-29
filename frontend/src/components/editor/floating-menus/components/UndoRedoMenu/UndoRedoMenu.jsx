@@ -3,10 +3,13 @@ import useInitializeLayerStates from './handlers/useInitializeLayerStates';
 import useLayerHistory from './handlers/fabricHistoryManager';
 import enumFloatingMenus from '../../handlers/enumFloatingMenus';
 import useMeasureFloatingMenu from '../useMeasureFloatingMenu';
+import { useEditorStore } from '../../../../../stores/editorStore';
 
 export default function UndoRedoMenu() {
-    const [isVisible, setIsVisible] = useState(true);
+    
     useInitializeLayerStates();
+
+    const { isUndoRedoMenuVisible, setUndoRedoMenuVisible } = useEditorStore();
     
     const { undo, redo } = useLayerHistory();
     const scaleFactor = Math.max(0.75, Math.min(1, window.innerHeight / 952));
@@ -20,16 +23,16 @@ export default function UndoRedoMenu() {
     const menuRef = useRef(null);
     
     useMeasureFloatingMenu(
-        isVisible ? menuRef : buttonRef, 
+        isUndoRedoMenuVisible ? menuRef : buttonRef, 
         enumFloatingMenus.UndoRedoMenu
     );
 
     return (
         <>
-            {!isVisible ? (
+            {!isUndoRedoMenuVisible ? (
                 <button
                     ref={buttonRef}
-                    onClick={() => setIsVisible(true)}
+                    onClick={() => setUndoRedoMenuVisible(true)}
                     id="show-undo-redo"
                     style={{
                         /* REMOVIDO: top */
@@ -147,7 +150,7 @@ export default function UndoRedoMenu() {
 
                     <div style={{ borderLeft: '1px solid rgba(55, 65, 81, 0.5)', marginLeft: `${scaledPadding}px`, paddingLeft: `${scaledPadding}px` }}>
                         <button
-                            onClick={() => setIsVisible(false)}
+                            onClick={() => setUndoRedoMenuVisible(false)}
                             style={{
                                 padding: `${scaledPadding - 2}px`,
                                 width: `${scaledCloseButtonSize}px`,
