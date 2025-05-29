@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDashboard } from '../../../hooks/useDashboard';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveDarkTheme } from '../../../lib/localDB/darkDB';
+
 export default function Header({
   isProfileMenuOpen,
   setIsProfileMenuOpen,
@@ -12,19 +13,32 @@ export default function Header({
   onHeaderHeightChange
 }) {
   const headerRef = useRef(null);
+  const [dynamicHeight, setDynamicHeight] = useState(64);
 
   useEffect(() => {
-    if (headerRef.current && onHeaderHeightChange) {
-      const updateHeight = () => {
-        const height = headerRef.current.offsetHeight;
-        onHeaderHeightChange(height);
-      };
+    const calculateHeight = () => {
+      const windowHeight = window.innerHeight;
+      // Scale header height: at 952px screen height, header should be 79px
+      // Using linear scaling with min 50px and max 80px
+      const referenceHeight = 952;
+      const referenceHeaderHeight = 79;
+      let height = (windowHeight / referenceHeight) * referenceHeaderHeight;
+      height = Math.min(Math.max(height, 50), 80);
+      setDynamicHeight(height);
       
-      updateHeight();
-      window.addEventListener('resize', updateHeight);
-      return () => window.removeEventListener('resize', updateHeight);
-    }
+      if (onHeaderHeightChange) {
+        onHeaderHeightChange(height);
+      }
+    };
+
+    calculateHeight();
+    window.addEventListener('resize', calculateHeight);
+    
+    return () => {
+      window.removeEventListener('resize', calculateHeight);
+    };
   }, [onHeaderHeightChange]);
+
   const { 
     toggleSidebar,
     profile,
@@ -42,10 +56,17 @@ export default function Header({
   }, [darkMode]);
 
   const { handleLogout } = useAuth();
+  
+  // Calculate icon size: 28px at header height of 79px, min 22px
+  const referenceHeaderHeight = 79;
+  const referenceIconSize = 33;
+  const iconSize = Math.max((dynamicHeight / referenceHeaderHeight) * referenceIconSize, 22);
+
   return (
     <header 
       ref={headerRef}
-      className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border-b border-gray-200/70 dark:border-gray-800/70 p-4 flex justify-end items-center gap-4 shadow-sm z-[1000]"
+      className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border-b border-gray-200/70 dark:border-gray-800/70 flex justify-end items-center gap-4 shadow-sm z-[1000]"
+      style={{ height: `${dynamicHeight}px`, padding: `${dynamicHeight * 0.25}px ${dynamicHeight * 0.5}px` }}
     >
       {/* Sidebar Toggle Button (Mobile) */}
       <button
@@ -55,10 +76,11 @@ export default function Header({
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 text-gray-600 dark:text-gray-300 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-200"
+          className="text-gray-600 dark:text-gray-300 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-200"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
@@ -66,19 +88,18 @@ export default function Header({
 
       {/* Theme Toggle Button */}
       <button
-        onClick={() => {
-          toggleTheme();
-        }}
+        onClick={toggleTheme}
         className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 group"
         aria-label="Toggle theme"
       >
         {darkMode ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-600 dark:text-gray-300 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-200"
+            className="text-yellow-400 group-hover:text-yellow-300 transition-colors duration-200"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
           >
             <path
               strokeLinecap="round"
@@ -90,10 +111,11 @@ export default function Header({
         ) : (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-600 dark:text-gray-300 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-200"
+            className="text-gray-600 dark:text-gray-300 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-200"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
           >
             <path
               strokeLinecap="round"
@@ -109,16 +131,19 @@ export default function Header({
       <div className="relative">
         <button
           onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-          className="group hover:opacity-90 transition-all duration-200"
+          className="flex items-center justify-center group hover:opacity-90 transition-all duration-200"
           aria-label="Profile menu"
         >
           {profile.isLoading ? (
-            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+            <div className="rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700"
+              style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
+            >
               <svg
-                className="animate-spin h-6 w-6 text-blue-500"
+                className="animate-spin text-blue-500"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
+                style={{ width: `${iconSize * 0.6}px`, height: `${iconSize * 0.6}px` }}
               >
                 <circle
                   className="opacity-25"
@@ -139,7 +164,8 @@ export default function Header({
             <img
               src={profile.picture}
               alt="User Profile"
-              className="w-10 h-10 rounded-full border-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-500 dark:group-hover:border-blue-400 transition-all duration-200"
+              className="rounded-full border-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-500 dark:group-hover:border-blue-400 transition-all duration-200"
+              style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
             />
           )}
         </button>
