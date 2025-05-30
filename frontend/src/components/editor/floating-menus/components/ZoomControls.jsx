@@ -5,7 +5,7 @@ import resetIcon from './icons/reset.png';
 import crossIcon from './icons/cross.png';
 import { useEditorStore } from "../../../../stores/editorStore";
 import enumFloatingMenus from "../handlers/enumFloatingMenus";
-import useMeasureFloatingMenu from "./useMeasureFloatingMenu";
+import { useMeasureFloatingMenu } from "./useMeasureFloatingMenu";
 import {useCanvasZoom} from "../../canvas/handlers/useCanvasZoom";
 
 export default function ZoomControls() {

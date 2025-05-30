@@ -9,7 +9,7 @@ import {
   ExternalLinkIcon
 } from '@heroicons/react/outline';
 import enumFloatingMenus from '../handlers/enumFloatingMenus';
-import useMeasureFloatingMenu from './useMeasureFloatingMenu';
+import { useMeasureFloatingMenu } from './useMeasureFloatingMenu';
 
 const iconMap = {
   InboxIcon: InboxIcon,
@@ -20,13 +20,13 @@ const iconMap = {
 };
 
 export default function LayersPanel() {
-  const { 
-    activeLayer, 
-    setActiveLayer, 
-    isLayerCarouselVisible, 
-    setLayerCarouselVisible, 
-    getCanvasInstance, 
-    activeImageIndex, 
+  const {
+    activeLayer,
+    setActiveLayer,
+    isLayerCarouselVisible,
+    setLayerCarouselVisible,
+    getCanvasInstance,
+    activeImageIndex,
     setCanvasObjectStatus
   } = useEditorStore();
 
@@ -45,7 +45,7 @@ export default function LayersPanel() {
   const scaledHiddenButtonSize = Math.min(34, Math.max(30, 34 * scaleFactor));
 
   useMeasureFloatingMenu(
-    isLayerCarouselVisible ? panelRef : buttonRef, 
+    isLayerCarouselVisible ? panelRef : buttonRef,
     enumFloatingMenus.Layers
   );
 
@@ -61,7 +61,7 @@ export default function LayersPanel() {
     } else {
       setCanvasObjectStatus(activeImageIndex, false);
     }
-    
+
     setActiveLayer(layerId);
   };
 
@@ -136,11 +136,10 @@ export default function LayersPanel() {
                   borderRadius: '0.25rem',
                   transition: 'background-color 200ms',
                 }}
-                className={`transition-all ${
-                  activeLayer === layer.id
+                className={`transition-all ${activeLayer === layer.id
                     ? 'bg-[#4a90e2] text-white'
                     : 'text-white hover:bg-gray-700/50'
-                }`}
+                  }`}
               >
                 <div className="flex flex-col items-center" style={{ gap: `${scaledPadding / 2}px` }}>
                   <IconComponent style={{ width: `${scaledIconSize}px`, height: `${scaledIconSize}px` }} />
@@ -150,39 +149,39 @@ export default function LayersPanel() {
             );
           })}
         </div>
-        </div>
-        <div style={{ borderLeft: '1px solid rgba(55, 65, 81, 0.5)', marginLeft: `${scaledPadding}px`, paddingLeft: `${scaledPadding}px` }}>
-          <button
-            onClick={() => setLayerCarouselVisible(false)}
-            style={{
-              padding: `${scaledPadding / 2}px`,
-              width: `${scaledCloseButtonSize}px`,
-              height: `${scaledCloseButtonSize}px`,
-              borderRadius: '0.25rem',
-              transition: 'background-color 200ms',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            className="hover:bg-gray-700/50 transition-colors duration-200"
-            title="Close layer controls"
+      </div>
+      <div style={{ borderLeft: '1px solid rgba(55, 65, 81, 0.5)', marginLeft: `${scaledPadding}px`, paddingLeft: `${scaledPadding}px` }}>
+        <button
+          onClick={() => setLayerCarouselVisible(false)}
+          style={{
+            padding: `${scaledPadding / 2}px`,
+            width: `${scaledCloseButtonSize}px`,
+            height: `${scaledCloseButtonSize}px`,
+            borderRadius: '0.25rem',
+            transition: 'background-color 200ms',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          className="hover:bg-gray-700/50 transition-colors duration-200"
+          title="Close layer controls"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            style={{ width: `16px`, height: `16px` }}
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              style={{ width: `16px`, height: `16px` }}
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-      
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
     </div>
   );
 }

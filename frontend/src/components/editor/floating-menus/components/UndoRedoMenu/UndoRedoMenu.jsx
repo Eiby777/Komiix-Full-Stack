@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import useInitializeLayerStates from './handlers/useInitializeLayerStates';
 import useLayerHistory from './handlers/fabricHistoryManager';
 import enumFloatingMenus from '../../handlers/enumFloatingMenus';
-import useMeasureFloatingMenu from '../useMeasureFloatingMenu';
+import { useMeasureFloatingMenu } from '../useMeasureFloatingMenu';
 import { useEditorStore } from '../../../../../stores/editorStore';
 
 export default function UndoRedoMenu() {

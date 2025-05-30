@@ -45,7 +45,7 @@ export const createTextSlice = (set, get) => ({
             } else if (property === 'strikethrough') {
               textBox.set('linethrough', configTypeText[property] === true ? 'linethrough' : null);
             } else if (property === 'stroke') {
-              textBox.set('stroke', ![undefined, false, null].includes(configTypeText[property]));
+              textBox.set('stroke', ![undefined, false, null].includes(configTypeText[property]) ? configTypeText[property] : null);
             } else if (property === 'uppercase') {
               textBox.set('text', configTypeText[property] === true ? textObject.text.toUpperCase() : textObject.text);
             } else if (property === 'lowercase') {

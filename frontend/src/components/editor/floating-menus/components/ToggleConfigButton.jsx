@@ -1,6 +1,6 @@
 import { FaCog } from 'react-icons/fa';
 import { useRef, useState, useEffect } from 'react';
-import useMeasureFloatingMenu from './useMeasureFloatingMenu';
+import { useMeasureFloatingMenu } from './useMeasureFloatingMenu';
 import enumFloatingMenus from '../handlers/enumFloatingMenus';
 import { useEditorStore } from '../../../../stores/editorStore';
 

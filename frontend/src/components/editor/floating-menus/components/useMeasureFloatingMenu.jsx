@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useEditorStore } from '../../../../stores/editorStore';
 
-const useMeasureFloatingMenu = (ref, menuType) => {
+export const useMeasureFloatingMenu = (ref, menuType) => {
   const setFloatingMenuSize = useEditorStore(state => state.setFloatingMenuSize);
 
   useEffect(() => {
@@ -17,11 +17,9 @@ const useMeasureFloatingMenu = (ref, menuType) => {
       resizeObserver.observe(ref.current);
     }
 
-    // Medición inicial
+    // Initial measurement
     updateSize();
 
     return () => resizeObserver.disconnect();
   }, [ref, menuType, setFloatingMenuSize]);
 };
-
-export default useMeasureFloatingMenu;
