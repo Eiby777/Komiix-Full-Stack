@@ -13,6 +13,7 @@ const AutoClean = () => {
   const [showWarning, setShowWarning] = useState(true);
   const [isDownloadingModels, setIsDownloadingModels] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
   const [hideLoading, setHideLoading] = useState(false);
   const [progress, setProgress] = useState({
     canvasProgress: { current: 0, total: 0 },
@@ -20,18 +21,9 @@ const AutoClean = () => {
   });
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [languageError, setLanguageError] = useState(false);
-  const [isProcessingComplete, setIsProcessingComplete] = useState(false);
   const downloadCompletedRef = useRef(false);
   const [selectAllImages, setSelectAllImages] = useState(true);
   const { saveState } = useLayerHistory();
-
-  useEffect(() => {
-    if (isLoading && isProcessingComplete && progress.canvasProgress.current >= progress.canvasProgress.total && progress.canvasProgress.total > 0) {
-      setHideLoading(true);
-      setIsLoading(false);
-      resetActiveTools();
-    }
-  }, [isLoading, progress, isProcessingComplete, resetActiveTools]);
 
   const handleUpdateObjectsStatus = () => {
     Object.keys(canvasInstances).forEach((index) => {
@@ -45,8 +37,8 @@ const AutoClean = () => {
 
   const updateProgress = ({ canvasProgress, recorteProgress }) => {
     setProgress({
-      canvasProgress, // { current, total } para lienzos
-      recortePercentage: Math.min(Math.round((recorteProgress.current / recorteProgress.total) * 100), 100), // Porcentaje de recortes
+      canvasProgress,
+      recortePercentage: Math.min(Math.round((recorteProgress.current / recorteProgress.total) * 100), 100),
     });
   };
 
@@ -117,13 +109,16 @@ const AutoClean = () => {
       await addCleanedObjects(result, selectedCanvasInstances, saveState);
       await nonSolidBackgroundRects(result, selectedCanvasInstances, MASK, saveState);
 
-      setIsProcessingComplete(true);
       setIsLoading(false);
       handleUpdateObjectsStatus();
     } catch (error) {
       console.error("Error en handleAccept:", error);
       setIsLoading(false);
       setIsDownloadingModels(false);
+    }
+    finally {
+      setHideLoading(true);
+      resetActiveTools();
     }
   };
 
@@ -136,8 +131,6 @@ const AutoClean = () => {
   if (hideLoading) {
     return null;
   }
-
-  const progressPercentage = progress.total > 0 ? (progress.current / progress.total) * 100 : 0;
 
   return (
     <div

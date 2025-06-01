@@ -782,52 +782,64 @@ export class PreProcess {
   processImages(analysisResults, selectedLanguage) {
     const textColor = "#FFFF00";
     this.setRemoveFurigana(selectedLanguage === 'jap');
-
-    const groupedResults = {};
-    analysisResults.forEach(result => {
-      if (!groupedResults[result.canvasIndex]) {
-        groupedResults[result.canvasIndex] = [];
-      }
-      const { canvas, id, coords, color, image, canvasIndex, background, text } = result;
-
-      if (result.error) {
-        groupedResults[result.canvasIndex].push({ ...result, boundingRect: null, numTextLines: 0, annotatedImage: null, ocrCanvas: null });
-        return;
-      }
-
-      const { processedCanvas, boundingRect, binarizedCanvas } = this.canvasPreProcessor.processForOCR(
-        canvas,
-        background,
-        text,
-        textColor,
-        color,
-        this.verticalText,
-        this.removeFurigana,
-        this.binarizeCanvas.bind(this),
-        this.dilateCanvas.bind(this),
-        this.removeBorderText.bind(this),
-        this.extractTextBlock.bind(this)
-      );
-
-      groupedResults[result.canvasIndex].push({
-        id,
-        coords,
-        color,
-        image,
-        canvas,
-        canvasIndex,
-        ocrCanvas: processedCanvas,
-        boundingRect,
-        binarizedCanvas,
-        //background,
-        //text,
-        //binarizedThreshold,
-        //numTextLines,
-        //annotatedImage,
-
+  
+    // Step 1: Group results by canvasIndex
+    const groupedResults = {}; // Initialized as an empty object
+    analysisResults.forEach(resultsForCanvasArray => {
+      resultsForCanvasArray.forEach(result => {
+        if (!groupedResults[result.canvasIndex]) {
+          groupedResults[result.canvasIndex] = [];
+        }
+        groupedResults[result.canvasIndex].push(result);
       });
     });
-
-    return Object.values(groupedResults);
+  
+    // Step 2: Determine the maximum canvasIndex to set up the final structure
+    const allCanvasIndices = analysisResults.flatMap(resultsForCanvasArray => resultsForCanvasArray.map(result => result.canvasIndex));
+    const maxCanvasIndex = allCanvasIndices.length > 0 ? Math.max(...allCanvasIndices) : -1;
+  
+    // Step 3: Create final structure maintaining empty and non-empty positions
+    const finalResults = Array.from({ length: maxCanvasIndex + 1 }, (_, index) => {
+      const resultsForCanvas = groupedResults[index] || [];
+  
+      return resultsForCanvas.map(result => {
+        const { canvas, id, coords, color, image, canvasIndex, background, text } = result;
+  
+        if (result.error) {
+          return { ...result, boundingRect: null, numTextLines: 0, annotatedImage: null, ocrCanvas: null };
+        }
+  
+        const { processedCanvas, boundingRect, binarizedCanvas } = this.canvasPreProcessor.processForOCR(
+          canvas,
+          background,
+          text,
+          textColor,
+          color,
+          this.verticalText,
+          this.removeFurigana,
+          this.binarizeCanvas.bind(this),
+          this.dilateCanvas.bind(this),
+          this.removeBorderText.bind(this),
+          this.extractTextBlock.bind(this)
+        );
+  
+        return {
+          id,
+          coords,
+          color,
+          image,
+          canvas,
+          canvasIndex,
+          ocrCanvas: processedCanvas,
+          boundingRect,
+          binarizedCanvas,
+        };
+      });
+    });
+  
+    return finalResults;
   }
+  
+  
+  
 }

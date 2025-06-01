@@ -125,7 +125,6 @@ export async function fetchDetections(imagesArray, progressCallback) {
       }
     }
 
-    console.log(modelsArrayBuffer);
     const results = await detectObjects(
       imagesArray,
       modelsArrayBuffer,
