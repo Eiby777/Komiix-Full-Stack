@@ -52,104 +52,221 @@ export const createMaskFromBoundingBoxes = (boundingRect, binarizedCanvas) => {
 };
 
 /**
- * Dilata los píxeles negros (texto) en un radio de 5 píxeles
+ * Dilata los píxeles negros (texto) en un radio de 5 píxeles usando propagación de mínimos
  * @param {Uint8ClampedArray} data - Datos del canvas
  * @param {number} width - Ancho del canvas
  * @param {number} height - Alto del canvas
  * @param {number} radius - Radio de dilatación (default: 5)
  * @returns {Uint8ClampedArray} Datos del canvas dilatados
  */
-function dilateText(data, width, height, radius = 3) {
+function dilateText(data, width, height, radius = 5) {
   const outputData = new Uint8ClampedArray(data.length);
-  const threshold = 50; // Umbral para píxeles negros
+  const tempData = new Uint8ClampedArray(width * height); // Array temporal para distancias
+  const threshold = 50;
 
+  // Inicializar tempData con distancias grandes (infinito)
+  tempData.fill(Infinity);
+
+  // Paso 1: Marcar píxeles de texto y propagar distancias horizontalmente
   for (let y = 0; y < height; y++) {
+    // Propagación hacia la derecha
+    let lastTextX = -radius - 1;
     for (let x = 0; x < width; x++) {
       const i = (y * width + x) * 4;
-      let isText = false;
-
-      // Verificar píxeles en un vecindario de 3x3
-      for (let dy = -radius; dy <= radius; dy++) {
-        for (let dx = -radius; dx <= radius; dx++) {
-          const nx = x + dx;
-          const ny = y + dy;
-          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-            const ni = (ny * width + nx) * 4;
-            if (data[ni] < threshold) { // Píxel negro encontrado
-              isText = true;
-              break;
-            }
-          }
-        }
-        if (isText) break;
+      if (data[i] < threshold) {
+        lastTextX = x;
+        tempData[y * width + x] = 0; // Píxel de texto
+      } else if (x - lastTextX <= radius) {
+        tempData[y * width + x] = x - lastTextX; // Distancia al píxel de texto más cercano
       }
+    }
 
-      if (isText) {
-        outputData[i] = 0; // R
-        outputData[i + 1] = 0; // G
-        outputData[i + 2] = 0; // B
-        outputData[i + 3] = 255; // A
-      } else {
-        outputData[i] = 255; // R
-        outputData[i + 1] = 255; // G
-        outputData[i + 2] = 255; // B
-        outputData[i + 3] = 255; // A
+    // Propagación hacia la izquierda
+    lastTextX = width + radius + 1;
+    for (let x = width - 1; x >= 0; x--) {
+      const i = (y * width + x) * 4;
+      if (data[i] < threshold) {
+        lastTextX = x;
+        tempData[y * width + x] = 0;
+      } else if (lastTextX - x <= radius && lastTextX - x < tempData[y * width + x]) {
+        tempData[y * width + x] = lastTextX - x;
       }
     }
   }
+
+  // Paso 2: Propagar distancias verticalmente y generar salida
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      let minDistance = tempData[y * width + x];
+
+      // Verificar vecinos verticales
+      for (let dy = -radius; dy <= radius; dy++) {
+        const ny = y + dy;
+        if (ny >= 0 && ny < height) {
+          minDistance = Math.min(minDistance, tempData[ny * width + x] + Math.abs(dy));
+        }
+      }
+
+      // Asignar color según la distancia
+      if (minDistance <= radius) {
+        outputData[i] = 0;
+        outputData[i + 1] = 0;
+        outputData[i + 2] = 0;
+        outputData[i + 3] = 255;
+      } else {
+        outputData[i] = 255;
+        outputData[i + 1] = 255;
+        outputData[i + 2] = 255;
+        outputData[i + 3] = 255;
+      }
+    }
+  }
+
   return outputData;
 }
 
 /**
- * Detecta líneas de texto en el canvas
+ * Detecta líneas de texto en el canvas usando etiquetado de componentes conectados
  * @param {Uint8ClampedArray} data - Datos del canvas
  * @param {Object} boundingRect - Bounding rect del recorte
  * @returns {Object} Objeto con límites de las líneas de texto
  */
 function detectTextLines(data, boundingRect) {
-  const lineBounds = {};
-  for (let y = 0; y < boundingRect.h; y++) {
-    let minX = boundingRect.w;
-    let maxX = 0;
-    let hasText = false;
-    for (let x = 0; x < boundingRect.w; x++) {
-      const i = (y * boundingRect.w + x) * 4;
-      const r = data[i];
-      if (r < 50) { // Píxel negro (texto)
-        minX = Math.min(minX, x);
-        maxX = Math.max(maxX, x);
-        hasText = true;
+  const { w: width, h: height, x: offsetX, y: offsetY } = boundingRect;
+  const labels = new Uint32Array(width * height); // Etiquetas para cada píxel
+  const equivalences = new Map(); // Mapa de equivalencias entre etiquetas
+  let currentLabel = 1;
+  const threshold = 50;
+
+  // Primera pasada: Asignar etiquetas temporales
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      if (data[i] >= threshold) continue; // Saltar píxeles blancos
+
+      const gi = y * width + x;
+      const neighborLabels = [];
+
+      // Verificar vecinos (conectividad de 8)
+      for (let dy = -1; dy <= 0; dy++) {
+        for (let dx = -1; dx <= (dy === 0 ? -1 : 1); dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            const ni = ny * width + nx;
+            if (labels[ni] > 0) {
+              neighborLabels.push(labels[ni]);
+            }
+          }
+        }
+      }
+
+      if (neighborLabels.length === 0) {
+        // Nueva componente
+        labels[gi] = currentLabel++;
+      } else {
+        // Asignar la etiqueta mínima y registrar equivalencias
+        const minLabel = Math.min(...neighborLabels);
+        labels[gi] = minLabel;
+        for (const label of neighborLabels) {
+          if (label !== minLabel) {
+            equivalences.set(label, minLabel);
+          }
+        }
       }
     }
-    if (hasText) {
-      lineBounds[y + boundingRect.y] = { minX: minX + boundingRect.x, maxX: maxX + boundingRect.x };
+  }
+
+  // Resolver equivalencias
+  const rootLabels = new Map();
+  for (let label = 1; label < currentLabel; label++) {
+    let root = label;
+    while (equivalences.has(root)) {
+      root = equivalences.get(root);
+    }
+    rootLabels.set(label, root);
+  }
+
+  // Segunda pasada: Calcular límites por fila
+  const lineBounds = {};
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const gi = y * width + x;
+      if (labels[gi] === 0) continue;
+
+      // Obtener la etiqueta raíz
+      const rootLabel = rootLabels.get(labels[gi]) || labels[gi];
+      const globalY = y + offsetY;
+      if (!lineBounds[globalY]) {
+        lineBounds[globalY] = { minX: Infinity, maxX: -Infinity };
+      }
+
+      // Actualizar límites
+      lineBounds[globalY].minX = Math.min(lineBounds[globalY].minX, x + offsetX);
+      lineBounds[globalY].maxX = Math.max(lineBounds[globalY].maxX, x + offsetX);
     }
   }
+
   return lineBounds;
 }
 
-/**
- * Agrupa líneas en bloques
- * @param {Object} lineBounds - Límites de las líneas de texto
- * @returns {Array} Array de bloques de líneas
- */
 function groupLinesIntoBlocks(lineBounds) {
-  const yValues = Object.keys(lineBounds).map(Number).sort((a, b) => a - b);
+  const lines = Object.keys(lineBounds)
+    .map(Number)
+    .sort((a, b) => a - b)
+    .map(y => ({ y, ...lineBounds[y] }));
+
   const blocks = [];
-  let currentBlock = [];
-  for (let i = 0; i < yValues.length; i++) {
-    if (i === 0 || yValues[i] - yValues[i - 1] <= 10) { // Umbral de 10 píxeles
-      currentBlock.push(yValues[i]);
+  if (lines.length === 0) return blocks;
+
+  const verticalThreshold = 20; // Máxima distancia vertical entre líneas
+  const blockGapThreshold = 50; // Máximo hueco vertical permitido en un bloque
+
+  let currentBlock = [lines[0]];
+  let currentMinY = lines[0].y;
+  let currentMaxY = lines[0].y;
+  let currentMinX = lines[0].minX;
+  let currentMaxX = lines[0].maxX;
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    const lastLine = currentBlock[currentBlock.length - 1];
+
+    // Calcular distancia vertical desde el último elemento del bloque
+    const verticalDistance = line.y - lastLine.y;
+    const horizontalOverlap = line.minX <= currentMaxX && line.maxX >= currentMinX;
+
+    // Verificar si debemos continuar el bloque actual
+    if (verticalDistance <= verticalThreshold && horizontalOverlap) {
+      currentBlock.push(line);
+      currentMinY = Math.min(currentMinY, line.y);
+      currentMaxY = Math.max(currentMaxY, line.y);
+      currentMinX = Math.min(currentMinX, line.minX);
+      currentMaxX = Math.max(currentMaxX, line.maxX);
     } else {
-      blocks.push(currentBlock);
-      currentBlock = [yValues[i]];
+      // Verificar si el hueco es pequeño y hay superposición
+      const gap = line.y - currentMaxY;
+      if (gap <= blockGapThreshold && horizontalOverlap) {
+        currentBlock.push(line);
+        currentMaxY = line.y;
+        currentMinX = Math.min(currentMinX, line.minX);
+        currentMaxX = Math.max(currentMaxX, line.maxX);
+      } else {
+        // Nuevo bloque
+        blocks.push(currentBlock);
+        currentBlock = [line];
+        currentMinY = line.y;
+        currentMaxY = line.y;
+        currentMinX = line.minX;
+        currentMaxX = line.maxX;
+      }
     }
   }
-  if (currentBlock.length > 0) {
-    blocks.push(currentBlock);
-  }
-  return blocks.map(block => block.map(y => ({ y, ...lineBounds[y] })));
+  blocks.push(currentBlock);
+  return blocks;
 }
+
 
 /**
  * Construye el polígono con curvas
@@ -157,66 +274,67 @@ function groupLinesIntoBlocks(lineBounds) {
  * @param {Array} textBlocks - Array de bloques de líneas
  */
 function constructMaskPolygon(ctx, textBlocks) {
-  for (let blockIndex = 0; blockIndex < textBlocks.length; blockIndex++) {
-    const block = textBlocks[blockIndex];
-    const firstLine = block[0];
-    const lastLine = block[block.length - 1];
+  const allPoints = [];
 
-    // Iniciar en el minX de la primera línea del bloque
-    ctx.moveTo(firstLine.minX, firstLine.y);
+  // Recoger todos los puntos de los bloques
+  textBlocks.forEach(block => {
+    block.forEach(line => {
+      allPoints.push({
+        x: line.minX,
+        y: line.y,
+        type: 'left'
+      });
+      allPoints.push({
+        x: line.maxX,
+        y: line.y,
+        type: 'right'
+      });
+    });
+  });
 
-    // Conectar hacia maxX dentro del bloque
-    for (let i = 0; i < block.length; i++) {
-      const current = block[i];
-      const next = block[i + 1];
-      if (next) {
+  // Ordenar puntos: primero por Y, luego por X para lados izquierdos, luego derechos
+  allPoints.sort((a, b) => {
+    if (a.y !== b.y) return a.y - b.y;
+    if (a.type !== b.type) return a.type === 'left' ? -1 : 1;
+    return a.type === 'left' ? a.x - b.x : b.x - a.x;
+  });
+
+  // Construir el lado superior
+  ctx.moveTo(allPoints[0].x, allPoints[0].y);
+  for (let i = 1; i < allPoints.length; i++) {
+    if (allPoints[i].type === 'left') {
+      const prev = allPoints[i - 1];
+      const curr = allPoints[i];
+
+      if (Math.abs(curr.y - prev.y) > 10) {
         ctx.bezierCurveTo(
-          current.maxX, current.y + (next.y - current.y) / 2, // Punto de control 1
-          next.maxX, next.y - (next.y - current.y) / 2,       // Punto de control 2
-          next.maxX, next.y                                   // Destino
+          prev.x, prev.y + 5,
+          curr.x, curr.y - 5,
+          curr.x, curr.y
         );
       } else {
-        ctx.lineTo(current.maxX, current.y);
+        ctx.lineTo(curr.x, curr.y);
       }
     }
-
-    // Conectar con el siguiente bloque si existe
-    if (blockIndex < textBlocks.length - 1) {
-      const nextBlock = textBlocks[blockIndex + 1];
-      const nextFirstLine = nextBlock[0];
-      ctx.bezierCurveTo(
-        lastLine.maxX, lastLine.y + (nextFirstLine.y - lastLine.y) / 3,   // Punto de control 1
-        nextFirstLine.maxX, nextFirstLine.y - (nextFirstLine.y - lastLine.y) / 3, // Punto de control 2
-        nextFirstLine.maxX, nextFirstLine.y                               // Destino
-      );
-    }
-
-    // Volver por el lado opuesto (minX)
-    for (let i = block.length - 1; i >= 0; i--) {
-      const current = block[i];
-      const prev = block[i - 1];
-      if (prev) {
-        ctx.bezierCurveTo(
-          current.minX, current.y - (current.y - prev.y) / 2, // Punto de control 1
-          prev.minX, prev.y + (current.y - prev.y) / 2,       // Punto de control 2
-          prev.minX, prev.y                                   // Destino
-        );
-      } else {
-        ctx.lineTo(current.minX, current.y);
-      }
-    }
-
-    // Conectar con el bloque anterior para cerrar el camino
-    if (blockIndex > 0) {
-      const prevBlock = textBlocks[blockIndex - 1];
-      const prevLastLine = prevBlock[prevBlock.length - 1];
-      ctx.bezierCurveTo(
-        firstLine.minX, firstLine.y - (firstLine.y - prevLastLine.y) / 3, // Punto de control 1
-        prevLastLine.minX, prevLastLine.y + (firstLine.y - prevLastLine.y) / 3, // Punto de control 2
-        prevLastLine.minX, prevLastLine.y                         // Destino
-      );
-    }
-
-    ctx.closePath();
   }
+
+  // Construir el lado inferior (en orden inverso)
+  for (let i = allPoints.length - 1; i >= 0; i--) {
+    if (allPoints[i].type === 'right') {
+      const prev = allPoints[i + 1] || allPoints[i];
+      const curr = allPoints[i];
+
+      if (i < allPoints.length - 1 && Math.abs(curr.y - prev.y) > 10) {
+        ctx.bezierCurveTo(
+          prev.x, prev.y - 5,
+          curr.x, curr.y + 5,
+          curr.x, curr.y
+        );
+      } else {
+        ctx.lineTo(curr.x, curr.y);
+      }
+    }
+  }
+
+  ctx.closePath();
 }

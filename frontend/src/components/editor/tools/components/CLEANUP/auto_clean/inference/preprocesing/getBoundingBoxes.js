@@ -276,60 +276,6 @@ class CanvasPreProcessor {
   }
 
   /**
- * Reduce el ruido eliminando blobs pequeños
- * @param {HTMLCanvasElement} canvas - Canvas binarizado
- * @param {number} backgroundValue - Valor del fondo
- * @param {number} textValue - Valor del texto
- * @returns {HTMLCanvasElement} Canvas con ruido reducido
- */
-  removeNoise(canvas, backgroundValue, textValue) {
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    const width = canvas.width;
-    const height = canvas.height;
-    const minBlobSize = 6; // Tamaño mínimo para considerar un blob
-
-    const visited = new Array(height).fill().map(() => new Array(width).fill(false));
-    const toRemove = new Set();
-
-    const floodFill = (x, y) => {
-      const stack = [[x, y]];
-      const blob = [];
-      while (stack.length > 0) {
-        const [cx, cy] = stack.pop();
-        if (cx < 0 || cx >= width || cy < 0 || cy >= height || visited[cy][cx] || data[(cy * width + cx) * 4] !== textValue) {
-          continue;
-        }
-        visited[cy][cx] = true;
-        blob.push([cx, cy]);
-        stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
-      }
-      return blob;
-    };
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        if (!visited[y][x] && data[(y * width + x) * 4] === textValue) {
-          const blob = floodFill(x, y);
-          if (blob.length < minBlobSize) {
-            blob.forEach(([bx, by]) => toRemove.add(by * width + bx));
-          }
-        }
-      }
-    }
-
-    for (const idx of toRemove) {
-      const dataIdx = idx * 4;
-      data[dataIdx] = data[dataIdx + 1] = data[dataIdx + 2] = backgroundValue;
-      data[dataIdx + 3] = 255;
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-    return canvas;
-  }
-
-  /**
    * Detecta e invierte el fondo oscuro basado en valores predefinidos
    * @param {HTMLCanvasElement} canvas - Canvas binarizado
    * @param {number} backgroundValue - Valor del fondo (0 o 255)
@@ -420,7 +366,6 @@ class CanvasPreProcessor {
     const letterSize = this.detectLetterSize(processedCanvas, finalTextValue);
 
     processedCanvas = this.unsharpMask(processedCanvas);
-    processedCanvas = this.removeNoise(processedCanvas, finalBackgroundValue, finalTextValue);
     const binarizedCanvas = binarizeCanvas(processedCanvas, background, text, false);
 
     const dilatedCanvas = dilateCanvas(binarizedCanvas);
@@ -444,8 +389,6 @@ class CanvasPreProcessor {
     processedCanvas = scaledCanvas;
     processedCanvas = this.addBorder(processedCanvas);
     processedCanvas = this.smoothForOCR(processedCanvas);
-
-
     return { processedCanvas, boundingRect, binarizedCanvas };
   }
 }
