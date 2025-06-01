@@ -99,6 +99,9 @@ export default function CanvasResizeHandler() {
   }, [isSettingsVisible, handleResize]);
 
   useEffect(() => {
+    const parentContainer = document.getElementById("div_canvases");
+    const newWidth = parentContainer.clientWidth;
+    if (newWidth === previousWidth) return;
     const debouncedHandleResize = debounce(handleResize, 300);
 
     window.addEventListener("resize", debouncedHandleResize);

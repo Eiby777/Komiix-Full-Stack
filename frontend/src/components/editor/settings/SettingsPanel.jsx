@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useEditorStore } from '../../../stores/editorStore';
 import { TOOLS } from '../../../constants/tools';
 import useHeightCalculation from './handlers/useHeightCalculation';
@@ -6,17 +6,45 @@ import useSeparatorDrag from './handlers/useSeparatorDrag';
 import ToolSettings from './components/ToolSettings';
 
 export default function SettingsPanel() {
-  const { activeTools, isSettingsVisible } = useEditorStore();
+  const { activeTools, isSettingsVisible, toolbarWidth } = useEditorStore();
   const settingsPanelRef = useRef(null);
   const panelRef = useRef(null);
-
-
+  const [settingsPanelWidth, setSettingsPanelWidth] = useState(null);
 
   // Get heights and setters from useHeightCalculation
   const { heights, setHeights, lastHeightPercentage, setLastHeightPercentage } = useHeightCalculation(panelRef);
 
   // Pass all necessary values to useSeparatorDrag
   useSeparatorDrag(panelRef, activeTools, heights, setHeights, lastHeightPercentage, setLastHeightPercentage);
+
+  // Calculate remaining width using ResizeObserver
+  useEffect(() => {
+    if (!isSettingsVisible) {
+      setSettingsPanelWidth(null); // Reset width when panel is hidden
+      return;
+    }
+
+    const parentContainer = document.getElementById('div_canvases');
+    if (!parentContainer) return;
+
+    const updateWidth = () => {
+      const newWidth = window.innerWidth - (parentContainer.clientWidth + toolbarWidth);
+      setSettingsPanelWidth(newWidth > 0 ? newWidth : 0); // Ensure non-negative width
+    };
+
+    updateWidth(); // Initial calculation
+
+    // Set up ResizeObserver to handle dynamic resizing
+    const resizeObserver = new ResizeObserver(updateWidth);
+    resizeObserver.observe(parentContainer);
+    window.addEventListener('resize', updateWidth);
+
+    // Cleanup
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateWidth);
+    };
+  }, [isSettingsVisible, toolbarWidth]);
 
   const activeToolsWithSettings = activeTools
     .map(t => Object.values(TOOLS).find(tool => tool.id === t))
@@ -26,15 +54,12 @@ export default function SettingsPanel() {
 
   const toolsToRender = [...activeToolsWithSettings];
 
-
-
-
   return (
     <div
       id="settings-panel"
       ref={settingsPanelRef}
-      className={`flex w-[20%] min-w-[230px] transition-all duration-300 ${isSettingsVisible ? 'block' : 'hidden'
-        }`}
+      className={`flex transition-all duration-300 ${isSettingsVisible ? 'block' : 'hidden'}`}
+      style={{ width: settingsPanelWidth !== null ? `${settingsPanelWidth}px` : 'auto' }}
     >
       <div className="border-l border-[var(--muted)] bg-[var(--muted)] w-[100%]">
         <div
