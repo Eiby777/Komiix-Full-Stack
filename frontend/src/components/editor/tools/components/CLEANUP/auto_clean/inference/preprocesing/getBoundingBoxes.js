@@ -14,8 +14,12 @@ class CanvasPreProcessor {
    * @returns {HTMLCanvasElement} Canvas en escala de grises
    */
   convertToGrayscale(canvas) {
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const newCanvas = document.createElement('canvas');
+    newCanvas.width = canvas.width;
+    newCanvas.height = canvas.height;
+    const newCtx = newCanvas.getContext('2d');
+    newCtx.drawImage(canvas, 0, 0);
+    const imageData = newCtx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
 
     for (let i = 0; i < data.length; i += 4) {
@@ -27,8 +31,8 @@ class CanvasPreProcessor {
       data[i + 3] = 255;
     }
 
-    ctx.putImageData(imageData, 0, 0);
-    return canvas;
+    newCtx.putImageData(imageData, 0, 0);
+    return newCanvas;
   }
 
   /**
@@ -371,9 +375,11 @@ class CanvasPreProcessor {
     const dilatedCanvas = dilateCanvas(binarizedCanvas);
     const center_x = dilatedCanvas.width / 2;
     const center_y = dilatedCanvas.height / 2;
+    
     const boundingRect = extractTextBlock(dilatedCanvas, background, center_x, center_y, true);
     if (!boundingRect) {
-      console.error("No se pudo detectar el texto en el canvas");
+      console.warn("No se pudo detectar el texto en el canvas");
+      return null;
     }
     const furiganaProcessor = new Furigana();
     if (removeFurigana) {
@@ -617,24 +623,13 @@ export class PreProcess {
         }
       }
       if (!foundTextPixel) {
-        console.error(`No se encontró píxel de texto en el radio de búsqueda. Retornando null.`);
+        console.warn(`No se encontró píxel de texto en el radio de búsqueda o el caso es complicado. Retornando null`);
         return null;
       }
     }
 
     const maxNoTextIterations = Math.min(Math.round((Math.min(canvas.width, canvas.height) / 10) * this.scaleFactor), 100);
-    for (let i = -maxNoTextIterations; i <= maxNoTextIterations; i++) {
-      for (let j = -maxNoTextIterations; j <= maxNoTextIterations; j++) {
-        const newX = pt_x + j;
-        const newY = pt_y + i;
-        if (newX >= 0 && newX < canvas.width && newY >= 0 && newY < canvas.height) {
-          const idx = (newY * canvas.width + newX) * 4;
-          const r = data[idx];
-          const g = data[idx + 1];
-          const b = data[idx + 2];
-        }
-      }
-    }
+    
 
     let left = pt_x;
     let top = pt_y;
@@ -782,9 +777,9 @@ export class PreProcess {
   processImages(analysisResults, selectedLanguage) {
     const textColor = "#FFFF00";
     this.setRemoveFurigana(selectedLanguage === 'jap');
-  
+
     // Step 1: Group results by canvasIndex
-    const groupedResults = {}; // Initialized as an empty object
+    const groupedResults = {};
     analysisResults.forEach(resultsForCanvasArray => {
       resultsForCanvasArray.forEach(result => {
         if (!groupedResults[result.canvasIndex]) {
@@ -793,23 +788,24 @@ export class PreProcess {
         groupedResults[result.canvasIndex].push(result);
       });
     });
-  
+
     // Step 2: Determine the maximum canvasIndex to set up the final structure
     const allCanvasIndices = analysisResults.flatMap(resultsForCanvasArray => resultsForCanvasArray.map(result => result.canvasIndex));
     const maxCanvasIndex = allCanvasIndices.length > 0 ? Math.max(...allCanvasIndices) : -1;
-  
+
     // Step 3: Create final structure maintaining empty and non-empty positions
     const finalResults = Array.from({ length: maxCanvasIndex + 1 }, (_, index) => {
       const resultsForCanvas = groupedResults[index] || [];
-  
+
       return resultsForCanvas.map(result => {
         const { canvas, id, coords, color, image, canvasIndex, background, text } = result;
-  
+
         if (result.error) {
           return { ...result, boundingRect: null, numTextLines: 0, annotatedImage: null, ocrCanvas: null };
         }
-  
-        const { processedCanvas, boundingRect, binarizedCanvas } = this.canvasPreProcessor.processForOCR(
+
+        // Call processForOCR and check for null
+        const ocrResult = this.canvasPreProcessor.processForOCR(
           canvas,
           background,
           text,
@@ -822,7 +818,13 @@ export class PreProcess {
           this.removeBorderText.bind(this),
           this.extractTextBlock.bind(this)
         );
-  
+
+        // Return null if processForOCR returns null or if required properties are missing
+        if (!ocrResult || !ocrResult.processedCanvas || !ocrResult.boundingRect || !ocrResult.binarizedCanvas) {
+          return null;
+        }
+
+        const { processedCanvas, boundingRect, binarizedCanvas } = ocrResult;
         return {
           id,
           coords,
@@ -834,12 +836,12 @@ export class PreProcess {
           boundingRect,
           binarizedCanvas,
         };
-      });
-    });
-  
+      }).filter(result => result !== null);
+    })
+
     return finalResults;
-  }
-  
-  
-  
+}
+
+
+
 }

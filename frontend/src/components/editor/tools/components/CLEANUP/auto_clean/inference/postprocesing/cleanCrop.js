@@ -271,7 +271,7 @@ export const cleanCrop = async (crop) => {
     return crop;
   }
   if (rectType !== "text") {
-    const maskCanvas = createMaskFromBoundingBoxes(boundingRect, binarizedCanvas, canvas);
+    const maskCanvas = createMaskFromBoundingBoxes(boundingRect, binarizedCanvas);
     if (!maskCanvas) {
       console.error(`Error creando máscara para recorte ${crop.id}`);
     }
@@ -295,7 +295,7 @@ export const cleanCrop = async (crop) => {
 
   // Para rectángulos "text" (recortes ajustados)
   let colorStats = getDominantColorAndCount(extended.canvas);
-  const maskCanvas = createMaskFromBoundingBoxes(boundingRect, binarizedCanvas, canvas);
+  const maskCanvas = createMaskFromBoundingBoxes(boundingRect, binarizedCanvas);
   if (maskCanvas) {
     colorStats = getDominantColorAndCount(extended.canvas, maskCanvas);
   }

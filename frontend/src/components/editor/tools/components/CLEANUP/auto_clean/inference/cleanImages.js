@@ -31,24 +31,17 @@ const cleanImages = async (
 ) => {
     try {
         const filteredData = filterRectangles(rectangles);
-        console.log("filteredData", filteredData);
         const croppedImages = croppImages(filteredData.filteredRectangles, images);
-        console.log("croppedImages", croppedImages);
         const backgroundColors = getBackgroundColor(croppedImages);
-        console.log("backgroundColors", backgroundColors);
         // Preprocess to detect bounding boxes and remove furigana (if Japanese)
         const preprocessor = new PreProcess();
         preprocessor.setVerticalOrientation(false); // Set if vertical text is known
         const processedResults = preprocessor.processImages(backgroundColors, selectedLanguage);
-        console.log("processedResults", processedResults);
 
         const { ocrImages, originalImages } = upscaleCroppedImages(processedResults);
-        console.log("ocrImages", ocrImages);
-        console.log("originalImages", originalImages);
 
         const counts = filteredData.counts;
         const validCanvases = counts.reduce((sum, count) => sum + (count > 0 ? 1 : 0), 0);
-        console.log("validCanvases", validCanvases);
         let processedRectangles = 0;
         const GROUP_SIZE = 2;
 
@@ -75,13 +68,10 @@ const cleanImages = async (
         );
 
         const downscaledResults = processOCRResults(tesseractResultsFlat, recorteMapping, ocrImages, GROUP_SIZE);
-        console.log("downscaledResults", downscaledResults);
 
         const cleanedImages = await cleanCroppedImages(originalImages, counts, images);
-        console.log("cleanedImages", cleanedImages);
 
         const nonSolidBackgroundRects = identifyNonSolidBackgrounds(cleanedImages, counts);
-        console.log("nonSolidBackgroundRects", nonSolidBackgroundRects);
 
         const tesseractResults = downscaledResults.map((canvasResults, canvasIndex) =>
             canvasResults.map((result) => tesseractResultsFlat
