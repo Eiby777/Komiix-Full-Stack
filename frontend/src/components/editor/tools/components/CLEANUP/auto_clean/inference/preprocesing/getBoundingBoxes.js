@@ -825,6 +825,7 @@ export class PreProcess {
         }
 
         const { processedCanvas, boundingRect, binarizedCanvas } = ocrResult;
+
         return {
           id,
           coords,

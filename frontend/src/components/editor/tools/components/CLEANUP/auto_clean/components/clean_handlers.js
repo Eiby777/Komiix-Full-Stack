@@ -157,6 +157,9 @@ export const addCleanedObjects = async (result, canvasInstances, saveState) => {
                 canvas.requestRenderAll();
                 saveState(fabricImg, ObjectStatus.ADD);
             }
+            else {
+                console.error(`No se encontró cleanedMaskUrl para el recorte ${crop.id}`);
+            }
         }
     }
 };

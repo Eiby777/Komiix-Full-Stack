@@ -100,6 +100,7 @@ const analyzeMaskedColors = (extendedCanvas, maskCanvas) => {
   const colorCount = {};
   let totalPixels = 0;
 
+  // Count pixels for each exact color
   for (let i = 0; i < data.length; i += 4) {
     const a = data[i + 3];
     if (a === 0) continue;
@@ -111,6 +112,7 @@ const analyzeMaskedColors = (extendedCanvas, maskCanvas) => {
     totalPixels++;
   }
 
+  // Convert color counts to sorted array
   const sortedColors = Object.entries(colorCount)
     .map(([key, count]) => ({
       color: key.split(",").map(Number),
@@ -118,8 +120,35 @@ const analyzeMaskedColors = (extendedCanvas, maskCanvas) => {
     }))
     .sort((a, b) => b.count - a.count);
 
-  const dominantCount = sortedColors[0]?.count || 0;
-  const percentage = totalPixels > 0 ? (dominantCount / totalPixels) * 100 : 0;
+  // Group similar colors for percentage calculation
+  const colorGroups = [];
+  const threshold = 10; // RGB distance threshold for similarity
+  for (const colorObj of sortedColors) {
+    const [r, g, b, a] = colorObj.color;
+    let grouped = false;
+
+    for (const group of colorGroups) {
+      const [gr, gg, gb, ga] = group.color;
+      if (a === ga) { // Ensure same alpha
+        const distance = Math.sqrt(
+          (r - gr) ** 2 + (g - gg) ** 2 + (b - gb) ** 2
+        );
+        if (distance <= threshold) {
+          group.count += colorObj.count;
+          grouped = true;
+          break;
+        }
+      }
+    }
+
+    if (!grouped) {
+      colorGroups.push({ color: colorObj.color, count: colorObj.count });
+    }
+  }
+
+  // Calculate percentage based on the dominant color group
+  const dominantGroupCount = colorGroups.length > 0 ? Math.max(...colorGroups.map(g => g.count)) : 0;
+  const percentage = totalPixels > 0 ? (dominantGroupCount / totalPixels) * 100 : 0;
   const uniqueColors = sortedColors.length;
 
   return { sortedColors, percentage, uniqueColors, totalPixels };
@@ -145,8 +174,8 @@ const fillMaskWithColors = (
   percentage,
   uniqueColors
 ) => {
-  const isSolidBackground = true;  // Siempre true cuando se rellena
-  if (percentage < 24) {
+  const isSolidBackground = true; 
+  if (parseInt(percentage) < 24) {
     return { ...crop, coords: extendedCoords, isSolidBackground: true };
   }
 
@@ -195,6 +224,7 @@ const fillMaskWithColors = (
     }
     fillCtx.putImageData(maskImageData, 0, 0);
     const cleanedMaskUrl = fillCanvas.toDataURL("image/png");
+    console.log("cleanedMaskUrl", cleanedMaskUrl);
 
     const ctx = extendedCanvas.getContext("2d");
     ctx.drawImage(maskCanvas, 0, 0);

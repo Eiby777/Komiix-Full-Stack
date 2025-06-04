@@ -2,12 +2,11 @@
  * Componente para escanear y procesar texto en imágenes del editor
  * @module TextScan
  */
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useEditorStore } from "../../../../../../stores/editorStore";
 import { X } from "lucide-react";
 import LanguageSelector from "./components/LanguageSelector";
 import { handleUpdateObjectsStatus } from "./handlers/handlers";
-import LoadingModal from "./components/LoadingModal";
 import ProgressBar from "./components/ProgressBar";
 import Buttons from "./components/Buttons/Button"
 

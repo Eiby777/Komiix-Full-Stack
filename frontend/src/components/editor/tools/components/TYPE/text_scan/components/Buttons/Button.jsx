@@ -64,7 +64,6 @@ const Buttons = ({
       );
 
       let translatedResult = await translateText(result, selectedLanguage, selectedTargetLanguage, setIsLoading);
-      // Reindex translatedResult to match activeImageIndex when scanning a single image
       if (scanOption === "current" && translatedResult.length === 1) {
         const reindexedResult = new Array(images.length).fill(null);
         reindexedResult[activeImageIndex] = translatedResult[0];
