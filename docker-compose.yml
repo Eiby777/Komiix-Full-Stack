@@ -7,11 +7,11 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
-    env_file:
-      - ./backend/.env
     environment:
       - PYTHONPATH=/app
       - REDIS_HOST=redis
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - COMPOSE_BAKE=true
     command: uvicorn server:app --host 0.0.0.0 --port 8000
     networks:
       - komiix-network
@@ -38,23 +38,17 @@ services:
   komiix-frontend:
     build:
       context: ./frontend
-      secrets:
-        - supabase_url
-        - supabase_key
+      args:
+        - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+        - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
     ports:
       - "80:80"
-    env_file:
-      - ./frontend/.env
     restart: unless-stopped
     container_name: komiix
+    environment:
+      - COMPOSE_BAKE=true
     networks:
       - komiix-network
-
-secrets:
-  supabase_url:
-    file: ./frontend/supabase_url.txt
-  supabase_key:
-    file: ./frontend/supabase_key.txt
 
 networks:
   komiix-network:

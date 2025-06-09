@@ -5,12 +5,14 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 
-# Usar secretos de compilación para inyectar variables durante npm run build
-RUN --mount=type=secret,id=supabase_url \
-    --mount=type=secret,id=supabase_key \
-    VITE_SUPABASE_URL=$(cat /run/secrets/supabase_url) \
-    VITE_SUPABASE_ANON_KEY=$(cat /run/secrets/supabase_key) \
-    npm run build
+# Pass environment variables at build time
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+
+# Build the application using environment variables
+RUN npm run build
 
 # Production stage
 FROM nginx:alpine
