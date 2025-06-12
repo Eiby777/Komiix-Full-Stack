@@ -7,10 +7,14 @@ from dependencies.auth import verify_jwt
 from loguru import logger
 import httpx
 import json
+import os
 
 router = APIRouter()
 
 logger.info("Translate router loaded")
+LIBRETRANSLATE_URL = os.getenv("LIBRETRANSLATE_URL")
+logger.info(f"LibreTranslate URL: {LIBRETRANSLATE_URL}")
+
 
 # Pydantic model for translation request
 class TranslateRequest(BaseModel):
@@ -30,8 +34,8 @@ class TranslateResponse(BaseModel):
     alternatives: list[str]
 
 # LibreTranslate internal API URL
-LIBRETRANSLATE_URL = "http://libretranslate:5000/translate"
-LIBRETRANSLATEDETECT_URL = "http://libretranslate:5000/detect"
+LIBRETRANSLATE_TRANSLATE_URL = f"{LIBRETRANSLATE_URL}/translate"
+LIBRETRANSLATE_DETECT_URL = f"{LIBRETRANSLATE_URL}/detect"
 
 @router.post("/translate", tags=["Translate"], response_model=TranslateResponse, dependencies=[Depends(verify_jwt)])
 @limiter.limit("30/minute")
@@ -53,7 +57,7 @@ async def translate(request: Request, translate_request: TranslateRequest, paylo
     # Forward request to LibreTranslate
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(LIBRETRANSLATE_URL, json=libre_payload, timeout=10.0)
+            response = await client.post(LIBRETRANSLATE_TRANSLATE_URL, json=libre_payload, timeout=10.0)
             response.raise_for_status()
             result = response.json()
         except httpx.HTTPStatusError as e:
@@ -102,8 +106,8 @@ async def detect(request: Request, detect_request: DetectRequest, payload: dict 
     # Forward request to LibreTranslate
     async with httpx.AsyncClient() as client:
         try:
-            logging.info(f"Forwarding request to LibreTranslate: {detect_payload, LIBRETRANSLATEDETECT_URL}")
-            response = await client.post(LIBRETRANSLATEDETECT_URL, json=detect_payload, timeout=10.0)
+            logging.info(f"Forwarding request to LibreTranslate: {detect_payload, LIBRETRANSLATE_DETECT_URL}")
+            response = await client.post(LIBRETRANSLATE_DETECT_URL, json=detect_payload, timeout=10.0)
             response.raise_for_status()
             result = response.json()
             logging.info(f"LibreTranslate response: {result}")

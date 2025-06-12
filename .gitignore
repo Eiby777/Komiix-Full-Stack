@@ -3,6 +3,8 @@ backend/app.log
 backend/backup
 backend/models
 
+libretranslate/.venv
+
 *.db
 *.log
 .docker

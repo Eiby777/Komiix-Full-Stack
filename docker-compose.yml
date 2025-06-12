@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   komiix-backend:
     build:
@@ -21,13 +23,19 @@ services:
       - redis
 
   libretranslate:
-    image: libretranslate/libretranslate
+    build:
+      context: ./libretranslate
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
     environment:
-      - LT_LOAD_ONLY=es,ja,zh,ko,en
+      - LT_LOAD_ONLY=${LT_LOAD_ONLY:-es,ja,zh,ko,en}
+      - LT_PACKAGE_DIR=/app/models
     networks:
       - komiix-network
+    volumes:
+      - libretranslate_models:/app/models
+    restart: unless-stopped
 
   redis:
     image: redis:alpine
@@ -54,3 +62,6 @@ services:
 networks:
   komiix-network:
     driver: bridge
+
+volumes:
+  libretranslate_models:
