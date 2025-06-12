@@ -14,6 +14,9 @@ docker-compose.override.yml
 *.swp
 *.swo
 *.venv
+*.iml
+*.xml
+.idea
 
 frontend/node_modules
 frontend/supabase_key.txt

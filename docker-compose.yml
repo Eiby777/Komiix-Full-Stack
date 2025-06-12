@@ -11,7 +11,8 @@ services:
       - PYTHONPATH=/app
       - REDIS_HOST=redis
       - CORS_ORIGINS=${CORS_ORIGINS}
-      - COMPOSE_BAKE=true
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - COMPOSE_BAKE=${COMPOSE_BAKE}
     command: uvicorn server:app --host 0.0.0.0 --port 8000
     networks:
       - komiix-network
@@ -46,7 +47,7 @@ services:
     restart: unless-stopped
     container_name: komiix
     environment:
-      - COMPOSE_BAKE=true
+      - COMPOSE_BAKE=${COMPOSE_BAKE}
     networks:
       - komiix-network
 

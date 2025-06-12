@@ -21,14 +21,12 @@ redis = Redis(
 logger.info("Fonts router loaded")
 
 # Base directory for font files
-# En Docker, las fuentes se montan en /app/fonts
-FONT_DIR = Path("/app/fonts")
-#FONT_DIR = Path(__file__).parent.parent / "fonts"
+FONT_DIR = Path(__file__).parent.parent / "fonts"
+FONT_METADATA_FILE = Path(__file__).parent.parent / "config" / "fonts_metadata.json"
+if not FONT_DIR.exists() and not FONT_METADATA_FILE.exists():
+    FONT_METADATA_FILE = Path("/app/config/fonts_metadata.json")
+    FONT_DIR = Path("/app/fonts")
 
-# Load font metadata from JSON
-# En Docker, el archivo de metadatos está en /app/config
-FONT_METADATA_FILE = Path("/app/config/fonts_metadata.json")
-#FONT_METADATA_FILE = Path(__file__).parent.parent / "config" / "fonts_metadata.json"    
 try:
     with open(FONT_METADATA_FILE, "r", encoding="utf-8") as f:
         FONT_METADATA = json.load(f)

@@ -24,13 +24,17 @@ logger.info("Endpoints router loaded")
 # Fragment configuration
 ENCRYPTED_FRAGMENT_INDEX = 3  # The index of the fragment that should be encrypted
 
-# Base directory for models and fragments
-MODEL_DIR = Path("/app/models")
-#MODEL_DIR = Path(__file__).parent.parent / "models"
+# Primero intentar con rutas de desarrollo local
+MODEL_DIR = Path(__file__).parent.parent / "models"
+METADATA_FILE = Path(__file__).parent.parent / "config" / "model_metadata.json"
+
+# Si no existe, intentar con rutas de Docker
+if not METADATA_FILE.exists():
+    MODEL_DIR = Path("/app/models")
+    METADATA_FILE = Path("/app/config/model_metadata.json")
+
 FRAGMENTS_DIR = MODEL_DIR / "fragmented_models"
 FULL_MODELS_DIR = MODEL_DIR / "full_models"
-METADATA_FILE = Path("/app/config/model_metadata.json")
-#METADATA_FILE = Path(__file__).parent.parent / "config" / "model_metadata.json"
 
 # Cargar MODEL_METADATA desde archivo JSON
 try:

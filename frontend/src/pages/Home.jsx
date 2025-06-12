@@ -17,7 +17,7 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const url = "http://localhost:5173";
+  const url = "https://komiix.com";
 
   useEffect(() => {
     // Listen for auth state changes (e.g., after login or OAuth redirect)

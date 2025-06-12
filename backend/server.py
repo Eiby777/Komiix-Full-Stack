@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
+import time
 from endpoints.models import router as models_router
 from endpoints.fonts import router as fonts_router
 from endpoints.translate import router as translate_router
@@ -41,14 +43,36 @@ app.lifespan = lifespan
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Request logging middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    
+    # Log request details
+    logger.info(f"Incoming request: {request.method} {request.url}")
+    logger.info(f"  Headers: {dict(request.headers)}")
+    logger.info(f"  Origin: {request.headers.get('origin')}")
+    logger.info(f"  Referer: {request.headers.get('referer')}")
+    
+    # Process the request
+    response = await call_next(request)
+    
+    # Log response details
+    process_time = (time.time() - start_time) * 1000
+    response.headers["X-Process-Time"] = str(process_time)
+    
+    logger.info(f"Request completed in {process_time:.2f}ms")
+    return response
+
 # CORS configuration
-origins = [os.getenv("CORS_ORIGINS").split(",")]
+origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "").split(",") if origin.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["X-Process-Time"],
 )
 
 # Include routers
