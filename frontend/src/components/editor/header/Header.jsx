@@ -123,6 +123,8 @@ export default function Header() {
           object.id = currentCanvasObjects[(objectIndex + 1)]?.id ?? null;
           object.layer = currentCanvasObjects[(objectIndex + 1)]?.layer ?? null;
           object.angle = currentCanvasObjects[(objectIndex + 1)]?.angle ?? null;
+          object.originalText = currentCanvasObjects[(objectIndex + 1)]?.originalText ?? null;
+          object.translatedText = currentCanvasObjects[(objectIndex + 1)]?.translatedText ?? null;
         });
       });
       return canvases;
