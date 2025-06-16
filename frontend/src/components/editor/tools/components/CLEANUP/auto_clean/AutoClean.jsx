@@ -11,17 +11,12 @@ import useLayerHistory from "../../../../floating-menus/components/UndoRedoMenu/
 const AutoClean = () => {
   const { canvasInstances, MASK, getCanvasInstance, setCanvasObjectStatus, resetActiveTools, activeImageIndex } = useEditorStore();
   const [showWarning, setShowWarning] = useState(true);
-  const [isDownloadingModels, setIsDownloadingModels] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
   const [hideLoading, setHideLoading] = useState(false);
   const [progress, setProgress] = useState({
     canvasProgress: { current: 0, total: 0 },
     recortePercentage: 0,
   });
-  const [selectedLanguage, setSelectedLanguage] = useState("");
-  const [languageError, setLanguageError] = useState(false);
-  const downloadCompletedRef = useRef(false);
   const [selectAllImages, setSelectAllImages] = useState(true);
   const { saveState } = useLayerHistory();
 
@@ -42,35 +37,9 @@ const AutoClean = () => {
     });
   };
 
-  const updateDownloadingStatus = (isDownloading) => {
-    if (!downloadCompletedRef.current) {
-      if (isDownloading) {
-        setIsDownloadingModels((prev) => {
-          if (!prev) {
-            return true;
-          }
-          return prev;
-        });
-      } else {
-        setIsDownloadingModels((prev) => {
-          if (prev) {
-            downloadCompletedRef.current = true;
-            return false;
-          }
-          return prev;
-        });
-      }
-    }
 
-  };
 
   const handleAccept = async () => {
-    if (!selectedLanguage) {
-      setLanguageError(true);
-      return;
-    }
-
-    setLanguageError(false);
     setShowWarning(false);
     setIsLoading(true);
 
@@ -93,9 +62,7 @@ const AutoClean = () => {
       const result = await cleanImages(
         rectangles,
         images,
-        updateProgress,
-        selectedLanguage,
-        updateDownloadingStatus
+        updateProgress
       );
 
       console.log("Result: ", result);
@@ -114,7 +81,6 @@ const AutoClean = () => {
     } catch (error) {
       console.error("Error en handleAccept:", error);
       setIsLoading(false);
-      setIsDownloadingModels(false);
     }
     finally {
       setHideLoading(true);
@@ -134,36 +100,26 @@ const AutoClean = () => {
 
   return (
     <div
-      className={`z-[600] fixed inset-0 flex items-center justify-center ${showWarning || isDownloadingModels || isLoading ? "" : "hidden"
+      className={`z-[600] fixed inset-0 flex items-center justify-center ${showWarning || isLoading ? "" : "hidden"
         }`}
     >
       <div
-        className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ease-in-out ${showWarning || isDownloadingModels || isLoading ? "opacity-100" : "opacity-0"
+        className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ease-in-out ${showWarning || isLoading ? "opacity-100" : "opacity-0"
           }`}
       />
       <div
-        className={`relative bg-[#1a1a1a] border border-white/20 rounded-md shadow-lg p-6 w-[400px] transition-all duration-300 ease-in-out ${showWarning || isDownloadingModels || isLoading ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        className={`relative bg-[#1a1a1a] border border-white/20 rounded-md shadow-lg p-6 w-[400px] transition-all duration-300 ease-in-out ${showWarning || isLoading ? "opacity-100 scale-100" : "opacity-0 scale-95"
           }`}
       >
         {showWarning && (
           <WarningModal
-            selectedLanguage={selectedLanguage}
-            setSelectedLanguage={setSelectedLanguage}
             selectAllImages={selectAllImages}
             setSelectAllImages={setSelectAllImages}
-            languageError={languageError}
-            setLanguageError={setLanguageError}
             onAccept={handleAccept}
             onCancel={handleCancel}
           />
         )}
-        {isDownloadingModels && !showWarning && (
-          <LoadingModal
-            title="Descargando modelos..."
-            message="Preparando Tesseract para el idioma seleccionado. Esto puede tomar un momento..."
-          />
-        )}
-        {isLoading && !showWarning && !isDownloadingModels && (
+        {isLoading && !showWarning && (
           <ProgressBar
             canvasProgress={progress.canvasProgress}
             percentage={progress.recortePercentage}
