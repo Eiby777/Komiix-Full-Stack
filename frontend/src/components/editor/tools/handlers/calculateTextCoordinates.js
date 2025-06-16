@@ -116,6 +116,7 @@ const calculateFallbackCoordinates = (text, fontFamily, rect, ctx) => {
  * @returns {Object} - {top, left, width, height, fontSize} ajustados.
  */
 const calculateTextCoordinates = (canvas, relativePointer, textObject, isText = null, rect = null) => {
+    console.log("rect", rect);
     // Extraer y preprocesar el texto
     let text = textObject.text || '';
     text = cleanText(text);

@@ -224,7 +224,6 @@ const fillMaskWithColors = (
     }
     fillCtx.putImageData(maskImageData, 0, 0);
     const cleanedMaskUrl = fillCanvas.toDataURL("image/png");
-    console.log("cleanedMaskUrl", cleanedMaskUrl);
 
     const ctx = extendedCanvas.getContext("2d");
     ctx.drawImage(maskCanvas, 0, 0);

@@ -97,29 +97,12 @@ const adjustTexts = async (canvasInstances, translatedResult, images, dimensionI
                 const relativePointer = { x: result.centerLeft, y: result.centerTop };
                 let cropX, cropY, cropWidth, cropHeight;
 
-                // Determine crop size based on isText
-                if (result.isText === false) {
-                    // Use rectangle dimensions + 50px padding
-                    const padding = 50;
-                    cropWidth = result.width + 2 * padding;
-                    cropHeight = result.height + 2 * padding;
-                    cropX = Math.max(0, result.left - padding);
-                    cropY = Math.max(0, result.top - padding);
-                } else if (result.isText === true) {
-                    // Use triple the rectangle dimensions
-                    cropWidth = result.width * 3;
-                    cropHeight = result.height * 3;
-                    cropX = Math.max(0, relativePointer.x - cropWidth / 2);
-                    cropY = Math.max(0, relativePointer.y - cropHeight / 2);
-                } else {
-                    // Default: 500x500 pixels
-                    const cropSize = 500;
-                    const halfCrop = cropSize / 2;
-                    cropWidth = cropSize;
-                    cropHeight = cropSize;
-                    cropX = Math.max(0, relativePointer.x - halfCrop);
-                    cropY = Math.max(0, relativePointer.y - halfCrop);
-                }
+                // Usar siempre el rectángulo con un padding de 50px
+                const padding = 0;
+                cropX = Math.max(0, result.left - padding);
+                cropY = Math.max(0, result.top - padding);
+                cropWidth = result.width + 2 * padding;
+                cropHeight = result.height + 2 * padding;
 
                 // Adjust if crop exceeds image boundaries
                 if (cropX + cropWidth > image.width) {
