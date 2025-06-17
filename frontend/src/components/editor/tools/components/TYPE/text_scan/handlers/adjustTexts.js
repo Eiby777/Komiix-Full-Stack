@@ -53,6 +53,7 @@ const adjustTexts = async (canvasInstances, translatedResult, images, dimensionI
                 top: canvasTop,
                 fontSize: updatedText.fontSize,
                 width: updatedText.width,
+                canvasIndex: canvasIndex,
             };
 
             return updatedData;

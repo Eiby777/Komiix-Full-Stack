@@ -116,7 +116,6 @@ const calculateFallbackCoordinates = (text, fontFamily, rect, ctx) => {
  * @returns {Object} - {top, left, width, height, fontSize} ajustados.
  */
 const calculateTextCoordinates = (canvas, relativePointer, textObject, isText = null, rect = null) => {
-    console.log("rect", rect);
     // Extraer y preprocesar el texto
     let text = textObject.text || '';
     text = cleanText(text);
@@ -130,7 +129,7 @@ const calculateTextCoordinates = (canvas, relativePointer, textObject, isText = 
         if (isText === true || isText === false) {
             // For isText=true, use original rectangle dimensions
             const fallbackRect = isText === true ? rect : rect;
-            console.log("fallbackRect", fallbackRect);
+            //console.log("fallbackRect", fallbackRect);
             return calculateFallbackCoordinates(text, fontFamily, fallbackRect, ctx);
         }
         return null;

@@ -839,52 +839,50 @@ export class PreProcess {
   processImages(analysisResults, selectedLanguage) {
     const textColor = "#FFFF00";
     this.setRemoveFurigana(selectedLanguage === 'jap');
-
-    const groupedResults = {};
-    analysisResults.forEach(result => {
-      if (!groupedResults[result.canvasIndex]) {
-        groupedResults[result.canvasIndex] = [];
+    const processedGroupedResults = [];
+    analysisResults.forEach((canvasGroup, canvasIndex) => {
+      if (!canvasGroup || canvasGroup.length === 0) {
+        processedGroupedResults[canvasIndex] = [];
+        return; 
       }
-      const { canvas, id, coords, color, image, canvasIndex, background, text } = result;
-
-      if (result.error) {
-        groupedResults[result.canvasIndex].push({ ...result, boundingRect: null, numTextLines: 0, annotatedImage: null, ocrCanvas: null });
-        return;
+      if (!processedGroupedResults[canvasIndex]) {
+        processedGroupedResults[canvasIndex] = [];
       }
-
-      const { processedCanvas, boundingRect, binarizedCanvas } = this.canvasPreProcessor.processForOCR(
-        canvas,
-        background,
-        text,
-        textColor,
-        color,
-        this.verticalText,
-        this.removeFurigana,
-        this.binarizeCanvas.bind(this),
-        this.dilateCanvas.bind(this),
-        this.removeBorderText.bind(this),
-        this.extractTextBlock.bind(this)
-      );
-
-      groupedResults[result.canvasIndex].push({
-        id,
-        coords,
-        color,
-        image,
-        canvas,
-        canvasIndex,
-        ocrCanvas: processedCanvas,
-        boundingRect,
-        binarizedCanvas,
-        //background,
-        //text,
-        //binarizedThreshold,
-        //numTextLines,
-        //annotatedImage,
-
+      canvasGroup.forEach(result => {
+        const { canvas, id, coords, color, image, background, text } = result;
+        if (result.error) {
+          processedGroupedResults[canvasIndex].push({ ...result, boundingRect: null, numTextLines: 0, annotatedImage: null, ocrCanvas: null });
+          return;
+        }
+  
+        const { processedCanvas, boundingRect, binarizedCanvas } = this.canvasPreProcessor.processForOCR(
+          canvas,
+          background,
+          text,
+          textColor,
+          color,
+          this.verticalText,
+          this.removeFurigana,
+          this.binarizeCanvas.bind(this),
+          this.dilateCanvas.bind(this),
+          this.removeBorderText.bind(this),
+          this.extractTextBlock.bind(this)
+        );
+  
+        processedGroupedResults[canvasIndex].push({
+          id,
+          coords,
+          color,
+          image,
+          canvas,
+          canvasIndex, // Keep canvasIndex for consistency
+          ocrCanvas: processedCanvas,
+          boundingRect,
+          binarizedCanvas,
+        });
       });
     });
-
-    return Object.values(groupedResults);
+  
+    return processedGroupedResults;
   }
 }

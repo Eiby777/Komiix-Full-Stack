@@ -69,7 +69,7 @@ const Buttons = ({
         reindexedResult[activeImageIndex] = translatedResult[0];
         translatedResult = reindexedResult;
       }
-
+      
       const adjustedResults = await adjustTexts(targetCanvasInstances, translatedResult, images, dimensionImages, setIsLoading, activeImageIndex);
 
       createTextBoxes(adjustedResults, targetCanvasInstances, colorToTypeTextMap, saveState);

@@ -41,14 +41,14 @@ const cleanImages = async (
     const filteredData = filterRectangles(rectangles);
     const croppedImages = croppImages(filteredData.filteredRectangles, images);
     const backgroundColors = getBackgroundColor(croppedImages);
-
+    
     // Preprocess to detect bounding boxes and remove furigana (if Japanese)
     const preprocessor = new PreProcess();
     preprocessor.setVerticalOrientation(false); // Set if vertical text is known
     const processedResults = preprocessor.processImages(backgroundColors, selectedLanguage);
     
     const { ocrImages, originalImages } = upscaleCroppedImages(processedResults);
-
+    
     const counts = filteredData.counts;
     const validCanvases = counts.reduce((sum, count) => sum + (count > 0 ? 1 : 0), 0);
     let processedRectangles = 0;
@@ -75,7 +75,7 @@ const cleanImages = async (
       },
       onDownloadProgress
     );
-
+    
     const downscaledResults = processOCRResults(tesseractResultsFlat, recorteMapping, ocrImages, GROUP_SIZE);
 
     const orientations = detectTextOrientation(downscaledResults, selectedLanguage);
@@ -98,6 +98,7 @@ const cleanImages = async (
           height,
           centerTop: top + height / 2,
           centerLeft: left + width / 2,
+          canvasIndex: canvasIndex,
         };
       });
     });
