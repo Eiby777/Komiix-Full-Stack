@@ -115,7 +115,7 @@ export const configTextObject = (coords, canvas, color, id, obj = null) => {
     );
 
     textObject.set({
-      splitByGrapheme: true,
+      splitByGrapheme: false,
       width: newWidth,
     });
     textObject.setCoords();
