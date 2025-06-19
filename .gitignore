@@ -25,3 +25,7 @@ frontend/supabase_key.txt
 frontend/supabase_url.txt
 frontend/dist
 frontend/src/lib/supabaseClient.js
+
+OnnxOCR/onnxocr/models
+OnnxOCR/onnxocr/templates
+

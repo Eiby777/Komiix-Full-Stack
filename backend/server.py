@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Request
+from fastapi.responses import JSONResponse
 import time
 from endpoints.models import router as models_router
 from endpoints.fonts import router as fonts_router
 from endpoints.translate import router as translate_router
+from endpoints.ocr import router as ocr_router
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from dependencies.limiter import limiter
@@ -43,21 +44,23 @@ app.lifespan = lifespan
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+
 # CORS configuration
-origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "").split(",") if origin.strip()]
+cors_origins = os.getenv("CORS_ORIGINS", "").split("|")
+origins = [origin.strip() for origin in cors_origins if origin.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
+    expose_headers=["Content-Disposition"],
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["*"],
-    expose_headers=["X-Process-Time"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
-# Include routers
 app.include_router(models_router, prefix="/api")
 app.include_router(fonts_router, prefix="/api")
 app.include_router(translate_router, prefix="/api")
+app.include_router(ocr_router, prefix="/api")
 
 @app.get("/")
 def home():

@@ -45,6 +45,7 @@ services:
       args:
         - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
         - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+        - VITE_KOMIIX_BACKEND_URL=${VITE_KOMIIX_BACKEND_URL}
     ports:
       - "80:80"
     restart: unless-stopped

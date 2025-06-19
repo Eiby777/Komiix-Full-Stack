@@ -1,2 +1,3 @@
-const domain="http://localhost:8000";
+const domain = import.meta.env.VITE_KOMIIX_BACKEND_URL;
+
 export default domain;
