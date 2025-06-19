@@ -134,6 +134,7 @@ class OcrService {
       this.onProgress({ status: "recognizing text", progress: 0 }); // Simulate Tesseract-like progress
 
       const imageBase64 = await recorte.toBase64();
+      
       const { results: ocrResults } = await this._callOcrApi(imageBase64, accessToken);
       
       return this._formatOcrResult(ocrResults, recorte);

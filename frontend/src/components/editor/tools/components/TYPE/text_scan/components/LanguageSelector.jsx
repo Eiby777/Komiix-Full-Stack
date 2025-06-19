@@ -32,6 +32,16 @@ const LanguageSelector = ({
     { id: "kor", name: "Coreano" },
   ];
 
+  // Filter out the selected target language from source language options
+  const sourceLanguageOptions = AVAILABLE_LANGUAGES.filter(
+    (lang) => !selectedTargetLanguage || lang.id !== selectedTargetLanguage
+  );
+
+  // Filter out the selected source language from target language options
+  const targetLanguageOptions = AVAILABLE_LANGUAGES.filter(
+    (lang) => !selectedLanguage || lang.id !== selectedLanguage
+  );
+
   return (
     <div className="mb-6">
       {/* Selector de idioma para detección */}
@@ -48,7 +58,7 @@ const LanguageSelector = ({
         className="w-full p-2 bg-transparent text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
       >
         <option value="">-- Selecciona un idioma --</option>
-        {AVAILABLE_LANGUAGES.map((lang) => (
+        {sourceLanguageOptions.map((lang) => (
           <option key={lang.id} value={lang.id}>
             {lang.name}
           </option>
@@ -74,7 +84,7 @@ const LanguageSelector = ({
         className="w-full p-2 bg-transparent text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
       >
         <option value="">-- Selecciona un idioma --</option>
-        {AVAILABLE_LANGUAGES.map((lang) => (
+        {targetLanguageOptions.map((lang) => (
           <option key={lang.id} value={lang.id}>
             {lang.name}
           </option>

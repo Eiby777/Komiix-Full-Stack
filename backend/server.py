@@ -54,7 +54,7 @@ app.add_middleware(
     allow_credentials=True,
     expose_headers=["Content-Disposition"],
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_headers=["Content-Type", "Authorization", "Cache-Control"],
 )
 
 app.include_router(models_router, prefix="/api")

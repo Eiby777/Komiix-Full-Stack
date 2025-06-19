@@ -114,10 +114,7 @@ export const configTextObject = (coords, canvas, color, id, obj = null) => {
       maxWidth + 20
     );
 
-    textObject.set({
-      splitByGrapheme: false,
-      width: newWidth,
-    });
+    textObject.set({ width: newWidth });
     textObject.setCoords();
     canvas.requestRenderAll();
   });

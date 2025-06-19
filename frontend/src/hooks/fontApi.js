@@ -11,7 +11,6 @@ export const fetchFontList = async () => {
         }
 
         const url = `${domain}/api/font-list`;
-        console.log(url);
         const response = await fetch(url, {
             method: 'GET',
             headers: {

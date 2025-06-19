@@ -52,6 +52,7 @@ export default function Header() {
   const [totalItems, setTotalItems] = useState(images?.length ?? 0);
   const [showLoadModal, setShowLoadModal] = useState(false);
   const { projectId } = useParams();
+  const hasInitialLoad = useRef(false);
 
   useEffect(() => {
     if (!projectId) return;
@@ -88,9 +89,12 @@ export default function Header() {
   const handleLoad = async (file = null) => {
     const user = await getUser();
     if (!file) {
-      const project = await getProjectById(projectId, user.id);
-      if (project) {
-        handleLoadImportedFile(project.savefile, canvasInstances, setShowLoadModal, activeLayer, setCanvasObjectStatus);
+      if (!hasInitialLoad.current) {
+        hasInitialLoad.current = true;
+        const project = await getProjectById(projectId, user.id);
+        if (project) {
+          handleLoadImportedFile(project.savefile, canvasInstances, setShowLoadModal, activeLayer, setCanvasObjectStatus);
+        }
       }
       return;
     }
@@ -125,6 +129,7 @@ export default function Header() {
           object.angle = currentCanvasObjects[(objectIndex + 1)]?.angle ?? null;
           object.originalText = currentCanvasObjects[(objectIndex + 1)]?.originalText ?? null;
           object.translatedText = currentCanvasObjects[(objectIndex + 1)]?.translatedText ?? null;
+          object.typeText = currentCanvasObjects[(objectIndex + 1)]?.typeText ?? null;
         });
       });
       return canvases;

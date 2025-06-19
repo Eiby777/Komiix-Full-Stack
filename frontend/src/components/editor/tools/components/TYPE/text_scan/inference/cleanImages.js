@@ -56,7 +56,7 @@ const cleanImages = async (
     let processedRectangles = 0;
     const GROUP_SIZE = 2;
 
-    const { recorteGroups, recorteMapping, totalRecortes } = prepareRecorteGroups(ocrImages, counts, GROUP_SIZE);
+    const { recorteGroups, recorteMapping, totalRecortes } = prepareRecorteGroups(originalImages, counts, GROUP_SIZE);
 
     const ocrService = new OcrService(
       (m) => {
@@ -79,7 +79,7 @@ const cleanImages = async (
       recorteGroups
     );
 
-    const downscaledResults = processOCRResults(tesseractResultsFlat, recorteMapping, ocrImages, GROUP_SIZE);
+    const downscaledResults = processOCRResults(tesseractResultsFlat, recorteMapping, originalImages, GROUP_SIZE);
 
     const orientations = detectTextOrientation(downscaledResults, selectedLanguage);
     const reorderedResults = reorderTextByOrientation(downscaledResults, orientations);
