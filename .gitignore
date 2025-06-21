@@ -2,6 +2,7 @@ backend/.venv
 backend/app.log
 backend/backup
 backend/models
+backend/onnxocr/onnx_ocr/__pycache__
 
 libretranslate/.venv
 
@@ -15,6 +16,7 @@ docker-compose.override.yml
 *.log
 *.swp
 *.swo
+__pycache__/
 *.venv
 *.iml
 *.xml

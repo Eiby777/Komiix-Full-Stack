@@ -27,6 +27,7 @@ export const detectLanguage = async (text) => {
 
 export const translateText = async (text, fromLang, toLang) => {
   try {
+    console.log(text, fromLang, toLang);
     const { data: { session } } = await supabase.auth.getSession();
     const accesToken = session.access_token;
     const response = await fetch(domain + '/api/translate', {
@@ -55,18 +56,11 @@ export const translateText = async (text, fromLang, toLang) => {
   }
 };
 
-export const LANGUAGE_OPTIONS = [
-  { value: 'en', label: 'English' },
-  { value: 'es', label: 'Spanish' },
-  { value: 'zh-Hans', label: 'Chinese' },
-  { value: 'ja', label: 'Japanese' },
-  { value: 'ko', label: 'Korean' }
-];
+
 
 export const fetchTranslation = async (text, targetLang) => {
   if (!text) return { translatedText: '', alternatives: [] };
   const detected = await detectLanguage(text);
-  console.log(detected);
   const { translatedText, alternatives } = await translateText(text, detected, targetLang);
   return { translatedText, alternatives, detectedLang: detected };
 };

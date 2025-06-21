@@ -9,14 +9,6 @@ export default defineConfig({
   },
   server: {
     https: false,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000/',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    },
     fs: {
       allow: ['.', './node_modules'],
     },

@@ -73,17 +73,7 @@ export const translateText = async (text, fromLang, toLang, setIsLoading) => {
   }
 };
 
-/**
- * Opciones de idiomas soportados
- * @constant {Array<Object>}
- */
-export const LANGUAGE_OPTIONS = [
-  { value: 'en', label: 'English' },
-  { value: 'es', label: 'Spanish' },
-  { value: 'zh', label: 'Chinese' },
-  { value: 'ja', label: 'Japanese' },
-  { value: 'ko', label: 'Korean' }
-];
+
 
 /**
  * Obtiene traducciones para un texto o arreglo de textos

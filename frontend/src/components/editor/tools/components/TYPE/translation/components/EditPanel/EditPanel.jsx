@@ -1,5 +1,5 @@
-import React, { useCallback, useRef, useMemo, useEffect } from 'react';
-import { LANGUAGE_OPTIONS } from '../TranslationLogic';
+import React, { useCallback, useMemo } from 'react';
+import { TRANSLATION_LANGUAGE_OPTIONS } from '../../../../../../../../hooks/languageOptions';
 import { useAutoResizeTextarea } from '../../handlers/useAutoResizeTextarea';
 
 // --- Utility Functions ---
@@ -106,6 +106,7 @@ const EditPanel = ({
   isTrackingChanges,
   setIsTrackingChanges,
   detectedLang,
+  setDetectedLang,
   targetLang,
   setTargetLang,
   alternatives,
@@ -142,9 +143,18 @@ const EditPanel = ({
       <div>
         <div className="flex items-center gap-2 mb-1">
           <label className="text-white text-xs">Original Text</label>
-          <span className="text-white text-xs opacity-70">
-            (Detected: {LANGUAGE_OPTIONS.find((opt) => opt.value === detectedLang)?.label || detectedLang})
-          </span>
+          <label className="text-white text-xs">Detected:</label>
+          <select
+            value={detectedLang}
+            onChange={(e) => setDetectedLang(e.target.value)}
+            className="p-1 rounded-md bg-[#2a2a2a] text-white border border-white/10 focus:outline-none focus:border-white/30 text-xs min-w-[100px] max-w-[150px] truncate"
+          >
+            {TRANSLATION_LANGUAGE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
         <textarea
           ref={useAutoResizeTextarea(originalText)}
@@ -165,7 +175,7 @@ const EditPanel = ({
             onChange={(e) => setTargetLang(e.target.value)}
             className="p-1 rounded-md bg-[#2a2a2a] text-white border border-white/10 focus:outline-none focus:border-white/30 text-xs min-w-[100px] max-w-[150px] truncate"
           >
-            {LANGUAGE_OPTIONS.map((option) => (
+            {TRANSLATION_LANGUAGE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>

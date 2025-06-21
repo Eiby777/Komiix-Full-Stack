@@ -24,9 +24,9 @@ const translateTexts = async (result, selectedLanguage, selectedTargetLanguage) 
         canvasResults.forEach((item, itemIndex) => {
             const text = item.reorderedText === "same" ? item.originalText : item.reorderedText;
             if (text) {
-                const cleanedText = handleCleanText(text);
-                const capitalizedText = cleanedText.charAt(0).toUpperCase() + cleanedText.slice(1).toLowerCase();
-                textsToTranslate.push(capitalizedText);
+                //const cleanedText = handleCleanText(text);
+                //const capitalizedText = cleanedText.charAt(0).toUpperCase() + cleanedText.slice(1).toLowerCase();
+                textsToTranslate.push(text);
                 textMappings.push({ canvasIndex, itemIndex });
             }
         });
