@@ -17,7 +17,6 @@ export const detectLanguage = async (text) => {
     });
     
     const data = await response.json();
-    console.log(data);
     return data.language || 'en';
   } catch (error) {
     console.error('Language detection error:', error);
@@ -27,7 +26,6 @@ export const detectLanguage = async (text) => {
 
 export const translateText = async (text, fromLang, toLang) => {
   try {
-    console.log(text, fromLang, toLang);
     const { data: { session } } = await supabase.auth.getSession();
     const accesToken = session.access_token;
     const response = await fetch(domain + '/api/translate', {
@@ -56,11 +54,8 @@ export const translateText = async (text, fromLang, toLang) => {
   }
 };
 
-
-
-export const fetchTranslation = async (text, targetLang) => {
+export const fetchTranslation = async (text, sourceLang, targetLang) => {
   if (!text) return { translatedText: '', alternatives: [] };
-  const detected = await detectLanguage(text);
-  const { translatedText, alternatives } = await translateText(text, detected, targetLang);
-  return { translatedText, alternatives, detectedLang: detected };
+  const { translatedText, alternatives } = await translateText(text, sourceLang, targetLang);
+  return { translatedText, alternatives };
 };

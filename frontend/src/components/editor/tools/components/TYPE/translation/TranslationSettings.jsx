@@ -3,9 +3,7 @@ import FilterControls from './components/FilterControls';
 import TranslationRow from './components/TranslationRow';
 import EditPanel from './components/EditPanel/EditPanel';
 import ColorTypeSelector from './components/ColorTypeSelector';
-import { fetchTranslation } from './components/TranslationLogic';
 import { useEditorStore } from '../../../../../../stores/editorStore';
-
 import { generateUniqueId } from './handlers/generateUniqueId';
 import { detectTextboxes } from './handlers/detectTextboxes';
 import { setupCanvasListeners } from './handlers/setupCanvasListeners';
@@ -36,7 +34,7 @@ const TextboxSettings = ({ index = 0 }) => {
   const [originalText, setOriginalText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
   const [isTrackingChanges, setIsTrackingChanges] = useState(false);
-  const [detectedLang, setDetectedLang] = useState('en');
+  const [sourceLang, setSourceLang] = useState('en');
   const [targetLang, setTargetLang] = useState('es');
   const [alternatives, setAlternatives] = useState([]);
   const [isTextareaFocused, setIsTextareaFocused] = useState(false);
@@ -49,8 +47,7 @@ const TextboxSettings = ({ index = 0 }) => {
   const updateTextboxTypeHandler = updateTextboxType(index, setTextData, canvasRef);
   const debouncedDetectAndTranslateHandler = debouncedDetectAndTranslate(
     debounce,
-    fetchTranslation,
-    setDetectedLang,
+    sourceLang,
     setTranslatedText,
     setAlternatives,
     isTrackingChanges,
@@ -61,7 +58,7 @@ const TextboxSettings = ({ index = 0 }) => {
     setSelectedId,
     setOriginalText,
     setTranslatedText,
-    setDetectedLang,
+    setSourceLang,
     setAlternatives,
     setTextData,
     index,
@@ -191,7 +188,8 @@ const TextboxSettings = ({ index = 0 }) => {
                 setTranslatedText={setTranslatedText}
                 isTrackingChanges={isTrackingChanges}
                 setIsTrackingChanges={setIsTrackingChanges}
-                detectedLang={detectedLang}
+                sourceLang={sourceLang}
+                setSourceLang={setSourceLang}
                 targetLang={targetLang}
                 setTargetLang={setTargetLang}
                 alternatives={alternatives}

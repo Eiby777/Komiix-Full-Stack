@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { TRANSLATION_LANGUAGE_OPTIONS } from '../../../../../../../../hooks/languageOptions';
 import { useAutoResizeTextarea } from '../../handlers/useAutoResizeTextarea';
 
@@ -84,7 +84,6 @@ const useTranslatedTextHandler = (setTranslatedText, setAlternatives, setTextDat
       }
       return newData;
     });
-    console.log('Translated text changed:', value);
     debouncedUpdateCanvasTranslated(value);
   }, [index, selectedId, setTextData, setTranslatedText, debouncedUpdateCanvasTranslated]);
 
@@ -105,8 +104,8 @@ const EditPanel = ({
   setTranslatedText,
   isTrackingChanges,
   setIsTrackingChanges,
-  detectedLang,
-  setDetectedLang,
+  sourceLang,
+  setSourceLang,
   targetLang,
   setTargetLang,
   alternatives,
@@ -119,6 +118,13 @@ const EditPanel = ({
 }) => {
   // Use custom hooks to encapsulate logic
   const { debouncedUpdateCanvasOriginal, debouncedUpdateCanvasTranslated } = useCanvasTextUpdater(canvasRef, selectedId);
+
+  // Update canvas when translatedText changes programmatically
+  useEffect(() => {
+    if (isTrackingChanges) {
+      debouncedUpdateCanvasTranslated(translatedText);
+    }
+  }, [translatedText, isTrackingChanges, debouncedUpdateCanvasTranslated]);
 
   const handleOriginalTextChange = useOriginalTextHandler(
     setOriginalText,
@@ -142,11 +148,10 @@ const EditPanel = ({
       {/* Original Text Section */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <label className="text-white text-xs">Original Text</label>
-          <label className="text-white text-xs">Detected:</label>
+          <label className="text-white text-xs">Texto Original</label>
           <select
-            value={detectedLang}
-            onChange={(e) => setDetectedLang(e.target.value)}
+            value={sourceLang}
+            onChange={(e) => setSourceLang(e.target.value)}
             className="p-1 rounded-md bg-[#2a2a2a] text-white border border-white/10 focus:outline-none focus:border-white/30 text-xs min-w-[100px] max-w-[150px] truncate"
           >
             {TRANSLATION_LANGUAGE_OPTIONS.map((option) => (
@@ -169,7 +174,7 @@ const EditPanel = ({
       {/* Translated Text Section */}
       <div>
         <div className="flex items-center gap-2 mb-1 flex-wrap">
-          <label className="text-white text-xs">Translated Text</label>
+          <label className="text-white text-xs">Texto Traducido</label>
           <select
             value={targetLang}
             onChange={(e) => setTargetLang(e.target.value)}
