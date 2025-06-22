@@ -1,4 +1,5 @@
 import React from "react";
+import { OCR_LANGUAGE_OPTIONS } from "../../../../../../../hooks/languageOptions";
 
 /**
  * LanguageSelector component - Provides dropdown selectors for source and target languages
@@ -24,22 +25,16 @@ const LanguageSelector = ({
   setTargetLanguageError,
 }) => {
 
-  const AVAILABLE_LANGUAGES = [
-    { id: "spa", name: "Español" },
-    { id: "eng", name: "Inglés" },
-    { id: "jpn", name: "Japonés" },
-    { id: "chi_sim", name: "Chino" },
-    { id: "kor", name: "Coreano" },
-  ];
+  
 
   // Filter out the selected target language from source language options
-  const sourceLanguageOptions = AVAILABLE_LANGUAGES.filter(
-    (lang) => !selectedTargetLanguage || lang.id !== selectedTargetLanguage
+  const sourceLanguageOptions = OCR_LANGUAGE_OPTIONS.filter(
+    (lang) => !selectedTargetLanguage || lang.value !== selectedTargetLanguage
   );
 
   // Filter out the selected source language from target language options
-  const targetLanguageOptions = AVAILABLE_LANGUAGES.filter(
-    (lang) => !selectedLanguage || lang.id !== selectedLanguage
+  const targetLanguageOptions = OCR_LANGUAGE_OPTIONS.filter(
+    (lang) => !selectedLanguage || lang.value !== selectedLanguage
   );
 
   return (
@@ -59,8 +54,8 @@ const LanguageSelector = ({
       >
         <option value="">-- Selecciona un idioma --</option>
         {sourceLanguageOptions.map((lang) => (
-          <option key={lang.id} value={lang.id}>
-            {lang.name}
+          <option key={lang.value} value={lang.value}>
+            {lang.label}
           </option>
         ))}
       </select>
@@ -85,8 +80,8 @@ const LanguageSelector = ({
       >
         <option value="">-- Selecciona un idioma --</option>
         {targetLanguageOptions.map((lang) => (
-          <option key={lang.id} value={lang.id}>
-            {lang.name}
+          <option key={lang.value} value={lang.value}>
+            {lang.label}
           </option>
         ))}
       </select>

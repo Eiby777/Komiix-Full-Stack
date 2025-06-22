@@ -1,14 +1,6 @@
 import fetchTranslation from "../components/TranslationLogic";
 import { cleanText as handleCleanText } from "../../../../handlers/calculateTextCoordinates";
 
-const LANGUAGE_MAP = {
-    spa: "es",
-    eng: "en",
-    jpn: "ja",
-    chi_sim: "zh",
-    kor: "ko",
-};
-
 /**
  * Translates texts detected in the canvas using the given language settings.
  * @param {Array<Array<Object>>} result - Result of text detection, grouped by canvas.
@@ -24,17 +16,17 @@ const translateTexts = async (result, selectedLanguage, selectedTargetLanguage) 
         canvasResults.forEach((item, itemIndex) => {
             const text = item.reorderedText === "same" ? item.originalText : item.reorderedText;
             if (text) {
-                //const cleanedText = handleCleanText(text);
+                const cleanedText = handleCleanText(text);
                 //const capitalizedText = cleanedText.charAt(0).toUpperCase() + cleanedText.slice(1).toLowerCase();
-                textsToTranslate.push(text);
+                textsToTranslate.push(cleanedText);
                 textMappings.push({ canvasIndex, itemIndex });
             }
         });
     });
 
     if (textsToTranslate.length > 0) {
-        const sourceLang = LANGUAGE_MAP[selectedLanguage] || "en";
-        const targetLang = LANGUAGE_MAP[selectedTargetLanguage] || "en";
+        const sourceLang = selectedLanguage;
+        const targetLang = selectedTargetLanguage;
 
         const translationResult = await fetchTranslation(textsToTranslate, sourceLang, targetLang);
 
@@ -51,7 +43,7 @@ const translateTexts = async (result, selectedLanguage, selectedTargetLanguage) 
             });
         }
     } else {
-        console.log("No texts to translate");
+        console.warn("No texts to translate");
     }
 
     return result;

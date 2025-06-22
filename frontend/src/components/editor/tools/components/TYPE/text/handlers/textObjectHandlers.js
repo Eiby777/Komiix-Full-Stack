@@ -51,7 +51,7 @@ const createTextBoxObject = ({ left, top, width = null, height = null }, color, 
     lockScalingX: false,
     lockScalingY: false,
     perPixelTargetFind: false,
-    splitByGrapheme: true,
+    splitByGrapheme: false,
   });
 };
 
