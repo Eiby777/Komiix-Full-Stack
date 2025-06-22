@@ -5,8 +5,8 @@
 export const TESSERACT_LANGUAGE_OPTIONS = [
   { value: 'eng', label: 'Inglés' },
   { value: 'spa', label: 'Español' },
-  { value: 'chi_sim', label: 'Chino' },
-  { value: 'chi_tra', label: 'Chino' },
+  { value: 'chi_sim', label: 'Chino Simplificado' },
+  { value: 'chi_tra', label: 'Chino Tradicional' },
   { value: 'jpn', label: 'Japonés' },
   { value: 'kor', label: 'Coreano' }
 ];
