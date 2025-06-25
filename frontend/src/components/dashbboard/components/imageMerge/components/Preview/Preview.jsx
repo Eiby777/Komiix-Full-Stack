@@ -93,13 +93,13 @@ const Preview = ({
           src={img.url}
           alt={`Preview ${index}`}
           className="w-full block"
-          style={{ margin: 0, padding: 0 }}
+          style={{ margin: 0, padding: 0, userSelect: 'none' }}
         />
       ))}
       {marks.map((mark, index) => (
         <div
           key={`mark-${mark.id}`}
-          className={`absolute w-full h-0.5 ${mark.id === selectedMarkId
+          className={`absolute w-full h-1 ${mark.id === selectedMarkId
               ? "bg-green-500"
               : index === draggedMarkIndex
                 ? "bg-blue-500"

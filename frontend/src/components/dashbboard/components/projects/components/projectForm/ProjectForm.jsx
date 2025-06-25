@@ -22,7 +22,9 @@ export default function ProjectForm({ setShowCreateProjectModal }) {
     uploadedFiles,
     handleDeleteFile,
     setUploadedFiles,
-    clearFiles
+    clearFiles,
+    uploadError,
+    setUploadError
   } = useFileUpload();
 
   const [name, setName] = useState("");
@@ -46,6 +48,7 @@ export default function ProjectForm({ setShowCreateProjectModal }) {
     setImageError(null);
     setNetworkError(null);
     setCreationError(null);
+    setUploadError(null);
 
     let hasError = false;
     const trimmedName = name.trim();
@@ -168,6 +171,11 @@ export default function ProjectForm({ setShowCreateProjectModal }) {
           {imageError && (
             <p className="text-sm text-red-500 bg-red-100 dark:bg-red-900/30 p-2 rounded-lg shadow-md">
               {imageError}
+            </p>
+          )}
+          {uploadError && (
+            <p className="text-sm text-red-500 bg-red-100 dark:bg-red-900/30 p-2 rounded-lg shadow-md">
+              {uploadError}
             </p>
           )}
           {creationError && (

@@ -1,9 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
 
+const MAX_FILE_LIMIT = 50;
+
 export function useFileUpload() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
 
   // Limpiar URLs al desmontar
   useEffect(() => {
@@ -16,6 +19,14 @@ export function useFileUpload() {
   }, []);
 
   const handleFileUpload = async (inputFiles) => {
+    setUploadError(null); // Limpiar errores previos
+    
+    // Verificar límite de imágenes
+    if (uploadedFiles.length + inputFiles.length > MAX_FILE_LIMIT) {
+      setUploadError(`No puedes subir más de ${MAX_FILE_LIMIT} imágenes en total.`);
+      return;
+    }
+    
     const validFiles = [];
 
     // Convert input to FileList if necessary
@@ -98,5 +109,7 @@ export function useFileUpload() {
     setUploadedFiles,
     fileInputRef,
     clearFiles,
+    uploadError,
+    setUploadError,
   };
 }

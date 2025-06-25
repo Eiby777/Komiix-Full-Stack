@@ -16,6 +16,7 @@ const useDeleteMarksKeyboard = ({
       if ((e.key === "Backspace" || e.key === "Delete") && selectedMarkId) {
         setMarks((prev) => {
           const markToDelete = prev.find((mark) => mark.id === selectedMarkId);
+          console.log(markToDelete);
           if (markToDelete) {
             setGhostMarks([{ id: markToDelete.id, y: markToDelete.y }]);
             setUndoStack((prev) => prev.filter((action) => action.id !== selectedMarkId));
