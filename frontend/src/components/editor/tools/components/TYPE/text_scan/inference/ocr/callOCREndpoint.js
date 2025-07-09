@@ -6,11 +6,9 @@ import { supabase } from "../../../../../../../../lib/supabaseClient";
  * Represents a single cropped image (recorte) with its associated data.
  */
 class Recorte {
-  constructor(image, id, coords, color) {
+  constructor(image, id) {
     this.image = image;
-    this.id = id;
-    this.coords = coords;
-    this.color = color;
+    this.id = id; // Keeping id for debugging purposes
   }
 
   /**
@@ -18,6 +16,7 @@ class Recorte {
    * @returns {Promise<string>} - The base64 representation of the image.
    */
   async toBase64() {
+    console.log(this.image);
     if (typeof this.image === 'string' && this.image.startsWith('data:')) {
       // If already a data URL, extract just the base64 part
       return this.image.split(',')[1];
@@ -111,9 +110,7 @@ class OcrService {
       id: originalRecorte.id,
       text: combinedText,
       confidence,
-      boundingBoxes,
-      coords: originalRecorte.coords,
-      color: originalRecorte.color,
+      boundingBoxes
     };
   }
 
@@ -139,9 +136,7 @@ class OcrService {
         id: recorte.id,
         text: "",
         confidence: 0,
-        boundingBoxes: [],
-        coords: recorte.coords,
-        color: recorte.color,
+        boundingBoxes: []
       };
     } finally {
       this.processedRectangles += 1;
@@ -169,7 +164,7 @@ class OcrService {
       const allGroupResults = [];
 
       for (const group of recorteGroups) {
-        const groupRecortes = group.map(r => new Recorte(r.image, r.id, r.coords, r.color));
+        const groupRecortes = group.map(r => new Recorte(r.image, r.id));
         const results = await Promise.all(
           groupRecortes.map(recorte => this._processSingleRecorte(recorte, accessToken))
         );

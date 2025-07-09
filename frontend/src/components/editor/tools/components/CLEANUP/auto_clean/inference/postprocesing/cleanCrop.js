@@ -287,7 +287,7 @@ const fillSolidBackground = (crop, canvas, coords, fillColor) => {
  * @returns {Promise<Object>} Objeto con imagen limpia, máscara, coordenadas y estado
  */
 export const cleanCrop = async (crop) => {
-  let { canvas, boundingRect, color, binarizedCanvas } = crop;
+  let { canvas, color, ocrResults } = crop;
   if (!canvas) {
     console.error(`Error validando canvas para recorte ${crop.id}`);
     return crop;
@@ -300,7 +300,7 @@ export const cleanCrop = async (crop) => {
     return crop;
   }
   if (rectType !== "text") {
-    const maskCanvas = createMaskFromBoundingBoxes(boundingRect, binarizedCanvas);
+    const maskCanvas = createMaskFromBoundingBoxes(extended.canvas, ocrResults);
     if (!maskCanvas) {
       console.error(`Error creando máscara para recorte ${crop.id}`);
     }
@@ -324,7 +324,7 @@ export const cleanCrop = async (crop) => {
 
   // Para rectángulos "text" (recortes ajustados)
   let colorStats = getDominantColorAndCount(extended.canvas);
-  const maskCanvas = createMaskFromBoundingBoxes(boundingRect, binarizedCanvas);
+  const maskCanvas = createMaskFromBoundingBoxes(extended.canvas, ocrResults);
   if (maskCanvas) {
     colorStats = getDominantColorAndCount(extended.canvas, maskCanvas);
   }

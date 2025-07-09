@@ -5,6 +5,7 @@ import getBackgroundColor from "./preprocesing/getBackgroundColor";
 import { cleanCroppedImages } from "./postprocesing/cleanCroppedImages";
 import { PreProcess } from "./preprocesing/getBoundingBoxes";
 import { identifyNonSolidBackgrounds } from "./postprocesing/sortFinalData";
+import OcrService from "../../../TYPE/text_scan/inference/ocr/callOCREndpoint";
 
 /**
  * Main function for automatic image cleaning
@@ -28,27 +29,70 @@ const cleanImages = async (
     try {
         const filteredData = filterRectangles(rectangles);
         const croppedImages = croppImages(filteredData.filteredRectangles, images);
-        const backgroundColors = getBackgroundColor(croppedImages);
-        // Preprocess to detect bounding boxes and remove furigana (if Japanese)
-        const preprocessor = new PreProcess();
-        preprocessor.setVerticalOrientation(false); // Set if vertical text is known
-        const processedResults = preprocessor.processImages(backgroundColors, selectedLanguage);
-
-        const { ocrImages, originalImages } = upscaleCroppedImages(processedResults);
+        console.log(croppedImages);
 
         const counts = filteredData.counts;
         const validCanvases = counts.reduce((sum, count) => sum + (count > 0 ? 1 : 0), 0);
         
-        // Report starting progress
         onProgress({
             canvasProgress: { current: 0, total: validCanvases },
             recorteProgress: { current: 0, total: 1 },
+            status: "Processing OCR..."
         });
 
-        // Process images without OCR
-        const cleanedImages = await cleanCroppedImages(originalImages, counts, images);
+        // Process images with OCR
+        let processedRectangles = 0;
+        const totalRecortes = croppedImages.flat().length;
         
-        // Report progress after processing images
+        const ocrService = new OcrService((m) => {
+            if (m.status === "recognizing text" && m.progress === 1) {
+                processedRectangles += 1;
+                const recorteProgressRatio = processedRectangles / totalRecortes;
+                const completedCanvases = Math.min(
+                    Math.floor(recorteProgressRatio * validCanvases),
+                    validCanvases
+                );
+                onProgress({
+                    status: m.status,
+                    canvasProgress: { 
+                        current: completedCanvases, 
+                        total: validCanvases 
+                    },
+                    recorteProgress: { 
+                        current: processedRectangles, 
+                        total: totalRecortes 
+                    }
+                });
+            }
+        });
+        
+        // Create a flat list of all crops with their original IDs
+        const allCrops = [];
+        const ocrInput = croppedImages.map((group, groupIndex) => 
+            group.map((crop, imageIndex) => {
+                const image = crop?.image || crop;
+                const cropId = crop.id || `crop-${groupIndex}-${imageIndex}`;
+                allCrops.push({ ...crop, originalId: cropId });
+                return {
+                    image,
+                    id: cropId
+                };
+            })
+        );
+
+        const ocrResults = await ocrService.callOcrEndpoint(ocrInput);
+        console.log('OCR Results:', ocrResults);
+
+        // Create a map of OCR results by ID for easy lookup
+        const ocrResultsMap = new Map();
+        ocrResults.flat().forEach(result => {
+            if (result && result.id) {
+                ocrResultsMap.set(result.id, result);
+            }
+        });
+
+        const cleanedImages = await cleanCroppedImages(ocrResultsMap, croppedImages, counts, images);
+        
         onProgress({
             canvasProgress: { current: validCanvases / 2, total: validCanvases },
             recorteProgress: { current: 0.5, total: 1 },
@@ -56,7 +100,6 @@ const cleanImages = async (
         
         const nonSolidBackgroundRects = identifyNonSolidBackgrounds(cleanedImages, counts);
 
-        // Report completion
         onProgress({
             canvasProgress: { current: validCanvases, total: validCanvases },
             recorteProgress: { current: 1, total: 1 },
