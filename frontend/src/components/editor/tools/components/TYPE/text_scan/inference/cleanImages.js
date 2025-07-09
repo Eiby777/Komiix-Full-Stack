@@ -3,9 +3,6 @@ import { filterRectangles } from "./preprocesing/filterRectangles";
 import { croppImages } from "./preprocesing/croppImages";
 import detectTextOrientation from "./postprocesing/detectTextOrientation";
 import reorderTextByOrientation from "./postprocesing/reorderTextByOrientation";
-import { upscaleCroppedImages } from "./preprocesing/scalingImages";
-import getBackgroundColor from "./preprocesing/getBackgroundColor";
-import { PreProcess } from "./preprocesing/getBoundingBoxes";
 import { prepareRecorteGroups, processOCRResults } from "./postprocesing/sortFinalData";
 
 /**
@@ -42,21 +39,13 @@ const cleanImages = async (
   try {
     const filteredData = filterRectangles(rectangles);
     const croppedImages = croppImages(filteredData.filteredRectangles, images);
-    const backgroundColors = getBackgroundColor(croppedImages);
-
-    // Preprocess to detect bounding boxes and remove furigana (if Japanese)
-    const preprocessor = new PreProcess();
-    preprocessor.setVerticalOrientation(false); // Set if vertical text is known
-    const processedResults = preprocessor.processImages(backgroundColors, selectedLanguage);
-
-    const { ocrImages, originalImages } = upscaleCroppedImages(processedResults);
 
     const counts = filteredData.counts;
     const validCanvases = counts.reduce((sum, count) => sum + (count > 0 ? 1 : 0), 0);
     let processedRectangles = 0;
     const GROUP_SIZE = 2;
 
-    const { recorteGroups, recorteMapping, totalRecortes } = prepareRecorteGroups(originalImages, counts, GROUP_SIZE);
+    const { recorteGroups, recorteMapping, totalRecortes } = prepareRecorteGroups(croppedImages, counts, GROUP_SIZE);
 
     const ocrService = new OcrService(
       (m) => {
@@ -80,7 +69,7 @@ const cleanImages = async (
     );
     console.log(tesseractResultsFlat);
 
-    const downscaledResults = processOCRResults(tesseractResultsFlat, recorteMapping, originalImages, GROUP_SIZE);
+    const downscaledResults = processOCRResults(tesseractResultsFlat, recorteMapping, croppedImages, GROUP_SIZE);
 
     const orientations = detectTextOrientation(downscaledResults, selectedLanguage);
     const reorderedResults = reorderTextByOrientation(downscaledResults, orientations);

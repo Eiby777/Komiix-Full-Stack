@@ -1,9 +1,6 @@
 import { filterRectangles } from "./preprocesing/filterRectangles";
 import { croppImages } from "./preprocesing/croppImages";
-import { upscaleCroppedImages } from "../components/handlers/scalingImages";
-import getBackgroundColor from "./preprocesing/getBackgroundColor";
 import { cleanCroppedImages } from "./postprocesing/cleanCroppedImages";
-import { PreProcess } from "./preprocesing/getBoundingBoxes";
 import { identifyNonSolidBackgrounds } from "./postprocesing/sortFinalData";
 import OcrService from "../../../TYPE/text_scan/inference/ocr/callOCREndpoint";
 
