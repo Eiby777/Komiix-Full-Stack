@@ -1,5 +1,5 @@
-import React from "react";
-import { OCR_LANGUAGE_OPTIONS } from "../../../../../../../hooks/languageOptions";
+import React, { useEffect } from "react";
+import { OCR_LANGUAGE_OPTIONS, TRANSLATION_LANGUAGE_OPTIONS } from "../../../../../../../hooks/languageOptions";
 
 /**
  * LanguageSelector component - Provides dropdown selectors for source and target languages
@@ -15,26 +15,47 @@ import { OCR_LANGUAGE_OPTIONS } from "../../../../../../../hooks/languageOptions
  * @returns {JSX.Element} Language selection UI with two dropdowns
  */
 const LanguageSelector = ({
-  selectedLanguage,
-  setSelectedLanguage,
-  languageError,
-  setLanguageError,
-  selectedTargetLanguage,
-  setSelectedTargetLanguage,
-  targetLanguageError,
-  setTargetLanguageError,
+  originalOCRLanguage,
+  setOriginalOCRLanguage,
+  ocrlanguageError,
+  setOCRLanguageError,
+  selectedOCRTargetLanguage,
+  setOriginalOCRTargetLanguage,
+  ocrtargetLanguageError,
+  setOCRTargetLanguageError,
+  setSelectedTranslationLanguage,
+  setOriginalTranslationLanguage
 }) => {
+  // Map OCR language values to Translation language values
+  const ocrToTranslationMap = {
+    'en': 'en',
+    'es': 'es',
+    'chi': 'zh-Hans',
+    'jpn': 'ja',
+    'ko': 'ko'
+  };
 
-  
+  // When OCR language changes, update the Translation language if possible
+  const handleOCRLanguageChange = (ocrValue) => {
+    setOriginalOCRLanguage(ocrValue);
+    setOCRLanguageError(false);
+    
+    // Find the corresponding translation language
+    const translationValue = ocrToTranslationMap[ocrValue];
+    if (translationValue) {
+      setSelectedTranslationLanguage(translationValue);
+      setOriginalTranslationLanguage(translationValue);
+    }
+  };
 
   // Filter out the selected target language from source language options
   const sourceLanguageOptions = OCR_LANGUAGE_OPTIONS.filter(
-    (lang) => !selectedTargetLanguage || lang.value !== selectedTargetLanguage
+    (lang) => !selectedOCRTargetLanguage || lang.value !== selectedOCRTargetLanguage
   );
 
   // Filter out the selected source language from target language options
   const targetLanguageOptions = OCR_LANGUAGE_OPTIONS.filter(
-    (lang) => !selectedLanguage || lang.value !== selectedLanguage
+    (lang) => !originalOCRLanguage || lang.value !== originalOCRLanguage
   );
 
   return (
@@ -45,11 +66,8 @@ const LanguageSelector = ({
       </label>
       <select
         id="language-select"
-        value={selectedLanguage}
-        onChange={(e) => {
-          setSelectedLanguage(e.target.value);
-          setLanguageError(false);
-        }}
+        value={originalOCRLanguage || ''}
+        onChange={(e) => handleOCRLanguageChange(e.target.value)}
         className="w-full p-2 bg-transparent text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
       >
         <option value="">-- Selecciona un idioma --</option>
@@ -59,7 +77,7 @@ const LanguageSelector = ({
           </option>
         ))}
       </select>
-      {languageError && (
+      {ocrlanguageError && (
         <p className="text-red-500 text-xs mt-2">
           Por favor, selecciona un idioma para continuar.
         </p>
@@ -67,14 +85,14 @@ const LanguageSelector = ({
 
       {/* Selector de idioma para traducción */}
       <label htmlFor="target-language-select" className="text-white/75 text-sm block mb-2 mt-4">
-        Idioma a traducir:
+        Idioma a traducir (se actualizará automáticamente con el idioma de detección):
       </label>
       <select
         id="target-language-select"
-        value={selectedTargetLanguage}
+        value={selectedOCRTargetLanguage || ''}
         onChange={(e) => {
-          setSelectedTargetLanguage(e.target.value);
-          setTargetLanguageError(false);
+          setOriginalOCRTargetLanguage(e.target.value);
+          setOCRTargetLanguageError(false);
         }}
         className="w-full p-2 bg-transparent text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
       >
@@ -85,7 +103,7 @@ const LanguageSelector = ({
           </option>
         ))}
       </select>
-      {targetLanguageError && (
+      {ocrtargetLanguageError && (
         <p className="text-red-500 text-xs mt-2">
           Por favor, selecciona un idioma de destino para continuar.
         </p>

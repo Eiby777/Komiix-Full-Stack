@@ -1,9 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from loguru import logger
-from onnx_ocr.onnxocr.onnx_paddleocr import ONNXPaddleOcr
 from typing import List, Dict, Any
-import os
 import base64
 import cv2
 import numpy as np
@@ -11,34 +9,63 @@ import time
 from fastapi import APIRouter
 from dependencies.limiter import limiter
 from dependencies.auth import verify_jwt
+from paddleocr import PaddleOCR  
 
 router = APIRouter()
 
 # Inicializar el modelo OCR
-model = ONNXPaddleOcr(use_angle_cls=True, use_gpu=False)
+model = PaddleOCR( 
+        use_doc_orientation_classify=False, # Disables document orientation classification model via this parameter
+        use_doc_unwarping=False, # Disables text image rectification model via this parameter
+        use_textline_orientation=False, # Disables text line orientation classification model via this parameter
+        text_detection_model_name='PP-OCRv5_server_det',
+        text_recognition_model_name='PP-OCRv5_server_rec',
+        ocr_version='PP-OCRv5'
+)
 
 # Modelo Pydantic para validación de entrada
 class OCRRequest(BaseModel):
     image: str  # Imagen en base64
 
 class BoundingBox(BaseModel):
+    x0: float
+    y0: float
     x1: float
     y1: float
-    x2: float
-    y2: float
-    x3: float
-    y3: float
-    x4: float
-    y4: float
 
 class OCRResult(BaseModel):
     text: str
     confidence: float
-    bounding_box: List[List[float]]
+    bounding_box: BoundingBox
 
 class OCRResponse(BaseModel):
     processing_time: float
-    results: List[Dict[str, Any]]
+    results: List[OCRResult]
+
+
+def polygon_to_bbox(polygon):
+    """
+    Convierte un polígono de 4 puntos a bounding box formato [x1, y1, x2, y2]
+    """
+    # Si el polígono es un numpy array, convertirlo a lista
+    if hasattr(polygon, 'tolist'):
+        polygon = polygon.tolist()
+    
+    # Verificar que tenemos datos válidos
+    if polygon is None or len(polygon) < 4:
+        return [0, 0, 0, 0]
+    
+    # Extraer todas las coordenadas x e y
+    x_coords = [point[0] for point in polygon]
+    y_coords = [point[1] for point in polygon]
+    
+    # Encontrar min y max
+    x1 = min(x_coords)
+    y1 = min(y_coords)
+    x2 = max(x_coords)
+    y2 = max(y_coords)
+    
+    return [x1, y1, x2, y2]
 
 
 @router.post("/ocr", tags=["OCR"], dependencies=[Depends(verify_jwt)], response_model=OCRResponse)
@@ -62,24 +89,47 @@ async def ocr_service(
 
         # Ejecutar OCR
         start_time = time.time()
-        result = model.ocr(img)
+        result = model.predict(img)
         processing_time = time.time() - start_time
 
-        # Formatear resultados
+        logger.info(f"OCR result format: {type(result)}")
+        
+        # Formatear resultados - sabemos que el formato es result[0] con los datos directamente
         ocr_results = []
-        for line in result[0]:
-            if isinstance(line[0], (list, np.ndarray)):
-                # Convertir a lista de listas
-                bounding_box = np.array(line[0]).reshape(4, 2).tolist()
-            else:
-                bounding_box = []
+        first_result = result[0]
+        
+        rec_texts = first_result.get('rec_texts', [])
+        rec_scores = first_result.get('rec_scores', [])
+        rec_polys = first_result.get('rec_polys', [])
+        
+        logger.info(f"Found {len(rec_texts)} texts, {len(rec_scores)} scores, {len(rec_polys)} polygons")
+        
+        # Procesar cada texto detectado
+        for i in range(len(rec_texts)):
+            try:
+                text = str(rec_texts[i])
+                confidence = float(rec_scores[i])
+                
+                # Convertir polígono a bounding box
+                polygon = rec_polys[i]
+                bbox = polygon_to_bbox(polygon)
+                
+                ocr_results.append({
+                    "text": text,
+                    "confidence": confidence,
+                "bounding_box": {
+                    "x0": bbox[0],
+                    "y0": bbox[1],
+                    "x1": bbox[2],
+                    "y1": bbox[3]
+                }
+                })
+                
+            except Exception as e:
+                logger.error(f"Error processing result index {i}: {str(e)}")
+                continue
 
-            ocr_results.append({
-                "text": line[1][0],
-                "confidence": float(line[1][1]),
-                "bounding_box": bounding_box
-            })
-
+        logger.info(f"Final OCR results: {ocr_results}")
         return {
             "processing_time": processing_time,
             "results": ocr_results

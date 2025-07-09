@@ -5,13 +5,14 @@ import translateText from "../../handlers/translateTexts";
 import adjustTexts from "../../handlers/adjustTexts";
 import createTextBoxes from "../../handlers/createTextBoxes";
 import useLayerHistory from "../../../../../../floating-menus/components/UndoRedoMenu/handlers/fabricHistoryManager";
-import ObjectStatus from "../../../../../../floating-menus/components/UndoRedoMenu/handlers/enumObjectRequests";
 
 const Buttons = ({
-  selectedLanguage,
-  selectedTargetLanguage,
-  setLanguageError,
-  setTargetLanguageError,
+  originalOCRLanguage,
+  selectedOCRTargetLanguage,
+  originalTranslationLanguage,
+  selectedTranslationLanguage,
+  setOCRLanguageError,
+  setOCRTargetLanguageError,
   setShowWarning,
   setIsLoading,
   setIsDownloadingModels,
@@ -31,12 +32,12 @@ const Buttons = ({
 
   const handleAccept = async () => {
     let hasError = false;
-    if (!selectedLanguage) {
-      setLanguageError(true);
+    if (!originalOCRLanguage) {
+      setOCRLanguageError(true);
       hasError = true;
     }
-    if (!selectedTargetLanguage) {
-      setTargetLanguageError(true);
+    if (!selectedOCRTargetLanguage) {
+      setOCRTargetLanguageError(true);
       hasError = true;
     }
     if (hasError) return;
@@ -58,12 +59,12 @@ const Buttons = ({
         fetchedRectangles,
         fetchedImages,
         (progressData) => setProgress(progressData),
-        selectedLanguage,
+        originalOCRLanguage,
         updateDownloadingStatus,
         setIsLoading
       );
 
-      let translatedResult = await translateText(result, selectedLanguage, selectedTargetLanguage, setIsLoading);
+      let translatedResult = await translateText(result, originalTranslationLanguage, selectedTranslationLanguage, setIsLoading);
       
       if (scanOption === "current" && translatedResult.length === 1) {
         const reindexedResult = new Array(images.length).fill(null);
@@ -92,11 +93,11 @@ const Buttons = ({
       <button
         onClick={handleAccept}
         className={`px-4 py-2 text-white/90 rounded-md transition-colors duration-200 ${
-          selectedLanguage && selectedTargetLanguage
+          originalOCRLanguage && selectedOCRTargetLanguage
             ? "bg-[#4a90e2] hover:bg-[#357abd]"
             : "bg-gray-600/50 cursor-not-allowed"
         }`}
-        disabled={!selectedLanguage || !selectedTargetLanguage}
+        disabled={!originalOCRLanguage || !selectedOCRTargetLanguage}
       >
         Aceptar
       </button>

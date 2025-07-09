@@ -104,12 +104,7 @@ class OcrService {
     const boundingBoxes = ocrResults.map((result) => ({
       text: result.text,
       confidence: result.confidence,
-      bbox: {
-        x0: result.bounding_box[0][0],
-        y0: result.bounding_box[0][1],
-        x1: result.bounding_box[2][0],
-        y1: result.bounding_box[2][1],
-      },
+      bbox: result.bounding_box
     }));
 
     return {

@@ -19,10 +19,16 @@ const TextScan = () => {
     canvasProgress: { current: 0, total: 0 },
     recorteProgress: { current: 0, total: 0 },
   });
-  const [selectedLanguage, setSelectedLanguage] = useState("");
-  const [languageError, setLanguageError] = useState(false);
-  const [selectedTargetLanguage, setSelectedTargetLanguage] = useState("");
-  const [targetLanguageError, setTargetLanguageError] = useState(false);
+  
+  const [originalOCRLanguage, setOriginalOCRLanguage] = useState("");
+  const [selectedOCRTargetLanguage, setSelectedOCRTargetLanguage] = useState("");
+  const [ocrlanguageError, setOCRLanguageError] = useState(false);
+  const [ocrtargetLanguageError, setOCRTargetLanguageError] = useState(false);
+
+  const [originalTranslationLanguage, setOriginalTranslationLanguage] = useState(false);
+  const [selectedTranslationLanguage, setSelectedTranslationLanguage] = useState("");
+  
+
   const [scanOption, setScanOption] = useState("all");
 
   useEffect(() => {
@@ -91,20 +97,30 @@ const TextScan = () => {
               </select>
             </div>
             <LanguageSelector
-              selectedLanguage={selectedLanguage}
-              setSelectedLanguage={setSelectedLanguage}
-              languageError={languageError}
-              setLanguageError={setLanguageError}
-              selectedTargetLanguage={selectedTargetLanguage}
-              setSelectedTargetLanguage={setSelectedTargetLanguage}
-              targetLanguageError={targetLanguageError}
-              setTargetLanguageError={setTargetLanguageError}
+              originalOCRLanguage={originalOCRLanguage}
+              setOriginalOCRLanguage={setOriginalOCRLanguage}
+
+              ocrlanguageError={ocrlanguageError}
+              setOCRLanguageError={setOCRLanguageError}
+
+              selectedOCRTargetLanguage={selectedOCRTargetLanguage}
+              setOriginalOCRTargetLanguage={setSelectedOCRTargetLanguage}
+              
+              ocrtargetLanguageError={ocrtargetLanguageError}
+              setOCRTargetLanguageError={setOCRTargetLanguageError}
+              
+              setSelectedTranslationLanguage={setSelectedTranslationLanguage}
+              setOriginalTranslationLanguage={setOriginalTranslationLanguage}
             />
             <Buttons
-              selectedLanguage={selectedLanguage}
-              selectedTargetLanguage={selectedTargetLanguage}
-              setLanguageError={setLanguageError}
-              setTargetLanguageError={setTargetLanguageError}
+              originalOCRLanguage={originalOCRLanguage}
+              selectedOCRTargetLanguage={selectedOCRTargetLanguage}
+              originalTranslationLanguage={originalTranslationLanguage}
+              selectedTranslationLanguage={selectedTranslationLanguage}
+
+              setOCRLanguageError={setOCRLanguageError}
+              setOCRTargetLanguageError={setOCRTargetLanguageError}
+              
               setShowWarning={setShowWarning}
               setIsLoading={setIsLoading}
               setIsDownloadingModels={setIsDownloadingModels}

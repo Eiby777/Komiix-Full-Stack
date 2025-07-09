@@ -32,6 +32,6 @@ export const OCR_LANGUAGE_OPTIONS = [
     { value: 'es', label: 'Español' },
     { value: 'chi', label: 'Chino' },
     { value: 'jpn', label: 'Japonés' },
-    //{ value: 'ko', label: 'Korean' }
+    { value: 'ko', label: 'Coreano' }
   ];
 
