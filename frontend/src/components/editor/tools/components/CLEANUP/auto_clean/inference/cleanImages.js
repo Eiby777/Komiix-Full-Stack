@@ -26,7 +26,6 @@ const cleanImages = async (
     try {
         const filteredData = filterRectangles(rectangles);
         const croppedImages = croppImages(filteredData.filteredRectangles, images);
-        console.log(croppedImages);
 
         const counts = filteredData.counts;
         const validCanvases = counts.reduce((sum, count) => sum + (count > 0 ? 1 : 0), 0);
@@ -78,7 +77,6 @@ const cleanImages = async (
         );
 
         const ocrResults = await ocrService.callOcrEndpoint(ocrInput);
-        console.log('OCR Results:', ocrResults);
 
         // Create a map of OCR results by ID for easy lookup
         const ocrResultsMap = new Map();

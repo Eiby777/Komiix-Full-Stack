@@ -8,7 +8,6 @@
  * @returns {React.Component} El componente Modal de carga
  */
 const LoadingModal = ({ title, message }) => {
-    console.log(message);
     return (
         <div className="text-center">
             <h3 className="text-lg font-semibold text-white/90 mb-4">{title}</h3>

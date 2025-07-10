@@ -9,6 +9,9 @@ const OriginalViewTool = () => {
         canvasInstances[activeImageIndex].getObjects().forEach((object) => {
             if (object.layer === LAYERS.TEXT.id || object.layer === LAYERS.CLEANUP.id) {
                 object.opacity = 0;
+                object.visible = false;
+                object.selectable = false;
+                object.evented = false;
                 canvasInstances[activeImageIndex].requestRenderAll();
             }
         });
@@ -17,6 +20,9 @@ const OriginalViewTool = () => {
             canvasInstances[activeImageIndex].getObjects().forEach((object) => {
                 if (object.layer === LAYERS.TEXT.id || object.layer === LAYERS.CLEANUP.id) {
                     object.opacity = 1;
+                    object.visible = true;
+                    object.selectable = true;
+                    object.evented = true;
                     canvasInstances[activeImageIndex].requestRenderAll();
                 }
             });

@@ -21,8 +21,6 @@ export const translateText = async (text, fromLang, toLang, setIsLoading) => {
       return { translatedText: text, alternatives: isArray ? text.map(() => []) : [] };
     }
 
-    //console.log('Translate request:', { q: text, source: fromLang, target: toLang });
-
     const { data: { session } } = await supabase.auth.getSession();
     const accesToken = session.access_token;
     const response = await fetch(domain + '/api/translate', {

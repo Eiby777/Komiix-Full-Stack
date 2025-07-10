@@ -63,7 +63,6 @@ const Buttons = ({
         updateDownloadingStatus,
         setIsLoading
       );
-
       let translatedResult = await translateText(result, originalTranslationLanguage, selectedTranslationLanguage, setIsLoading);
       
       if (scanOption === "current" && translatedResult.length === 1) {

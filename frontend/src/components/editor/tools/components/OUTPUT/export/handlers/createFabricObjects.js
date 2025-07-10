@@ -27,14 +27,11 @@ const addTextToCanvas = async (canvasInstance, fabricCanvas, textObjects, cleanI
     await Promise.all(
         textObjects.map(async (textObj) => {
             const clonedTextObj = await textObj.clone();
-            console.log('textObj', clonedTextObj.left, clonedTextObj.top);
             const adjustedCoords = calculateRelativePointer(
                 { x: clonedTextObj.left, y: clonedTextObj.top },
                 canvasInstance,
                 cleanImage
             );
-
-            console.log(adjustedCoords);
 
             if (adjustedCoords) {
                 clonedTextObj.set({

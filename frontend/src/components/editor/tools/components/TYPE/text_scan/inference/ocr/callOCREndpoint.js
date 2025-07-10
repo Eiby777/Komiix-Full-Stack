@@ -16,7 +16,6 @@ class Recorte {
    * @returns {Promise<string>} - The base64 representation of the image.
    */
   async toBase64() {
-    console.log(this.image);
     if (typeof this.image === 'string' && this.image.startsWith('data:')) {
       // If already a data URL, extract just the base64 part
       return this.image.split(',')[1];

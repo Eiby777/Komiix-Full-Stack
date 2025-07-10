@@ -129,7 +129,6 @@ const calculateTextCoordinates = (canvas, relativePointer, textObject, isText = 
         if (isText === true || isText === false) {
             // For isText=true, use original rectangle dimensions
             const fallbackRect = isText === true ? rect : rect;
-            //console.log("fallbackRect", fallbackRect);
             return calculateFallbackCoordinates(text, fontFamily, fallbackRect, ctx);
         }
         return null;

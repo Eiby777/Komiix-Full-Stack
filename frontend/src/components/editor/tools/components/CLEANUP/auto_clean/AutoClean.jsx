@@ -65,8 +65,6 @@ const AutoClean = () => {
         updateProgress
       );
 
-      console.log("Result: ", result);
-
       if (!result) {
         console.warn("Hubo un problema limpiando las imágenes");
         setIsLoading(false);

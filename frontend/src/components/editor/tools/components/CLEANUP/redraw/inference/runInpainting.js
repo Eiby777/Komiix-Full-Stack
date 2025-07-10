@@ -95,7 +95,6 @@ async function runInpainting(imagesArray, modelArrayBuffer, progressCallback) {
         });
       }
     }
-    console.log("Results:", results);
 
     return results;
   } finally {

@@ -81,7 +81,6 @@ const DefineMarksChunks = ({
         if (images.length === 0) return;
         const imageWidth = images[0].width;
         const imageHeight = images[0].height;
-        console.log(imageWidth, imageHeight);
         const calculatedHeight = Math.floor(imageWidth / .07 / 32) + imageWidth;
         if (calculatedHeight > imageHeight) {
             setHeightValue(imageHeight);

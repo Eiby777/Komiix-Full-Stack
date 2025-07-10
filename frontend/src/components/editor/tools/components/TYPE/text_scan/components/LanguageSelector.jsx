@@ -54,8 +54,9 @@ const LanguageSelector = ({
   );
 
   // Filter out the selected source language from target language options
-  const targetLanguageOptions = OCR_LANGUAGE_OPTIONS.filter(
-    (lang) => !originalOCRLanguage || lang.value !== originalOCRLanguage
+  const targetLanguageOptions = TRANSLATION_LANGUAGE_OPTIONS.filter(
+    (lang) => !originalOCRLanguage || 
+             lang.value !== ocrToTranslationMap[originalOCRLanguage]
   );
 
   return (
@@ -92,6 +93,7 @@ const LanguageSelector = ({
         value={selectedOCRTargetLanguage || ''}
         onChange={(e) => {
           setOriginalOCRTargetLanguage(e.target.value);
+          setSelectedTranslationLanguage(e.target.value);
           setOCRTargetLanguageError(false);
         }}
         className="w-full p-2 bg-transparent text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"

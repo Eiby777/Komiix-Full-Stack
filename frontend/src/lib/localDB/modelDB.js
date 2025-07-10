@@ -68,7 +68,6 @@ export const saveModel = async (name, modelData, version, token = uuidv4()) => {
       tx.objectStore('modelVersions').put({ name, version, token, tokenExpiration }),
     ]);
     await tx.done;
-    console.log(`Model ${name} saved with token: ${token}`);
   } catch (error) {
     console.error(`Failed to save model ${name}:`, error.message);
     throw error;
@@ -117,7 +116,6 @@ export const updateModel = async (name, updatedData) => {
       versionsStore.put(updatedVersion),
     ]);
     await tx.done;
-    console.log(`Model ${name} updated with token: ${updatedVersion.token}`);
   } catch (error) {
     console.error(`Failed to update model ${name}:`, error.message);
     throw error;

@@ -6,8 +6,6 @@
  * @returns {HTMLCanvasElement|null} Canvas con la máscara (texto en blanco, fondo transparente) o null si no es válido
  */
 export const createMaskFromBoundingBoxes = (canvas, ocrResults, borderRadius = 8) => {
-  console.log(canvas, ocrResults);
-  
   // Validar entradas
   if (!canvas || !ocrResults || !Array.isArray(ocrResults) || ocrResults.length === 0) {
     console.warn('Canvas o resultados OCR no válidos');
@@ -62,8 +60,6 @@ export const createMaskFromBoundingBoxes = (canvas, ocrResults, borderRadius = 8
       
       // Dibujar rectángulo blanco con esquinas redondeadas
       drawRoundedRect(x0, y0, width, height, effectiveRadius);
-      
-      console.log(`Dibujando box ${index + 1}: x=${x0}, y=${y0}, w=${width}, h=${height}, radio=${effectiveRadius}, texto="${box.text}"`);
     }
   });
   

@@ -64,7 +64,7 @@ const ToolsContainer = memo(({ currentImageIndex }) => {
           const isTokenValid = cachedModel && typeof cachedModel.token === 'string' && cachedModel.token && cachedModel.tokenExpiration > Date.now();
 
           if (modelExists && isTokenValid) {
-            console.log(`Skipping server check for ${modelName}: valid token`);
+            console.warn(`Skipping server check for ${modelName}: valid token`);
             continue;
           }
 

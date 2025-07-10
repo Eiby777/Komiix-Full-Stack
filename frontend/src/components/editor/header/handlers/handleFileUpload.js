@@ -67,7 +67,6 @@ const handleCreateObject = (item, object, canvas, currentWidth, currentHeight, a
             obj.set({ opacity: 0, selectable: false, evented: false });
         }else{
             obj.set({ opacity: 1, selectable: true, evented: true });
-            console.log("Object added to canvas:", obj);
         }
         canvas.add(obj);
         canvas.renderAll();
