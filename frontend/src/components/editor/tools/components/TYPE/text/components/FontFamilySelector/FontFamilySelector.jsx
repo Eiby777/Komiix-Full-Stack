@@ -20,11 +20,13 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
           fonts = await fetchFontList();
           await saveFonts(fonts);
         }
-        const options = fonts.map(font => ({
-          value: font.id,
-          label: font.name,
-          fontName: font.name
-        }));
+        const options = fonts
+          .map(font => ({
+            value: font.id,
+            label: font.name,
+            fontName: font.name
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label));
         setFontOptions(options);
       } catch (error) {
         console.error('Error loading font list:', error);

@@ -143,6 +143,16 @@ const EditPanel = ({
     debouncedUpdateCanvasTranslated
   );
 
+  // Función para capitalizar el texto (primera letra en mayúscula, resto en minúscula)
+  const capitalizeText = useCallback(() => {
+    if (originalText && typeof originalText === 'string') {
+      const capitalized = originalText.charAt(0).toUpperCase() + originalText.slice(1).toLowerCase();
+      setOriginalText(capitalized);
+      // Actualizar también en el canvas si es necesario
+      debouncedUpdateCanvasOriginal(capitalized);
+    }
+  }, [originalText, setOriginalText, debouncedUpdateCanvasOriginal]);
+
   return (
     <div className="mt-2 space-y-3">
       {/* Original Text Section */}
@@ -160,6 +170,14 @@ const EditPanel = ({
               </option>
             ))}
           </select>
+          <button
+            type="button"
+            onClick={capitalizeText}
+            className="p-1 rounded-md bg-[#2a2a2a] hover:bg-[#333] text-white/80 hover:text-white border border-white/10 focus:outline-none focus:border-white/30 text-xs transition-colors"
+            title="Capitalizar texto"
+          >
+            Aa
+          </button>
         </div>
         <textarea
           ref={useAutoResizeTextarea(originalText)}
