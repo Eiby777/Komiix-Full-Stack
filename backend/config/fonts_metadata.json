@@ -425,5 +425,12 @@
         "filename": "Just_Another_Hand.woff2",
         "version": "1.0.0",
         "hash": "2b0c4145ce436ab09879aa7a70ee9da96c7f0b50a92d47ad8ed02373a97414d8"
+    },
+    {
+        "id": "FNT062",
+        "name": "Arial",
+        "filename": "Arial.woff",
+        "version": "1.0.0",
+        "hash": "a8b2efb850dcfb88cfb44d51815d80c4e0635178e076981bf607e5c30f8a0bc0"
     }
 ]
