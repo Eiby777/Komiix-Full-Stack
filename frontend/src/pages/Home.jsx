@@ -38,7 +38,11 @@ export default function Home() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: url, // Redirect to frontend (HTTPS)
+          redirectTo: window.location.origin,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
       if (error) throw error;
@@ -59,7 +63,7 @@ export default function Home() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: url, // Redirect to frontend (HTTPS)
+          redirectTo: window.location.origin,
         },
       });
       if (error) throw error;
