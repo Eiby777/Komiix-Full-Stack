@@ -26,8 +26,6 @@ services:
     image: libretranslate/libretranslate
     ports:
       - "5000:5000"
-    volumes:
-      #- libretranslate_models:/home/libretranslate/.local
     environment:
       - LT_LOAD_ONLY=es,en,zh-Hans,ko,ja
     networks:
