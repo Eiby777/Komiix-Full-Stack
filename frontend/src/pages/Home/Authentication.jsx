@@ -1,6 +1,6 @@
-import { X, Facebook } from 'lucide-react';
+import { X } from 'lucide-react';
 
-const Authentication = ({ setShowAuthModal, handleGoogleAuth, handleFacebookAuth, loading, error }) => {
+const Authentication = ({ setShowAuthModal, handleGoogleAuth, loading, error }) => {
     return (
         <div className="fixed inset-0 bg-gray-500/50 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl border border-gray-300 dark:border-gray-700 transition-all duration-300">
@@ -74,40 +74,6 @@ const Authentication = ({ setShowAuthModal, handleGoogleAuth, handleFacebookAuth
                                     />
                                 </svg>
                                 Continuar con Google
-                            </>
-                        )}
-                    </button>
-
-                    <button
-                        onClick={handleFacebookAuth}
-                        disabled={loading}
-                        className="w-full py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                    >
-                        {loading ? (
-                            <svg
-                                className="animate-spin h-5 w-5 text-gray-700 dark:text-gray-200 mr-2"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    className="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                />
-                                <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                />
-                            </svg>
-                        ) : (
-                            <>
-                                <Facebook className="w-5 h-5 mr-2 text-[#1877F2]" />
-                                Continuar con Facebook
                             </>
                         )}
                     </button>

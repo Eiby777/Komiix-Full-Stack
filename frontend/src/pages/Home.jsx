@@ -18,7 +18,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const url = "https://komiix.com";
-  // const url = "http://localhost:3000";
 
   useEffect(() => {
     // Listen for auth state changes (e.g., after login or OAuth redirect)
@@ -52,26 +51,7 @@ export default function Home() {
     }
   };
 
-  const handleFacebookAuth = async () => {
-    setLoading(true);
-    setError(null);
 
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
-        options: {
-          redirectTo: window.location.origin,
-        },
-      });
-      if (error) throw error;
-      // Redirect handled by onAuthStateChange
-    } catch (err) {
-      console.error('Facebook auth failed:', err.message);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <React.Fragment>
@@ -130,7 +110,6 @@ export default function Home() {
         <Authentication
           setShowAuthModal={setShowAuthModal}
           handleGoogleAuth={handleGoogleAuth}
-          handleFacebookAuth={handleFacebookAuth}
           loading={loading}
           error={error}
         />
