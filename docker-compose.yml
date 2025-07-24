@@ -7,7 +7,7 @@ services:
       - "8001:8000"
     volumes:
       - ./backend:/app
-      - paddle_models:/root/.paddlex/official_models
+      #- paddle_models:/root/.paddlex/official_models
     environment:
       - PYTHONPATH=/app
       - REDIS_HOST=redis
@@ -27,7 +27,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - libretranslate_models:/home/libretranslate/.local
+      #- libretranslate_models:/home/libretranslate/.local
     environment:
       - LT_LOAD_ONLY=es,en,zh-Hans,ko,ja
     networks:
@@ -61,5 +61,5 @@ networks:
     driver: bridge
 
 volumes:
-  libretranslate_models:
-  paddle_models:
+  #- libretranslate_models:
+  #- paddle_models:
