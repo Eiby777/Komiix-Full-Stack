@@ -5,8 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8001:8000"
-    volumes:
-      - ./backend:/app
+    #volumes:
+      #- ./backend:/app
       #- paddle_models:/root/.paddlex/official_models
     environment:
       - PYTHONPATH=/app
