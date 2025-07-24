@@ -17,7 +17,6 @@ export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const url = "https://komiix.com";
 
   useEffect(() => {
     // Listen for auth state changes (e.g., after login or OAuth redirect)
@@ -38,7 +37,7 @@ export default function Home() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: url,
+          redirectTo: "https://komiix.com",
         },
       });
       if (error) throw error;
