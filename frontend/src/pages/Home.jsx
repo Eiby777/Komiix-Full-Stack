@@ -18,6 +18,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const url = "https://komiix.com";
+  // const url = "http://localhost:3000";
 
   useEffect(() => {
     // Listen for auth state changes (e.g., after login or OAuth redirect)
