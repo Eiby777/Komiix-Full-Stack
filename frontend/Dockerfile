@@ -4,7 +4,8 @@ WORKDIR /app
 
 # Copy package files first for better caching
 COPY package*.json ./
-RUN npm ci --only=production --silent
+# Install all dependencies including devDependencies for building
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -26,6 +27,9 @@ FROM nginx:alpine
 
 # Install curl for healthchecks
 RUN apk add --no-cache curl
+
+# Create directory for nginx
+RUN mkdir -p /usr/share/nginx/html
 
 # Copy built files
 COPY --from=builder /app/dist /usr/share/nginx/html
