@@ -47,6 +47,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS configuration
 cors_origins = os.getenv("CORS_ORIGINS", "").split("|")
+logger.info(f"CORS_ORIGINS: {cors_origins}")
 origins = [origin.strip() for origin in cors_origins if origin.strip()]
 app.add_middleware(
     CORSMiddleware,

@@ -60,6 +60,7 @@ const checkIfModelIsUpdated = async (modelName) => {
     throw new Error(`Error HTTP (version ${modelName}): ${response.status}`);
   }
   const responseData = await response.json();
+  console.log(responseData);
   const { version: serverVersion, original_filename: filename, is_fragmented } = responseData;
   return { serverVersion, filename, is_fragmented };
 };

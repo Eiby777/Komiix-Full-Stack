@@ -19,7 +19,8 @@ RUN pip install --upgrade pip
 
 # Copy requirements first for better caching
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+#RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Install paddleocr dependencies
 RUN paddleocr install_hpi_deps cpu
