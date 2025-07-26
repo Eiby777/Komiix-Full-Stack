@@ -29,23 +29,26 @@ services:
     environment:
       - LT_LOAD_ONLY=es,en,zh-Hans,ko,ja
       - LT_THREADS=2
+      - LT_UPDATE_MODELS=true
     networks:
       - komiix-network
     restart: unless-stopped
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1G  # Aumentado para descarga de modelos
         reservations:
-          memory: 256M
+          memory: 512M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
-      timeout: 15s
-      retries: 3
-      start_period: 60s
+      test: ["CMD", "curl", "-f", "http://localhost:5000/translate", "-H", "Content-Type: application/json", "-d", "{\"q\":\"test\",\"source\":\"en\",\"target\":\"es\"}"]
+      interval: 60s  # Más tiempo entre checks
+      timeout: 30s   # Timeout más largo
+      retries: 10    # Más reintentos
+      start_period: 300s  # 5 minutos para que descargue modelos
     depends_on:
       - redis
+    volumes:
+      - libretranslate_models:/home/libretranslate/.local
 
   komiix-backend:
     build:
@@ -66,7 +69,7 @@ services:
       - UVICORN_WORKER_CONNECTIONS=1000
       - UVICORN_KEEPALIVE=2
     command: >
-      sh -c "sleep 10 && 
+      sh -c "sleep 30 && 
              uvicorn server:app 
              --host 0.0.0.0 
              --port 8000 
@@ -97,7 +100,7 @@ services:
       interval: 30s
       timeout: 15s
       retries: 5
-      start_period: 60s
+      start_period: 120s  # Más tiempo porque espera a libretranslate
     volumes:
       - backend_logs:/app/logs
 
@@ -162,4 +165,6 @@ volumes:
   nginx_logs:
     driver: local
   backend_logs:
+    driver: local
+  libretranslate_models:
     driver: local
