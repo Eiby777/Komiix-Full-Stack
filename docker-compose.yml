@@ -51,8 +51,8 @@ services:
     networks:
       - komiix-network
     depends_on:
-      libretranslate
-      redis
+      - libretranslate
+      - redis
     restart: unless-stopped
 
   komiix-frontend:
