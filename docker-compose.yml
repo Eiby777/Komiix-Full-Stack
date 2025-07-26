@@ -9,14 +9,6 @@ services:
       - komiix-network
     restart: unless-stopped
 
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
-    command: redis-server --maxmemory 200mb --maxmemory-policy allkeys-lru
-
   libretranslate:
     image: libretranslate/libretranslate
     ports:
@@ -59,18 +51,9 @@ services:
     networks:
       - komiix-network
     depends_on:
-      libretranslate:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      libretranslate
+      redis
     restart: unless-stopped
-
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   komiix-frontend:
     build:
@@ -93,19 +76,8 @@ services:
     networks:
       - komiix-network
     depends_on:
-      komiix-backend:
-        condition: service_healthy
+      komiix-backend
 
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    ulimits:
-      nofile:
-        soft: 65536
-        hard: 65536
 
 networks:
   komiix-network:
