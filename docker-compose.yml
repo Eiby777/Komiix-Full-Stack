@@ -19,14 +19,12 @@ services:
       - libretranslate
       - redis
     restart: unless-stopped
-    # Resource limits
     deploy:
       resources:
         limits:
           memory: 1G
         reservations:
           memory: 512M
-    # Health check
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 30s
@@ -67,10 +65,13 @@ services:
   komiix-frontend:
     build:
       context: ./frontend
+      dockerfile: Dockerfile
       args:
         - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
         - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
         - VITE_KOMIIX_BACKEND_URL=${VITE_KOMIIX_BACKEND_URL}
+      # Configuración específica para builds grandes
+      shm_size: 2gb
     ports:
       - "3000:80"
     restart: unless-stopped
@@ -79,21 +80,39 @@ services:
       - COMPOSE_BAKE=${COMPOSE_BAKE}
     networks:
       - komiix-network
-    # Resource limits
+    # Recursos optimizados para servir archivos grandes
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M  # Incrementado para manejar WASM
+          cpus: '1.0'
         reservations:
-          memory: 128M
-    # Health check
+          memory: 256M
+          cpus: '0.5'
+    # Health check optimizado
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
-
+    # Configuración adicional para archivos grandes
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    # Volumenes para optimización (opcional)
+    volumes:
+      - nginx_cache:/var/cache/nginx
+      - nginx_logs:/var/log/nginx
+    
 networks:
   komiix-network:
     driver: bridge
+
+# Volumenes para optimización
+volumes:
+  nginx_cache:
+    driver: local
+  nginx_logs:
+    driver: local

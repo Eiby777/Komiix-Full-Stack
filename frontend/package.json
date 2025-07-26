@@ -5,14 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "vite build --mode production",
+    "build:analyze": "vite build --mode production && npx vite-bundle-analyzer dist/stats.html",
+    "preview": "vite preview",
+    "build:chunks": "VITE_BUILD_CHUNKS=true vite build"
   },
   "dependencies": {
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
-    "@heroicons/react": "^1.0.6",
+    "@heroicons/react": "^2.0.18",
     "@reduxjs/toolkit": "^2.5.0",
     "@supabase/supabase-js": "^2.47.16",
     "@tailwindcss/postcss": "^4.0.1",
@@ -42,8 +44,10 @@
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
+    "terser": "^5.43.1",
     "typescript": "^5.0.2",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vite-bundle-analyzer": "^0.7.0"
   },
   "resolutions": {
     "glob": "^9.0.0",
@@ -53,5 +57,15 @@
     "gauge": "^4.0.0",
     "domexception": "^5.0.0",
     "abab": "^3.0.0"
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
 }

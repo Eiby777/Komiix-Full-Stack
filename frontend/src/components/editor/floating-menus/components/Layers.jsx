@@ -3,11 +3,11 @@ import { useEditorStore } from '../../../../stores/editorStore';
 import { LAYERS } from '../../../../constants/layers';
 import {
   InboxIcon,
-  AnnotationIcon,
-  BanIcon,
-  TranslateIcon,
-  ExternalLinkIcon
-} from '@heroicons/react/outline';
+  ChatBubbleOvalLeftEllipsisIcon as AnnotationIcon,
+  NoSymbolIcon as BanIcon,
+  LanguageIcon as TranslateIcon,
+  ArrowTopRightOnSquareIcon as ExternalLinkIcon
+} from '@heroicons/react/24/outline';
 import enumFloatingMenus from '../handlers/enumFloatingMenus';
 import { useMeasureFloatingMenu } from './useMeasureFloatingMenu';
 
