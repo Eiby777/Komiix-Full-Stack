@@ -1,24 +1,26 @@
 // utils/lazyONNX.js
 let onnxRuntime = null;
 
-export const loadONNXRuntime = async () => {
+async function loadONNX() {
   if (onnxRuntime) return onnxRuntime;
-  
-  try {
-    // Dynamic import solo cuando se necesite
-    onnxRuntime = await import('onnxruntime-web');
-    
-    // Configuración optimizada para producción
-    onnxRuntime.env.wasm.wasmPaths = "/assets/";
-    onnxRuntime.env.wasm.numThreads = Math.min(navigator.hardwareConcurrency || 4, 4);
-    onnxRuntime.env.wasm.simd = true;
-    
-    return onnxRuntime;
-  } catch (error) {
-    console.error('Error loading ONNX Runtime:', error);
-    throw error;
+
+  importScripts("https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js");
+
+  // Conditionally set thread count
+  if (self.crossOriginIsolated) {
+    console.log("Cross-origin isolation is enabled. Using multiple threads.");
+    ort.env.wasm.numThreads = Math.min(self.navigator?.hardwareConcurrency || 2, 2);
+  } else {
+    console.warn("Cross-origin isolation is NOT enabled. Using a single thread.");
+    ort.env.wasm.numThreads = 1;
   }
-};
+
+  ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/";
+  ort.env.wasm.simd = true;
+
+  onnxRuntime = ort;
+  return onnxRuntime;
+}
 
 // detectObjects.js optimizado
 async function decodeBase64Image(
@@ -278,7 +280,7 @@ async function detectObjects(
     const createWorkerPromise = (images, modelArrayBuffer, startIndex, workerId, modelKey) => {
       return new Promise((resolve, reject) => {
         const worker = new Worker(workerUrl);
-        
+
         // Timeout para evitar workers colgados
         const timeout = setTimeout(() => {
           worker.terminate();
@@ -302,7 +304,7 @@ async function detectObjects(
               break;
           }
         };
-        
+
         worker.onerror = (error) => {
           clearTimeout(timeout);
           reject(error);
@@ -323,7 +325,7 @@ async function detectObjects(
     };
 
     const [globesModel, textModel] = modelsArrayBuffer;
-    
+
     // Ejecutar workers con cache keys
     const allWorkerPromises = [
       createWorkerPromise(imagesForWorker1, globesModel, 0, "globes1", "globes_model"),
@@ -333,7 +335,7 @@ async function detectObjects(
     ];
 
     const [globesResults1, globesResults2, textResults1, textResults2] = await Promise.all(allWorkerPromises);
-    
+
     resultsByModel.globes = [...globesResults1, ...globesResults2];
     resultsByModel.text = [...textResults1, ...textResults2];
 

@@ -1,53 +1,6 @@
+version: '3.8'
+
 services:
-  komiix-backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "8001:8000"
-    environment:
-      - PYTHONPATH=/app
-      - REDIS_HOST=redis
-      - CORS_ORIGINS=${CORS_ORIGINS}
-      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
-      - COMPOSE_BAKE=${COMPOSE_BAKE}
-      - LIBRETRANSLATE_URL=${LIBRETRANSLATE_URL}
-    command: uvicorn server:app --host 0.0.0.0 --port 8000 --workers 1
-    networks:
-      - komiix-network
-    depends_on:
-      - libretranslate
-      - redis
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-        reservations:
-          memory: 512M
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  libretranslate:
-    image: libretranslate/libretranslate
-    ports:
-      - "5000:5000"
-    environment:
-      - LT_LOAD_ONLY=es,en,zh-Hans,ko,ja
-    networks:
-      - komiix-network
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
-
   redis:
     image: redis:alpine
     ports:
@@ -61,6 +14,92 @@ services:
           memory: 256M
         reservations:
           memory: 128M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    command: redis-server --maxmemory 200mb --maxmemory-policy allkeys-lru
+
+  libretranslate:
+    image: libretranslate/libretranslate
+    ports:
+      - "5000:5000"
+    environment:
+      - LT_LOAD_ONLY=es,en,zh-Hans,ko,ja
+      - LT_THREADS=2
+    networks:
+      - komiix-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      - redis
+
+  komiix-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - PYTHONPATH=/app
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - COMPOSE_BAKE=${COMPOSE_BAKE}
+      - LIBRETRANSLATE_URL=http://libretranslate:5000
+      # Configuraciones adicionales para estabilidad
+      - UVICORN_WORKERS=1
+      - UVICORN_WORKER_CONNECTIONS=1000
+      - UVICORN_KEEPALIVE=2
+    command: >
+      sh -c "sleep 10 && 
+             uvicorn server:app 
+             --host 0.0.0.0 
+             --port 8000 
+             --workers 1
+             --worker-connections 1000
+             --keepalive-timeout 2
+             --timeout-keep-alive 2
+             --access-log
+             --log-level info"
+    networks:
+      - komiix-network
+    depends_on:
+      libretranslate:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - backend_logs:/app/logs
 
   komiix-frontend:
     build:
@@ -70,49 +109,57 @@ services:
         - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
         - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
         - VITE_KOMIIX_BACKEND_URL=${VITE_KOMIIX_BACKEND_URL}
-      # Configuración específica para builds grandes
       shm_size: 2gb
     ports:
       - "3000:80"
     restart: unless-stopped
-    container_name: komiix
+    container_name: komiix-frontend
     environment:
       - COMPOSE_BAKE=${COMPOSE_BAKE}
+      # Nginx optimizations
+      - NGINX_WORKER_PROCESSES=auto
+      - NGINX_WORKER_CONNECTIONS=1024
     networks:
       - komiix-network
-    # Recursos optimizados para servir archivos grandes
+    depends_on:
+      komiix-backend:
+        condition: service_healthy
     deploy:
       resources:
         limits:
-          memory: 512M  # Incrementado para manejar WASM
+          memory: 512M
           cpus: '1.0'
         reservations:
           memory: 256M
           cpus: '0.5'
-    # Health check optimizado
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
-    # Configuración adicional para archivos grandes
+      start_period: 30s
     ulimits:
       nofile:
         soft: 65536
         hard: 65536
-    # Volumenes para optimización (opcional)
     volumes:
       - nginx_cache:/var/cache/nginx
       - nginx_logs:/var/log/nginx
-    
+
 networks:
   komiix-network:
     driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: komiix-br0
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
 
-# Volumenes para optimización
 volumes:
   nginx_cache:
     driver: local
   nginx_logs:
+    driver: local
+  backend_logs:
     driver: local
