@@ -1,7 +1,6 @@
 backend/.venv
 backend/app.log
 backend/backup
-backend/models
 backend/onnxocr/onnx_ocr/__pycache__
 
 libretranslate/.venv
