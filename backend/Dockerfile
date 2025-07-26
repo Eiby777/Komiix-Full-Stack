@@ -25,8 +25,14 @@ RUN pip install -r requirements.txt
 # Install paddleocr dependencies
 RUN paddleocr install_hpi_deps cpu
 
+# Create necessary directories
+RUN mkdir -p /app/models/fragmented_models/globes/key /app/models/fragmented_models/text/key
+
 # Copy application code
 COPY . .
+
+# Set proper permissions for key files
+RUN chmod 600 /app/models/fragmented_models/globes/key/globes_key.bin /app/models/fragmented_models/text/key/text_key.bin 2>/dev/null || true
 
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash app \

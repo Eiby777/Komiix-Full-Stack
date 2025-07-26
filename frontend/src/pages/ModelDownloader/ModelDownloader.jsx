@@ -28,6 +28,7 @@ const ModelDownloader = ({ modelName, onComplete, version, setModelStatus, isFra
             method: "GET",
             headers: {
               "Content-Type": "application/json",
+              "Cache-Control": "no-cache",
               "Authorization": `Bearer ${accesToken}`
             }
           });
@@ -41,8 +42,10 @@ const ModelDownloader = ({ modelName, onComplete, version, setModelStatus, isFra
             method: "GET",
             headers: {
               "Content-Type": "application/octet-stream",
+              "Cache-Control": "no-cache",
               "Authorization": `Bearer ${accesToken}`
             }
+            
           });
           if (!keyResponse.ok) {
             const errorText = await keyResponse.text();
@@ -56,6 +59,7 @@ const ModelDownloader = ({ modelName, onComplete, version, setModelStatus, isFra
             const fragmentResponse = await fetch(`${BASE_URL}/get-fragment/${modelName}/${fragmentName}`, {
               method: "GET",
               headers: {
+                "Cache-Control": "no-cache",
                 "Authorization": `Bearer ${accesToken}`
               }
             });
