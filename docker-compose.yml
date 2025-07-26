@@ -5,8 +5,6 @@ services:
     image: redis:alpine
     ports:
       - "6379:6379"
-    networks:
-      - komiix-network
     restart: unless-stopped
 
   libretranslate:
@@ -15,8 +13,6 @@ services:
       - "5000:5000"
     environment:
       - LT_LOAD_ONLY=es,en,zh-Hans,ko,ja
-    networks:
-      - komiix-network
     restart: unless-stopped
 
   komiix-backend:
@@ -48,8 +44,6 @@ services:
              --timeout-keep-alive 2
              --access-log
              --log-level info"
-    networks:
-      - komiix-network
     depends_on:
       - libretranslate
       - redis
@@ -73,18 +67,5 @@ services:
       # Nginx optimizations
       - NGINX_WORKER_PROCESSES=auto
       - NGINX_WORKER_CONNECTIONS=1024
-    networks:
-      - komiix-network
     depends_on:
-      komiix-backend
-
-
-networks:
-  komiix-network:
-    driver: bridge
-    driver_opts:
-      com.docker.network.bridge.name: komiix-br0
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.20.0.0/16
+      - komiix-backend
