@@ -24,7 +24,11 @@ export default function Sidebar({ darkMode, setActiveSection }) {
       {!isSidebarCollapsed && (
         <div 
           className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-[1001] transition-opacity duration-300"
-          onClick={toggleSidebar}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSidebar();
+          }}
         />
       )}
       
@@ -33,25 +37,31 @@ export default function Sidebar({ darkMode, setActiveSection }) {
         className={`
           fixed md:relative z-[1002] min-h-screen text-white transition-all duration-300 ease-in-out shadow-2xl
           ${isSidebarCollapsed 
-            ? '-translate-x-full md:translate-x-0' 
+            ? '-translate-x-full md:translate-x-0 md:w-20' 
             : 'translate-x-0'
           } 
           ${darkMode 
             ? 'bg-gradient-to-b from-gray-900 to-black' 
             : 'bg-gradient-to-b from-blue-800 to-indigo-900'
           }
+          md:transform-none
         `}
-        style={{ width: isSidebarCollapsed && window.innerWidth >= 768 ? '80px' : `${sidebarWidth}px` }}
+        style={{ width: `${sidebarWidth}px` }}
       >
         {/* Close Button - Solo visible en móviles */}
         <button
-          onClick={toggleSidebar}
-          className="md:hidden absolute top-4 right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 z-10"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSidebar();
+          }}
+          className="md:hidden absolute top-4 right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 z-[1003] focus:outline-none focus:ring-2 focus:ring-white/50"
           aria-label="Cerrar menú"
+          type="button"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
+            className="h-6 w-6 pointer-events-none"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -62,7 +72,7 @@ export default function Sidebar({ darkMode, setActiveSection }) {
         </button>
 
         {/* Header */}
-        <div className="p-3 pb-3 border-b border-white/10">
+        <div className="p-3 pb-3 border-b border-white/10 relative">
           <h2
             className={`text-2xl font-extrabold tracking-tight transition-all duration-300 ${
               isSidebarCollapsed ? 'text-center text-lg md:opacity-0' : 'text-left'
