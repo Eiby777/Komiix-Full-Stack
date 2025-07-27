@@ -33,16 +33,15 @@ export default function Sidebar({ darkMode, setActiveSection }) {
         className={`
           fixed md:relative z-[1002] min-h-screen text-white transition-all duration-300 ease-in-out shadow-2xl
           ${isSidebarCollapsed 
-            ? '-translate-x-full md:translate-x-0 md:w-20' 
+            ? '-translate-x-full md:translate-x-0' 
             : 'translate-x-0'
           } 
           ${darkMode 
             ? 'bg-gradient-to-b from-gray-900 to-black' 
             : 'bg-gradient-to-b from-blue-800 to-indigo-900'
           }
-          md:transform-none
         `}
-        style={{ width: `${sidebarWidth}px` }}
+        style={{ width: isSidebarCollapsed && window.innerWidth >= 768 ? '80px' : `${sidebarWidth}px` }}
       >
         {/* Close Button - Solo visible en móviles */}
         <button
