@@ -127,9 +127,14 @@ export function useDashboard() {
     }
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(prev => !prev);
+  };
+
   return {
     isSidebarCollapsed,
     setIsSidebarCollapsed,
+    toggleSidebar,
     isDragging,
     setIsDragging,
     projectName,
