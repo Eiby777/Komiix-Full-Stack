@@ -20,7 +20,7 @@ import { useEditorStore } from "../stores/editorStore";
 export function useDashboard() {
   const { profile, setProfile } = useAuth();
   const { projects, setProjects } = useEditorStore();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const { setIsSidebarCollapsed } = useEditorStore();
   const [isDragging, setIsDragging] = useState(false);
   const [projectName, setProjectName] = useState("");
   const profileMenuRef = useRef(null);
@@ -127,14 +127,28 @@ export function useDashboard() {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(prev => !prev);
-  };
+  // Efecto para manejar el estado del sidebar en base al tamaño de pantalla
+  useEffect(() => {
+    const handleResize = () => {
+      // Si la pantalla es >=768px (md), asegurar que el sidebar esté visible
+      if (window.innerWidth >= 768) {
+        setIsSidebarCollapsed(false);
+      }
+    };
+
+    // Ejecutar al montar
+    handleResize();
+
+    // Escuchar cambios en el tamaño de la ventana
+    window.addEventListener('resize', handleResize);
+
+    // Limpiar listener al desmontar
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   return {
-    isSidebarCollapsed,
-    setIsSidebarCollapsed,
-    toggleSidebar,
     isDragging,
     setIsDragging,
     projectName,

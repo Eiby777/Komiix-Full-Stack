@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDashboard } from '../../../hooks/useDashboard';
 import { useAuth } from '../../../hooks/useAuth';
 import { saveDarkTheme } from '../../../lib/localDB/darkDB';
+import { useEditorStore } from '../../../stores/editorStore';
 
 export default function Header({
   isProfileMenuOpen,
@@ -39,10 +40,9 @@ export default function Header({
     };
   }, [onHeaderHeightChange]);
 
-  const { 
-    toggleSidebar,
-    profile,
-  } = useDashboard();
+  const { profile } = useDashboard();
+
+  const { toggleSidebar } = useEditorStore();
 
   const toggleTheme = () => {
     const newDarkMode = !darkMode;
@@ -68,10 +68,10 @@ export default function Header({
       className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border-b border-gray-200/70 dark:border-gray-800/70 flex justify-end items-center gap-4 shadow-sm z-[1000]"
       style={{ height: `${dynamicHeight}px`, padding: `${dynamicHeight * 0.25}px ${dynamicHeight * 0.5}px` }}
     >
-      {/* Sidebar Toggle Button - Always visible */}
+      {/* Sidebar Toggle Button - Only visible on mobile */}
       <button
         onClick={toggleSidebar}
-        className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 group"
+        className="md:hidden p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 group"
         aria-label="Toggle sidebar"
       >
         <svg
