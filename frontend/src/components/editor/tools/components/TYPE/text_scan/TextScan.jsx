@@ -90,7 +90,7 @@ const TextScan = () => {
                 id="scan-option-select"
                 value={scanOption}
                 onChange={(e) => setScanOption(e.target.value)}
-                className="w-full p-2 bg-transparent text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
+                className="w-full p-2 bg-[#2a2a2a] text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
               >
                 <option value="all">Todas las imágenes</option>
                 <option value="current">Imagen actual</option>

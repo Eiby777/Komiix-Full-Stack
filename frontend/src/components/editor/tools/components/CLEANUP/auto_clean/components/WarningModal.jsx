@@ -30,7 +30,7 @@ const WarningModal = ({
             <select
               value={selectAllImages}
               onChange={(e) => setSelectAllImages(e.target.value === "true")}
-              className="w-full p-2 bg-transparent text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
+              className="w-full p-2 bg-[#2a2a2a] text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
             >
               <option value="true">Todas las imágenes</option>
               <option value="false">Imagen actual</option>

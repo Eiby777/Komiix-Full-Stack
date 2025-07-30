@@ -69,7 +69,7 @@ const LanguageSelector = ({
         id="language-select"
         value={originalOCRLanguage || ''}
         onChange={(e) => handleOCRLanguageChange(e.target.value)}
-        className="w-full p-2 bg-transparent text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
+        className="w-full p-2 bg-[#2a2a2a] text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
       >
         <option value="">-- Selecciona un idioma --</option>
         {sourceLanguageOptions.map((lang) => (
@@ -96,7 +96,7 @@ const LanguageSelector = ({
           setSelectedTranslationLanguage(e.target.value);
           setOCRTargetLanguageError(false);
         }}
-        className="w-full p-2 bg-transparent text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
+        className="w-full p-2 bg-[#2a2a2a] text-white rounded-md border border-gray-700 focus:outline-none focus:border-[#4a90e2]"
       >
         <option value="">-- Selecciona un idioma --</option>
         {targetLanguageOptions.map((lang) => (
