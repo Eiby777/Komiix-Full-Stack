@@ -16,7 +16,6 @@ const ExportTool = () => {
   const [quality, setQuality] = useState(80);
   const [dimensions, setDimensions] = useState({ width: '', height: '' });
   const [maintainAspectRatio, setMaintainAspectRatio] = useState(true);
-  const [colorSpace, setColorSpace] = useState('sRGB');
   const [includeMetadata, setIncludeMetadata] = useState(false);
   const [imageMode, setImageMode] = useState('RGB');
   const [interlacing, setInterlacing] = useState(false);
@@ -34,7 +33,7 @@ const ExportTool = () => {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
       <div className="relative bg-[#262626] border border-white/10 rounded-2xl shadow-2xl w-[680px] max-h-[90vh] overflow-y-auto text-white">
         <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-white/10">
-          <h2 className="text-xl font-semibold text-white">Export Options</h2>
+          <h2 className="text-xl font-semibold text-white">Opciones de Exportación</h2>
           <button onClick={handleClose} className="text-white hover:text-red-400">
             <X className="w-5 h-5" />
           </button>
@@ -59,8 +58,6 @@ const ExportTool = () => {
             setResizeAll={setResizeAll}
           />
           <ColorAndMode
-            colorSpace={colorSpace}
-            setColorSpace={setColorSpace}
             imageMode={imageMode}
             setImageMode={setImageMode}
           />

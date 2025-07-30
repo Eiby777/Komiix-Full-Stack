@@ -56,7 +56,7 @@ const ExportMode = ({ exportAll, setExportAll }) => {
           }
         `}
             </style>
-            <label className="text-sm text-white/80 block mb-2">Export Mode:</label>
+            <label className="text-sm text-white/80 block mb-2">Modo de Exportación:</label>
             <div className="flex items-center gap-4">
                 <label className="custom-switch">
                     <input
@@ -66,7 +66,7 @@ const ExportMode = ({ exportAll, setExportAll }) => {
                     />
                     <span className="slider"></span>
                 </label>
-                <span className="text-sm text-white/75">{exportAll ? 'All Images' : 'Current Image'}</span>
+                <span className="text-sm text-white/75">{exportAll ? 'Todas las Imágenes' : 'Imagen Actual'}</span>
             </div>
         </div>
     );

@@ -20,7 +20,7 @@ const AdvancedOptions = ({ includeMetadata, setIncludeMetadata, interlacing, set
           onChange={(e) => setIncludeMetadata(e.target.checked)}
           className="mr-2 accent-blue-500"
         />
-        Include Metadata
+        Incluir Metadatos
       </label>
       <label className="flex items-center text-sm text-white/75">
         <input
@@ -29,7 +29,7 @@ const AdvancedOptions = ({ includeMetadata, setIncludeMetadata, interlacing, set
           onChange={(e) => setInterlacing(e.target.checked)}
           className="mr-2 accent-blue-500"
         />
-        Enable Interlacing
+        Habilitar Entrelazado
       </label>
     </div>
   );

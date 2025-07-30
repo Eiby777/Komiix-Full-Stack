@@ -41,10 +41,19 @@ const applyImageMode = async (canvas, imageMode) => {
   const height = canvas.height;
 
   if (imageMode === 'Grayscale') {
-    ctx.filter = 'grayscale(100%)';
     const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    
+    // Convert to grayscale using luminance formula
+    for (let i = 0; i < data.length; i += 4) {
+      const gray = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+      data[i] = gray;     // Red
+      data[i + 1] = gray; // Green
+      data[i + 2] = gray; // Blue
+      // Alpha channel (data[i + 3]) remains unchanged
+    }
+    
     ctx.putImageData(imageData, 0, 0);
-    ctx.filter = 'none';
   }
 
   return canvas;

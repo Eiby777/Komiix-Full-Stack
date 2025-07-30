@@ -13,14 +13,14 @@ const FileNameInput = ({ exportAll, fileName, setFileName }) => {
   return (
     <div>
       <label className="text-sm text-white/80 block mb-1">
-        {exportAll ? 'File Prefix:' : 'File Name:'}
+        {exportAll ? 'Prefijo de Archivo:' : 'Nombre de Archivo:'}
       </label>
       <input
         type="text"
         value={fileName}
         onChange={(e) => setFileName(e.target.value)}
         className="w-full p-3 bg-gray-700/50 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-        placeholder={exportAll ? 'e.g., image (becomes image-1, image-2, ...)' : 'e.g., my-image'}
+        placeholder={exportAll ? 'ej., imagen (se convierte en imagen-1, imagen-2, ...)' : 'ej., mi-imagen'}
       />
     </div>
   );

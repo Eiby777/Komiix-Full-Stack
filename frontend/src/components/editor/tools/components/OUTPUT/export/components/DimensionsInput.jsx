@@ -129,7 +129,7 @@ const DimensionsInput = ({
       </style>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="text-sm text-white/80 block mb-1">Width (px):</label>
+          <label className="text-sm text-white/80 block mb-1">Ancho (px):</label>
           <div className="number-input-container">
             <input
               type="number"
@@ -154,7 +154,7 @@ const DimensionsInput = ({
           </div>
         </div>
         <div>
-          <label className="text-sm text-white/80 block mb-1">Height (px):</label>
+          <label className="text-sm text-white/80 block mb-1">Alto (px):</label>
           <div className="number-input-container">
             <input
               type="number"
@@ -186,7 +186,7 @@ const DimensionsInput = ({
           onChange={(e) => setMaintainAspectRatio(e.target.checked)}
           className="mr-2 accent-blue-500"
         />
-        Maintain Aspect Ratio
+        Mantener Relación de Aspecto
       </label>
       {exportAll && (
         <label className="flex items-center text-sm text-white/75 mt-2">

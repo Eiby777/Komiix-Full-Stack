@@ -73,7 +73,7 @@ const FormatAndQuality = ({ format, setFormat, quality, setQuality }) => {
         `}
       </style>
       <div>
-        <label className="text-sm text-white/80 block mb-1">Format:</label>
+        <label className="text-sm text-white/80 block mb-1">Formato:</label>
         <select
           value={format}
           onChange={(e) => setFormat(e.target.value)}
@@ -88,7 +88,7 @@ const FormatAndQuality = ({ format, setFormat, quality, setQuality }) => {
       </div>
       {(format === 'JPEG' || format === 'WEBP') && (
         <div>
-          <label className="text-sm text-white/80 block mb-1">Quality (0-100%):</label>
+          <label className="text-sm text-white/80 block mb-1">Calidad (0-100%):</label>
           <div className="number-input-container">
             <input
               type="number"
