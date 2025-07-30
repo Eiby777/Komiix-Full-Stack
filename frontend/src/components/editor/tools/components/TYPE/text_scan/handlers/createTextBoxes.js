@@ -64,6 +64,7 @@ const createTextBoxes = (result, canvasInstances, colorToTypeTextMap, saveState)
       canvas.discardActiveObject();
       canvas.requestRenderAll();
       saveState(textObject, ObjectStatus.ADD);
+      canvas.renderAll();
     });
 
     idArrays[canvasIndex] = canvasIds;
