@@ -46,9 +46,9 @@ export const handleFontChange = (font, textObject, fabricCanvas, setFontFamily, 
     fabricCanvas.requestRenderAll();
     if (setFontFamily) setFontFamily(font);
     const typeText = textObject.typeText || "Ninguno";
-    console.log(typeText);
-    console.log(font);
-    console.log(textObject);
+    console.warn(typeText);
+    console.warn(font);
+    console.warn(textObject);
     
     updateConfigTypeTexts(textObject, 'fontFamily', font, typeText);
     saveState(textObject, ObjectStatus.UPDATE);
