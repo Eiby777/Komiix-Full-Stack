@@ -68,9 +68,13 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
       
       // Wait for the font to load
       await fontFace.load();
+
+      fabricCanvas.renderAll();
       
       // Now apply the font to the text object using the escaped font name
       await handleFontChange(escapedFontName, textObject, fabricCanvas, setFontFamily, saveState);
+
+      fabricCanvas.renderAll();
       
       // Update the font family state after successful load
       setFontFamily(fontName);
@@ -135,8 +139,17 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     })
   };
 
+  // Normalize font names by removing quotes for comparison
+  const normalizeFontName = (name) => {
+    if (!name) return '';
+    // Remove single or double quotes from the beginning and end
+    return name.replace(/^['"]|['"]$/g, '').trim();
+  };
+
   // Find the current selected option based on fontFamily
-  const selectedOption = fontOptions.find(option => option.fontName === fontFamily) || null;
+  const selectedOption = fontOptions.find(option => 
+    normalizeFontName(option.fontName) === normalizeFontName(fontFamily)
+  ) || null;
   
   return (
     <div className="flex items-center w-full gap-1 sm:gap-2 min-w-0" title="Font Family">
