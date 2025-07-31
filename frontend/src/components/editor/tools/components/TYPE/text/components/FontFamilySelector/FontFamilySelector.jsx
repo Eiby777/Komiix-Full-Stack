@@ -43,63 +43,36 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     const fontName = selectedOption.fontName;
     setFontFamily(fontName);
     
-    // Skip if the font is already loaded
-    if (document.fonts.check(`16px "${fontName}"`)) {
-      await handleFontChange(fontName, textObject, fabricCanvas, setFontFamily, saveState);
-      return;
-    }
-    
-    let fontFace = null;
-    let fontUrl = null;
-    
     try {
       setLoading(true);
       
       // Load the font file
       const fontData = await fetchFontFile(fontName);
       const fontBlob = new Blob([fontData], { type: 'font/woff2' });
-      fontUrl = URL.createObjectURL(fontBlob);
+      const fontUrl = URL.createObjectURL(fontBlob);
       
-      // Create a new FontFace instance with proper format and display settings
-      fontFace = new FontFace(fontName, `url(${fontUrl}) format('woff2')`, {
-        style: 'normal',
-        weight: '400',
-        display: 'swap'
-      });
+      // Create a new FontFace instance
+      const fontFace = new FontFace(fontName, `url(${fontUrl})`);
       
       // Add it to the document.fonts
       document.fonts.add(fontFace);
       
-      // Wait for the font to load with a timeout
-      const loadPromise = fontFace.loaded.catch(error => {
-        console.warn(`Failed to load font ${fontName}:`, error);
-        // Fallback to system font if loading fails
-        return Promise.resolve();
-      });
+      // Wait for the font to load
+      await fontFace.load();
       
-      // Set a timeout for font loading
-      const timeoutPromise = new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Race between font loading and timeout
-      await Promise.race([loadPromise, timeoutPromise]);
-      
-      // Apply the font to the text object
+      // Now apply the font to the text object
       await handleFontChange(fontName, textObject, fabricCanvas, setFontFamily, saveState);
       
-      // Force a re-render
-      if (fabricCanvas) {
-        fabricCanvas.requestRenderAll();
-      }
+      // Force a re-render after a short delay
+      setTimeout(() => {
+        if (fabricCanvas) {
+          fabricCanvas.requestRenderAll();
+        }
+      }, 100);
       
     } catch (error) {
       console.error('Error loading font:', error);
-      // Fallback to system font in case of error
-      await handleFontChange('Arial', textObject, fabricCanvas, setFontFamily, saveState);
     } finally {
-      // Clean up the object URL to prevent memory leaks
-      if (fontUrl) {
-        URL.revokeObjectURL(fontUrl);
-      }
       setLoading(false);
     }
   };
