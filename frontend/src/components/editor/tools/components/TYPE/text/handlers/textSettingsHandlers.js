@@ -39,19 +39,40 @@ export const updateConfigTypeTexts = (textObject, property, value, typeText) => 
   debouncedUpdateTextConfig(textObject, typeText);
 };
 
-export const handleFontChange = (font, textObject, fabricCanvas, setFontFamily, saveState) => {
-  if (textObject) {
+export const handleFontChange = async (font, textObject, fabricCanvas, setFontFamily, saveState) => {
+  if (!textObject) return;
+
+  try {
+    // First update the font on the current object
     textObject.set('fontFamily', font);
     textObject.setCoords();
-    fabricCanvas.requestRenderAll();
-    if (setFontFamily) setFontFamily(font);
-    const typeText = textObject.typeText || "Ninguno";
-    console.warn(typeText);
-    console.warn(font);
-    console.warn(textObject);
     
+    // Force a render to ensure the font is applied
+    fabricCanvas.requestRenderAll();
+    
+    // Update local state
+    if (setFontFamily) {
+      setFontFamily(font);
+    }
+    
+    // Get the type text
+    const typeText = textObject.typeText || "Ninguno";
+    
+    // Wait for the next tick to ensure the font is loaded
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    // Update config for other text objects
     updateConfigTypeTexts(textObject, 'fontFamily', font, typeText);
+    
+    // Save state
     saveState(textObject, ObjectStatus.UPDATE);
+    
+    // Force another render after a short delay
+    setTimeout(() => {
+      fabricCanvas.requestRenderAll();
+    }, 100);
+  } catch (error) {
+    console.error('Error in handleFontChange:', error);
   }
 };
 
