@@ -71,7 +71,8 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
 
       fabricCanvas.setActiveObject(textObject);
       fabricCanvas.bringObjectToFront(textObject);
-      fabricCanvas.setCoords();
+      textObject.setCoords();
+      fabricCanvas.requestRenderAll();
       // Now apply the font to the text object using the escaped font name
       await handleFontChange(escapedFontName, textObject, fabricCanvas, setFontFamily, saveState);
 
@@ -79,8 +80,7 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
       
       fabricCanvas.setActiveObject(textObject);
       fabricCanvas.bringObjectToFront(textObject);
-      fabricCanvas.setCoords();
-
+      textObject.setCoords();
       fabricCanvas.renderAll();
       
       // Update the font family state after successful load
