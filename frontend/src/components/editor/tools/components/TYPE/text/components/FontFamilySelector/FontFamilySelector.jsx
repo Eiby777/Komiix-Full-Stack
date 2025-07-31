@@ -38,35 +38,38 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
   }, []);
 
   const handleChange = async (selectedOption) => {
+    if (!selectedOption || !textObject) return;
+    
     const fontName = selectedOption.fontName;
     setFontFamily(fontName);
     
     try {
       setLoading(true);
-      const fontData = await fetchFontFile(fontName);
       
-      // Create a Blob from the font data
+      // Load the font file
+      const fontData = await fetchFontFile(fontName);
       const fontBlob = new Blob([fontData], { type: 'font/woff2' });
       const fontUrl = URL.createObjectURL(fontBlob);
       
-      // Create dynamic @font-face rule
-      const fontFace = `
-        @font-face {
-          font-family: "${fontName}";
-          src: url(${fontUrl}) format('woff2');
+      // Create a new FontFace instance
+      const fontFace = new FontFace(fontName, `url(${fontUrl})`);
+      
+      // Add it to the document.fonts
+      document.fonts.add(fontFace);
+      
+      // Wait for the font to load
+      await fontFace.load();
+      
+      // Now apply the font to the text object
+      await handleFontChange(fontName, textObject, fabricCanvas, setFontFamily, saveState);
+      
+      // Force a re-render after a short delay
+      setTimeout(() => {
+        if (fabricCanvas) {
+          fabricCanvas.requestRenderAll();
         }
-      `;
+      }, 100);
       
-      // Add the font-face to the document
-      const styleSheet = document.createElement('style');
-      styleSheet.textContent = fontFace;
-      document.head.appendChild(styleSheet);
-      
-      // Wait for the font to load before applying it
-      await document.fonts.load(`16px "${fontName}"`);
-      
-      // Apply the font to the text object
-      handleFontChange(fontName, textObject, fabricCanvas, setFontFamily, saveState);
     } catch (error) {
       console.error('Error loading font:', error);
     } finally {
