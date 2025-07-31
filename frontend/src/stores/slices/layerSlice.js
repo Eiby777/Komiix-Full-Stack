@@ -107,7 +107,7 @@ export const createLayerSlice = (set, get) => ({
 
         if (!state) return; // Si no hay estado definido para la capa, ignorar
 
-        // Aplicar el estado general de la capa
+        /*// Aplicar el estado general de la capa
         object.set("opacity", state.opacity);
         object.set("selectable", state.selectable);
         object.set("evented", state.evented);
@@ -120,7 +120,7 @@ export const createLayerSlice = (set, get) => ({
         // Desactivar selección si el objeto está activo y no es seleccionable
         if (object === activeObject && !state.selectable) {
           canvas.discardActiveObject();
-        }
+        }*/
       });
       canvas.renderAll();
     });
