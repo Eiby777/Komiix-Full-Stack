@@ -37,11 +37,20 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     loadFonts();
   }, []);
 
+  const escapeFontName = (name) => {
+    // If the font name contains any of these characters, wrap it in quotes
+    if (/[\s!"#$%&'()*+,.\/:;<=>?@\[\]\\^`{|}~]/.test(name)) {
+      return `'${name.replace(/'/g, "\\'")}'`;
+    }
+    return name;
+  };
+
   const handleChange = async (selectedOption) => {
     if (!selectedOption || !textObject) return;
     
     const fontName = selectedOption.fontName;
-    setFontFamily(fontName);
+    const escapedFontName = escapeFontName(fontName);
+    console.log('Loading font:', fontName, 'Escaped as:', escapedFontName);
     
     try {
       setLoading(true);
@@ -51,8 +60,8 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
       const fontBlob = new Blob([fontData], { type: 'font/woff2' });
       const fontUrl = URL.createObjectURL(fontBlob);
       
-      // Create a new FontFace instance
-      const fontFace = new FontFace(fontName, `url(${fontUrl})`);
+      // Create a new FontFace instance with escaped font name
+      const fontFace = new FontFace(escapedFontName, `url(${fontUrl})`);
       
       // Add it to the document.fonts
       document.fonts.add(fontFace);
@@ -60,8 +69,11 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
       // Wait for the font to load
       await fontFace.load();
       
-      // Now apply the font to the text object
-      await handleFontChange(fontName, textObject, fabricCanvas, setFontFamily, saveState);
+      // Now apply the font to the text object using the escaped font name
+      await handleFontChange(escapedFontName, textObject, fabricCanvas, setFontFamily, saveState);
+      
+      // Update the font family state after successful load
+      setFontFamily(fontName);
       
     } catch (error) {
       console.error('Error loading font:', error);
@@ -123,29 +135,40 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     })
   };
 
+  // Find the current selected option based on fontFamily
+  const selectedOption = fontOptions.find(option => option.fontName === fontFamily) || null;
+  
   return (
     <div className="flex items-center w-full gap-1 sm:gap-2 min-w-0" title="Font Family">
-  <style>
-    {`
-      .font-selector__input input::selection,
-      .font-selector__single-value::selection {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-      }
-    `}
-  </style>
-  <FaFont className="text-gray-400 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5" />
-  <Select
-    options={fontOptions}
-    value={fontOptions.find(option => option.fontName === fontFamily) || null}
-    onChange={handleChange}
-    styles={customStyles}
-    isLoading={loading}
-    placeholder="Select font..."
-    className="flex-1 min-w-0 text-xs sm:text-sm"
-    classNamePrefix="font-selector"
-  />
-</div>
+      <style>
+        {`
+          .font-selector__input input::selection,
+          .font-selector__single-value::selection {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+          }
+          .font-selector__single-value {
+            color: white !important;
+          }
+        `}
+      </style>
+      <FaFont className="text-gray-400 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5" />
+      <Select
+        options={fontOptions}
+        value={selectedOption}
+        onChange={handleChange}
+        styles={customStyles}
+        isLoading={loading}
+        placeholder="Select font..."
+        className="flex-1 min-w-0 text-xs sm:text-sm"
+        classNamePrefix="font-selector"
+        isSearchable={true}
+        components={{
+          DropdownIndicator: null
+        }}
+        menuPortalTarget={document.body}
+      />
+    </div>
   );
 };
 

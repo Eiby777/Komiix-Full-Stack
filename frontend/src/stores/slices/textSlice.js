@@ -50,7 +50,18 @@ export const createTextSlice = (set, get) => ({
               textBox.set('text', configTypeText[property] === true ? textObject.text.toUpperCase() : textObject.text);
             } else if (property === 'lowercase') {
               textBox.set('text', configTypeText[property] === true ? textObject.text.toLowerCase() : textObject.text);
-            } else {
+            }
+            else if (property === 'fontFamily') {
+              //check if the font is available
+              if (document.fonts.check(`16px ${configTypeText[property]}`)) {
+                textBox.set(property, configTypeText[property]);
+              }
+              else {
+                console.error('Font not available');
+                
+              }
+            }
+            else {
               textBox.set(property, configTypeText[property]);
             }
           }

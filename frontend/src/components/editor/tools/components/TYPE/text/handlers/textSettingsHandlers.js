@@ -43,10 +43,11 @@ export const handleFontChange = (font, textObject, fabricCanvas, setFontFamily, 
   if (textObject) {
     textObject.set('fontFamily', font);
     textObject.setCoords();
-    fabricCanvas.requestRenderAll();
+    
     if (setFontFamily) setFontFamily(font);
     const typeText = textObject.typeText || "Ninguno";
     updateConfigTypeTexts(textObject, 'fontFamily', font, typeText);
+    fabricCanvas.requestRenderAll();
     saveState(textObject, ObjectStatus.UPDATE);
   }
 };
