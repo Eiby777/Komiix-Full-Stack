@@ -63,13 +63,6 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
       // Now apply the font to the text object
       await handleFontChange(fontName, textObject, fabricCanvas, setFontFamily, saveState);
       
-      // Force a re-render after a short delay
-      setTimeout(() => {
-        if (fabricCanvas) {
-          fabricCanvas.requestRenderAll();
-        }
-      }, 100);
-      
     } catch (error) {
       console.error('Error loading font:', error);
     } finally {
