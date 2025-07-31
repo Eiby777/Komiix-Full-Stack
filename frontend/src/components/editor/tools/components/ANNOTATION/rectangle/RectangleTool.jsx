@@ -26,6 +26,7 @@ const RectangleTool = ({ currentImageIndex }) => {
     selectedRectangleColor,
     setRectangleColor,
     getCanvasInstance,
+    colorToTypeTextMap
   } = useEditorStore();
 
   const isActive = activeTools.includes(TOOLS.RECTANGLE.id);
@@ -62,6 +63,11 @@ const RectangleTool = ({ currentImageIndex }) => {
     if (activeObjects.length === 1) {
       const activeRect = activeObjects[0];
       setRectangleColor(activeRect.stroke);
+      const typeText = colorToTypeTextMap[activeRect.stroke];
+      activeRect.set({
+        typeText
+      });
+      activeRect.setCoords();
       selectedColorRef.current = activeRect.stroke;
     }
     canvas.requestRenderAll();
