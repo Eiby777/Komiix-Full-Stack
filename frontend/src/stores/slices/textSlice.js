@@ -55,11 +55,10 @@ export const createTextSlice = (set, get) => ({
               //check if the font is available
               if (document.fonts.check(`16px ${configTypeText[property]}`)) {
                 textBox.set(property, configTypeText[property]);
+                textBox.setCoords();
+                canvas.requestRenderAll();
               }
-              else {
-                console.error('Font not available');
-                
-              }
+              else console.error('Font not available');
             }
             else {
               textBox.set(property, configTypeText[property]);
