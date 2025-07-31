@@ -52,13 +52,7 @@ export const createTextSlice = (set, get) => ({
               textBox.set('text', configTypeText[property] === true ? textObject.text.toLowerCase() : textObject.text);
             }
             else if (property === 'fontFamily') {
-              //check if the font is available
-              if (document.fonts.check(`16px ${configTypeText[property]}`)) {
-                textBox.set(property, configTypeText[property]);
-                textBox.setCoords();
-                canvas.requestRenderAll();
-              }
-              else console.error('Font not available');
+              console.log(configTypeText[property]);
             }
             else {
               textBox.set(property, configTypeText[property]);

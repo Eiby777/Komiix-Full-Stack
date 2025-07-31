@@ -36,21 +36,46 @@ export const updateConfigTypeTexts = (textObject, property, value, typeText) => 
     draft[typeText][property] = value;
   });
 
-  debouncedUpdateTextConfig(textObject, typeText);
+  if (property !== 'fontFamily') {
+    debouncedUpdateTextConfig(textObject, typeText);
+  }
 };
 
 export const handleFontChange = (font, textObject, fabricCanvas, setFontFamily, saveState) => {
-  if (textObject) {
-    textObject.set('fontFamily', font);
-    textObject.setCoords();
+  if (!textObject) return;
+  
+  const typeText = textObject.typeText || "Ninguno";
+  
+  // Update the current text object
+  textObject.set('fontFamily', font);
+  textObject.setCoords();
+  if (setFontFamily) setFontFamily(font);
+  
+  const { canvasObjectStatus, canvasInstances } = getState();
+  canvasInstances.forEach((canvas, index) => { 
+    if (!canvasObjectStatus[index]) return;
+    const objects = canvas.getObjects();
+    const textBoxes = objects.filter(
+      (obj) => obj.type === 'textbox' && obj !== textObject && obj.typeText === typeText
+    );
+    if (!textBoxes.length) return;
     
-    if (setFontFamily) setFontFamily(font);
-    const typeText = textObject.typeText || "Ninguno";
-    updateConfigTypeTexts(textObject, 'fontFamily', font, typeText);
-    fabricCanvas.requestRenderAll();
-    saveState(textObject, ObjectStatus.UPDATE);
-  }
+    textBoxes.forEach((textBox) => {
+      if (font !== undefined && font !== null) {
+            textBox.set('fontFamily', font);
+            textBox.setCoords();
+          }
+    });
+    
+    canvas.requestRenderAll();
+  });
+  
+  // Update the config and save state
+  updateConfigTypeTexts(textObject, 'fontFamily', font, typeText);
+  fabricCanvas.requestRenderAll();
+  saveState(textObject, ObjectStatus.UPDATE);
 };
+  
 
 export const handleSizeChange = (size, textObject, fabricCanvas, setFontSize, saveState) => {
   if (textObject) {
