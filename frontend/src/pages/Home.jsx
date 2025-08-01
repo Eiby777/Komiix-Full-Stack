@@ -99,6 +99,12 @@ export default function Home() {
               >
                 Términos de Servicio
               </button>
+              <button 
+                onClick={() => window.open('https://discord.gg/GU53CsXabn', '_blank')}
+                className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 text-sm font-medium transition-colors duration-200"
+              >
+                Discord
+              </button>
             </div>
           </div>
         </div>
