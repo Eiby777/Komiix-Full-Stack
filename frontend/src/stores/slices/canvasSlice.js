@@ -19,6 +19,10 @@ export const createCanvasSlice = (set, get) => ({
     set((state) => {
       state.canvasObjectStatus[index] = status;
     }),
+  setAllCanvasObjectStatus: (status) =>
+    set((state) => {
+      state.canvasObjectStatus = status;
+    }),
   getCanvasObjectStatus: (index) => get().canvasObjectStatus[index],
   getAllCanvasObjectStatus: () => get().canvasObjectStatus,
 });

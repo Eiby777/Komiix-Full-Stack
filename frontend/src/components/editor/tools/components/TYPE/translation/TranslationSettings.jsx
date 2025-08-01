@@ -155,7 +155,7 @@ const TextboxSettings = ({ index = 0 }) => {
   });
 
   return (
-    <div className="w-full space-y-2 bg-[#1a1a1a] rounded-lg" style={{ maxWidth: '100%' }}>
+    <div className="space-y-2 w-full max-h-full text-white rounded-lg bg-[#1a1a1a] p-2">
       <ColorTypeSelector selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
       <FilterControls
         filterText={filterText}

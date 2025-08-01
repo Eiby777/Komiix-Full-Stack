@@ -121,8 +121,8 @@ const calculateTextCoordinates = (canvas, relativePointer, textObject, isText = 
     text = cleanText(text);
     const fontFamily = textObject.fontFamily || 'sans-serif';
 
-    // Usar el canvas proporcionado
-    const ctx = canvas.getContext('2d');
+    // Obtener contexto con willReadFrequently optimizado para lecturas múltiples
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
     // Fallback if primary calculation fails and isText is true or false
     const useFallback = () => {
@@ -149,6 +149,7 @@ const calculateTextCoordinates = (canvas, relativePointer, textObject, isText = 
         );
     };
 
+    // Resto del código permanece igual...
     // Explorar región con BFS para detectar el globo
     const visited = new Set();
     const queue = [{ x: relativePointer.x, y: relativePointer.y }];

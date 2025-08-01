@@ -121,7 +121,7 @@ export const TOOLS = {
   TEXT_BOX: {
     id: "text-box",
     title: "Configura la traducción",
-    label: "Caja de texto",
+    label: "Caja de traduccion",
     icon: FA_TextBoxIcon,
     layer: LAYERS.TEXT.id,
     hasSettings: true,

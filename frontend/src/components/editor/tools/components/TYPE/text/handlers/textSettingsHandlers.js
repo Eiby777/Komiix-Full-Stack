@@ -41,41 +41,43 @@ export const updateConfigTypeTexts = (textObject, property, value, typeText) => 
   }
 };
 
-export const handleFontChange = (font, textObject, fabricCanvas, setFontFamily, saveState) => {
+export const handleFontChange = (font, textObject, fabricCanvas, setFontFamily, saveState, canvasInstances, canvasObjectStatus) => {
+  console.log("handleFontChange")
+  console.log(textObject);
   if (!textObject) return;
-  
+console.log(canvasObjectStatus);
   const typeText = textObject.typeText || "Ninguno";
-  
-  // Update the current text object
-  textObject.set('fontFamily', font);
-  textObject.setCoords();
-  if (setFontFamily) setFontFamily(font);
-  
-  const { canvasObjectStatus, canvasInstances } = getState();
-  canvasInstances.forEach((canvas, index) => { 
+  setFontFamily(font);
+
+
+  canvasInstances.forEach((canvas, index) => {
     if (!canvasObjectStatus[index]) return;
+    console.log(canvasObjectStatus[index]);
     const objects = canvas.getObjects();
     const textBoxes = objects.filter(
-      (obj) => obj.type === 'textbox' && obj !== textObject && obj.typeText === typeText
+      (obj) => obj.type === 'textbox' && obj.typeText === typeText
     );
+    console.log(textBoxes);
     if (!textBoxes.length) return;
-    
+
     textBoxes.forEach((textBox) => {
+      console.log(textBox);
       if (font !== undefined && font !== null) {
-            textBox.set('fontFamily', font);
-            textBox.setCoords();
-          }
+        console.log("font", font);
+        textBox.set('fontFamily', font);
+        textBox.setCoords();
+      }
     });
-    
+
     canvas.requestRenderAll();
   });
-  
+
   // Update the config and save state
   updateConfigTypeTexts(textObject, 'fontFamily', font, typeText);
   fabricCanvas.requestRenderAll();
   saveState(textObject, ObjectStatus.UPDATE);
 };
-  
+
 
 export const handleSizeChange = (size, textObject, fabricCanvas, setFontSize, saveState) => {
   if (textObject) {
@@ -85,7 +87,7 @@ export const handleSizeChange = (size, textObject, fabricCanvas, setFontSize, sa
     fabricCanvas.requestRenderAll();
     if (setFontSize) setFontSize(size);
     const typeText = textObject.typeText || "Ninguno";
-    updateConfigTypeTexts(textObject, 'fontSize', parsedSize,typeText);
+    updateConfigTypeTexts(textObject, 'fontSize', parsedSize, typeText);
     saveState(textObject, ObjectStatus.UPDATE);
   }
 };
@@ -98,12 +100,12 @@ export const handleLineHeightChange = (lineHeight, textObject, fabricCanvas, set
     fabricCanvas.requestRenderAll();
     if (setLineHeight) setLineHeight(lineHeight);
     const typeText = textObject.typeText || "Ninguno";
-    updateConfigTypeTexts(textObject, 'lineHeight', parsedLineHeight,typeText);
+    updateConfigTypeTexts(textObject, 'lineHeight', parsedLineHeight, typeText);
     saveState(textObject, ObjectStatus.UPDATE);
   }
 };
 
-export const handleSizeInput = (e, handler, setValue, textObject, fabricCanvas, ) => {
+export const handleSizeInput = (e, handler, setValue, textObject, fabricCanvas,) => {
   const value = e.target.value;
   if (/^\d*\.?\d*$/.test(value)) {
     setValue(value);
@@ -141,12 +143,12 @@ export const handleFontSizeButtonChange = (isUp, currentValue, setValue, handler
   let newValue = isUp
     ? (numValue + 1).toString()
     : Math.max(8, numValue - 1).toString();
-  
+
   if (currentValue.includes('.')) {
     const decimalPlaces = currentValue.split('.')[1]?.length || 1;
     newValue = parseFloat(newValue).toFixed(decimalPlaces);
   }
-  
+
   setValue(newValue);
   handler(newValue, textObject, fabricCanvas, setValue);
 };
@@ -155,7 +157,7 @@ export const handleLineHeightButtonChange = (isUp, currentValue, setValue, handl
   const newValue = (isUp
     ? numValue + 0.1
     : Math.max(0.5, numValue - 0.1)).toFixed(1); // Mínimo de 0.5
-  
+
   setValue(newValue);
   handler(newValue, textObject, fabricCanvas, setValue);
 };
@@ -165,7 +167,7 @@ export const handleStrokeWidthButtonChange = (isUp, currentValue, setValue, hand
   const newValue = isUp
     ? (numValue + 1).toString()
     : Math.max(0, numValue - 1).toString();
-  
+
   setValue(newValue);
   handler(newValue, textObject, fabricCanvas, setValue);
 };

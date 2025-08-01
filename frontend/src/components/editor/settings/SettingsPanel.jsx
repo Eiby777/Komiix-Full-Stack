@@ -28,8 +28,11 @@ export default function SettingsPanel() {
     if (!parentContainer) return;
 
     const updateWidth = () => {
-      const newWidth = window.innerWidth - (parentContainer.clientWidth + toolbarWidth);
-      setSettingsPanelWidth(newWidth > 0 ? newWidth : 0); // Ensure non-negative width
+      const parentWidth = parentContainer.clientWidth;
+      const newWidth = window.innerWidth - (parentWidth + toolbarWidth);
+      const maxPanelWidth = 370; // Set a maximum width for the settings panel
+      const calculatedWidth = Math.min(Math.max(newWidth, 0), maxPanelWidth);
+      setSettingsPanelWidth(calculatedWidth);
     };
 
     updateWidth(); // Initial calculation
@@ -58,8 +61,14 @@ export default function SettingsPanel() {
     <div
       id="settings-panel"
       ref={settingsPanelRef}
-      className={`flex transition-all duration-300 ${isSettingsVisible ? 'block' : 'hidden'}`}
-      style={{ width: settingsPanelWidth !== null ? `${settingsPanelWidth}px` : 'auto' }}
+      className={`flex ${isSettingsVisible ? 'block' : 'hidden'}`}
+      style={{
+        width: settingsPanelWidth !== null ? `${settingsPanelWidth}px` : 'auto',
+        maxWidth: '100%',
+        transition: isSettingsVisible ? 'opacity 300ms ease-in-out, transform 300ms ease-in-out' : 'none',
+        opacity: isSettingsVisible ? 1 : 0.8,
+        transform: isSettingsVisible ? 'translateX(0)' : 'translateX(10px)'
+      }}
     >
       <div className="border-l border-[var(--muted)] bg-[var(--muted)] w-[100%]">
         <div

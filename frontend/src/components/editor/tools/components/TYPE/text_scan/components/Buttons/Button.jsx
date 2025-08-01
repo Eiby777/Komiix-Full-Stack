@@ -46,6 +46,9 @@ const Buttons = ({
     setIsLoading(true);
 
     try {
+      // Fase 1: Scanning
+      setProgress(prev => ({ ...prev, phase: 'scanning' }));
+
       // Fetch images based on scanOption
       let targetCanvasInstances = canvasInstances;
       if (scanOption === "current") {
@@ -58,22 +61,29 @@ const Buttons = ({
       const result = await cleanImages(
         fetchedRectangles,
         fetchedImages,
-        (progressData) => setProgress(progressData),
+        (progressData) => setProgress(prev => ({ ...prev, ...progressData })),
         originalOCRLanguage,
         updateDownloadingStatus,
         setIsLoading
       );
+
+      // Fase 2: Translation
+      setProgress(prev => ({ ...prev, phase: 'translating' }));
+
       let translatedResult = await translateText(result, originalTranslationLanguage, selectedTranslationLanguage, setIsLoading);
-      
+
       if (scanOption === "current" && translatedResult.length === 1) {
         const reindexedResult = new Array(images.length).fill(null);
         reindexedResult[activeImageIndex] = translatedResult[0];
         translatedResult = reindexedResult;
       }
-      
-      const adjustedResults = await adjustTexts(targetCanvasInstances, translatedResult, images, dimensionImages, setIsLoading, activeImageIndex);
 
+      // Fase 3: Creating text boxes
+      setProgress(prev => ({ ...prev, phase: 'creating' }));
+
+      const adjustedResults = await adjustTexts(targetCanvasInstances, translatedResult, images, dimensionImages, setIsLoading, activeImageIndex);
       createTextBoxes(adjustedResults, targetCanvasInstances, colorToTypeTextMap, saveState);
+
     } catch (error) {
       console.error("Error durante el escaneo de texto:", error);
     } finally {
@@ -91,11 +101,10 @@ const Buttons = ({
       </button>
       <button
         onClick={handleAccept}
-        className={`px-4 py-2 text-white/90 rounded-md transition-colors duration-200 ${
-          originalOCRLanguage && selectedOCRTargetLanguage
+        className={`px-4 py-2 text-white/90 rounded-md transition-colors duration-200 ${originalOCRLanguage && selectedOCRTargetLanguage
             ? "bg-[#4a90e2] hover:bg-[#357abd]"
             : "bg-gray-600/50 cursor-not-allowed"
-        }`}
+          }`}
         disabled={!originalOCRLanguage || !selectedOCRTargetLanguage}
       >
         Aceptar

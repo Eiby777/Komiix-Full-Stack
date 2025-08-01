@@ -18,6 +18,7 @@ const TextScan = () => {
   const [progress, setProgress] = useState({
     canvasProgress: { current: 0, total: 0 },
     recorteProgress: { current: 0, total: 0 },
+    phase: 'scanning' // Agregar esta nueva propiedad
   });
   
   const [originalOCRLanguage, setOriginalOCRLanguage] = useState("");

@@ -3,13 +3,24 @@ import { FaFont } from 'react-icons/fa';
 import Select from 'react-select';
 import { handleFontChange } from '../../handlers/textSettingsHandlers';
 import { fetchFontList, fetchFontFile } from '../../../../../../../../hooks/fontApi';
-import { saveFonts, getFontList } from '../../../../../../../../lib/localDB/fontDB';
+import {
+  saveFontList,
+  getFontList,
+  saveFontFile,
+  getFontFile,
+  updateFontFile,
+  checkFontVersion,
+  deleteFontList,
+  cleanupOldFonts
+} from '../../../../../../../../lib/localDB/fontDB';
+import { useEditorStore } from '../../../../../../../../stores/editorStore';
 import useLayerHistory from '../../../../../../floating-menus/components/UndoRedoMenu/handlers/fabricHistoryManager';
 
 const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanvas }) => {
   const [fontOptions, setFontOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const { saveState } = useLayerHistory();
+  const { canvasInstances, setAllCanvasObjectStatus } = useEditorStore();
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -18,13 +29,14 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
         let fonts = await getFontList();
         if (!fonts) {
           fonts = await fetchFontList();
-          await saveFonts(fonts);
+          await saveFontList(fonts);
         }
         const options = fonts
           .map(font => ({
             value: font.id,
             label: font.name,
-            fontName: font.name
+            fontName: font.name,
+            version: font.version || '1.0'
           }))
           .sort((a, b) => a.label.localeCompare(b.label));
         setFontOptions(options);
@@ -34,53 +46,158 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
         setLoading(false);
       }
     };
+
+    const cleanup = async () => {
+      try {
+        const deleted = await cleanupOldFonts();
+        if (deleted > 0) {
+          console.log(`Cleaned up ${deleted} old fonts`);
+        }
+      } catch (error) {
+        console.error('Error during font cleanup:', error);
+      }
+    };
+
     loadFonts();
+    cleanup();
   }, []);
 
   const escapeFontName = (name) => {
-    // If the font name contains any of these characters, wrap it in quotes
     if (/[\s!"#$%&'()*+,.\/:;<=>?@\[\]\\^`{|}~]/.test(name)) {
       return `'${name.replace(/'/g, "\\'")}'`;
     }
     return name;
   };
 
-  const handleChange = async (selectedOption) => {
-    if (!selectedOption || !textObject) return;
-    
-    const fontName = selectedOption.fontName;
+  // Función simplificada para cargar fuente desde blob local
+  const loadFontFromBlob = async (fontName, fontBlob) => {
     const escapedFontName = escapeFontName(fontName);
-    console.log('Loading font:', fontName, 'Escaped as:', escapedFontName);
-    
+
     try {
-      setLoading(true);
-      
-      // Load the font file
-      const fontData = await fetchFontFile(fontName);
-      const fontBlob = new Blob([fontData], { type: 'font/woff2' });
+      // Verificar si la fuente ya está cargada en el DOM
+      const existingFont = Array.from(document.fonts).find(font =>
+        font.family === escapedFontName || font.family === fontName
+      );
+
+      if (existingFont && existingFont.status === 'loaded') {
+        console.log('Font already loaded in DOM:', fontName);
+        return escapedFontName;
+      }
+
+      // Crear URL del blob y FontFace
       const fontUrl = URL.createObjectURL(fontBlob);
-      
-      // Create a new FontFace instance with escaped font name
       const fontFace = new FontFace(escapedFontName, `url(${fontUrl})`);
-      
-      // Add it to the document.fonts
+
+      // Agregar y cargar la fuente
       document.fonts.add(fontFace);
-      
-      // Wait for the font to load
       await fontFace.load();
 
-      // Now apply the font to the text object using the escaped font name
-      await handleFontChange(escapedFontName, textObject, fabricCanvas, setFontFamily, saveState);
-      
-      // Update the font family state after successful load
-      setFontFamily(fontName);
-      
+      console.log('Font loaded successfully from local storage:', fontName);
+
+      // Limpiar el blob URL después de un breve delay
+      setTimeout(() => {
+        URL.revokeObjectURL(fontUrl);
+      }, 1000);
+
+      return escapedFontName;
+
     } catch (error) {
-      console.error('Error loading font:', error);
+      console.error('Error loading font from blob:', error);
+      throw error;
+    }
+  };
+
+  const updateCanvasObjectStatus = () => {
+    const currentObjectStatus = canvasInstances.map(canvas =>
+      canvas.getObjects().some(object => object.type === 'textbox')
+    );
+    setAllCanvasObjectStatus(currentObjectStatus);
+    return currentObjectStatus;
+  };
+
+  const handleChange = async (selectedOption) => {
+    if (!selectedOption || !textObject) return;
+
+    const fontName = selectedOption.fontName;
+    const requiredVersion = selectedOption.version || '1.0';
+
+    console.log('Loading font:', fontName, 'version:', requiredVersion);
+
+    try {
+      setLoading(true);
+
+      // Paso 1: Verificar si existe localmente y si la versión es correcta
+      const versionCheck = await checkFontVersion(fontName, requiredVersion);
+
+      let fontBlob;
+      let finalFontName;
+
+      if (versionCheck.exists && !versionCheck.needsUpdate) {
+        // La fuente existe localmente y está actualizada
+        console.log('Using cached font:', fontName);
+        const localFont = await getFontFile(fontName);
+        fontBlob = localFont.blob;
+      } else {
+        // Necesitamos descargar la fuente
+        console.log('Fetching font from server:', fontName);
+        const fetchedBlob = await fetchFontFile(fontName);
+
+        // Guardar o actualizar en la base de datos local
+        if (versionCheck.exists) {
+          await updateFontFile(fontName, fetchedBlob, requiredVersion);
+        } else {
+          await saveFontFile(fontName, fetchedBlob, requiredVersion);
+        }
+
+        fontBlob = fetchedBlob;
+      }
+
+      // Paso 2: Cargar la fuente en el DOM
+      finalFontName = await loadFontFromBlob(fontName, fontBlob);
+
+      const canvasObjectStatus = await updateCanvasObjectStatus();
+      // Paso 3: Aplicar la fuente al objeto de texto
+      await handleFontChange(finalFontName, textObject, fabricCanvas, setFontFamily, saveState, canvasInstances, canvasObjectStatus);
+
+      // Paso 4: Actualizar el estado
+      setFontFamily(fontName);
+
+      console.log('Font change completed successfully:', fontName);
+
+    } catch (error) {
+      console.error('Error in font change process:', error);
+
+      // Fallback: intentar usar la fuente sin cargarla
+      try {
+        const fallbackFontName = escapeFontName(fontName);
+        await handleFontChange(fallbackFontName, textObject, fabricCanvas, setFontFamily, saveState);
+        setFontFamily(fontName);
+        console.log('Applied font as fallback:', fallbackFontName);
+      } catch (fallbackError) {
+        console.error('Fallback font application also failed:', fallbackError);
+        // En caso de error total, mantener la fuente anterior
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  // Limpiar fuentes DOM no utilizadas (opcional, para optimización de memoria)
+  const cleanupDOMFonts = () => {
+    const loadedFonts = Array.from(document.fonts);
+    loadedFonts.forEach(font => {
+      // Solo eliminar fuentes que nunca se cargaron exitosamente
+      if (font.status === 'unloaded' || font.status === 'error') {
+        document.fonts.delete(font);
+      }
+    });
+  };
+
+  // Limpiar fuentes DOM cada minuto
+  useEffect(() => {
+    const cleanup = setInterval(cleanupDOMFonts, 60000);
+    return () => clearInterval(cleanup);
+  }, []);
 
   const customStyles = {
     control: (provided, state) => ({
@@ -135,18 +252,15 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     })
   };
 
-  // Normalize font names by removing quotes for comparison
   const normalizeFontName = (name) => {
     if (!name) return '';
-    // Remove single or double quotes from the beginning and end
     return name.replace(/^['"]|['"]$/g, '').trim();
   };
 
-  // Find the current selected option based on fontFamily
-  const selectedOption = fontOptions.find(option => 
+  const selectedOption = fontOptions.find(option =>
     normalizeFontName(option.fontName) === normalizeFontName(fontFamily)
   ) || null;
-  
+
   return (
     <div className="flex items-center w-full gap-1 sm:gap-2 min-w-0" title="Font Family">
       <style>
