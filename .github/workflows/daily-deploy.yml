@@ -7,6 +7,11 @@ on:
   # También permite la ejecución manual
   workflow_dispatch:
 
+# Solo necesitamos permisos de lectura del contenido
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -22,21 +27,18 @@ jobs:
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
 
-      - name: Merge develop into main
-        run: |
-          # Asegurarse de tener las referencias remotas
-          git fetch --all
-          
-          # Cambiar a main
-          git checkout main
-          
-          # Actualizar main
-          git pull origin main
-          
-          # Fusionar develop en main
-          git merge origin/develop --no-ff -m "Merge develop into main [skip ci]"
-          
-          # Subir los cambios
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: merge develop into main [skip ci]'
+          title: 'Release: Merge develop into main'
+          body: 'This is an automated PR to merge develop into main.'
+          branch: 'release/merge-develop-into-main'
+          base: 'main'
+          branch-suffix: 'short-commit-hash'
+          delete-branch: true
+          draft: false
+          labels: |
+            automated
+            release
