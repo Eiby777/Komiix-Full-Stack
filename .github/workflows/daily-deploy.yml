@@ -1,10 +1,5 @@
 name: Daily Deploy to Production
 
-# Necesitamos permisos de escritura para poder hacer push
-defaults:
-  run:
-    shell: bash
-
 on:
   schedule:
     # Ejecuta los domingos a las 12:00 AM (medianoche) hora de República Dominicana (GMT-4)
@@ -12,9 +7,9 @@ on:
   # También permite la ejecución manual
   workflow_dispatch:
 
-# Dar permisos explícitos al GITHUB_TOKEN
+# Solo necesitamos permisos de lectura del contenido
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
 
 jobs:
@@ -32,31 +27,18 @@ jobs:
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
 
-      - name: Configure Git
-        run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
-          git config --global --add safe.directory /github/workspace
-
-      - name: Merge develop into main
-        run: |
-          # Configurar el remote con el token
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          
-          # Asegurarse de tener las referencias remotas
-          git fetch origin
-          
-          # Configurar las ramas
-          git config --global --add safe.directory /github/workspace
-          git checkout main
-          
-          # Actualizar main
-          git pull origin main
-          
-          # Fusionar develop en main
-          git merge origin/develop --no-ff -m "Merge develop into main [skip ci]"
-          
-          # Subir los cambios
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: merge develop into main [skip ci]'
+          title: 'Release: Merge develop into main'
+          body: 'This is an automated PR to merge develop into main.'
+          branch: 'release/merge-develop-into-main'
+          base: 'main'
+          branch-suffix: 'short-commit-hash'
+          delete-branch: true
+          draft: false
+          labels: |
+            automated
+            release
