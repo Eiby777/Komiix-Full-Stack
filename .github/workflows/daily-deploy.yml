@@ -1,0 +1,42 @@
+name: Daily Deploy to Production
+
+on:
+  schedule:
+    # Ejecuta los domingos a las 12:00 AM (medianoche) hora de República Dominicana (GMT-4)
+    - cron: '0 4 * * 0'
+  # También permite la ejecución manual
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git identity
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+
+      - name: Merge develop into main
+        run: |
+          # Asegurarse de tener las referencias remotas
+          git fetch --all
+          
+          # Cambiar a main
+          git checkout main
+          
+          # Actualizar main
+          git pull origin main
+          
+          # Fusionar develop en main
+          git merge origin/develop --no-ff -m "Merge develop into main [skip ci]"
+          
+          # Subir los cambios
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

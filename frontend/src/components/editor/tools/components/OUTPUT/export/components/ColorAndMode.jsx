@@ -10,8 +10,8 @@ import React from 'react';
  */
 const ColorAndMode = ({ imageMode, setImageMode }) => {
   const optionsColorMode = [
-    { value: 'RGB', label: 'RGB' },
-    { value: 'Grayscale', label: 'Grayscale' },
+    { value: 'RGB', label: 'Color' },
+    { value: 'Grayscale', label: 'Escala de Grises' },
   ];
   
   return (

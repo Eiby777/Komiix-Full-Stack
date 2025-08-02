@@ -65,7 +65,7 @@ export default function ToolsSideBar() {
           className="absolute top-1/2 -translate-y-1/2 bg-[#1a1a1a] text-white text-sm px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[1000]"
           style={{ left: `${toolbarWidth}px` }}
         >
-          {tool.label} {tool.shortcut && `(${tool.shortcut})`} {isActive && '(Active)'}
+          {tool.label} {tool.shortcut && `(${tool.shortcut})`} {isActive && '(Activo)'}
         </div>
       </div>
     );

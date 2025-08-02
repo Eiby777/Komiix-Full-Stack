@@ -22,7 +22,7 @@ export default function CloneSettings() {
       {/* Slider: Clone Size */}
       <div className="mb-6">
         <label htmlFor="cloneSize" className="block text-sm font-medium mb-1 text-gray-300">
-          Clone Size
+          Tamaño del Clonador
         </label>
         <input
           id="cloneSize"
@@ -33,13 +33,13 @@ export default function CloneSettings() {
           onChange={handleCloneSizeChange}
           className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 accent-blue-600"
         />
-        <div className="text-sm mt-1 text-gray-400">Size: {selectedCloneSize}</div>
+        <div className="text-sm mt-1 text-gray-400">Tamaño: {selectedCloneSize}</div>
       </div>
 
       {/* Slider: Hardness */}
       <div className="mb-6">
         <label htmlFor="hardness" className="block text-sm font-medium mb-1 text-gray-300">
-          Hardness
+          Dureza
         </label>
         <input
           id="hardness"
@@ -50,7 +50,7 @@ export default function CloneSettings() {
           onChange={handleCloneHardnessChange}
           className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 accent-blue-600"
         />
-        <div className="text-sm mt-1 text-gray-400">Hardness: {selectedCloneHardness}</div>
+        <div className="text-sm mt-1 text-gray-400">Dureza: {selectedCloneHardness}</div>
       </div>
     </div>
   );

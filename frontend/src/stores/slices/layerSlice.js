@@ -142,8 +142,8 @@ export const createLayerSlice = (set, get) => ({
     [LAYERS.TEXT.id]: {
       visible: activeLayer === LAYERS.TEXT.id || activeLayer === LAYERS.OUTPUT.id,
       opacity: activeLayer === LAYERS.TEXT.id || activeLayer === LAYERS.OUTPUT.id ? 1 : 0,
-      selectable: activeLayer === LAYERS.TEXT.id,
-      evented: activeLayer === LAYERS.TEXT.id,
+      selectable: false,
+      evented: false,
     },
     [LAYERS.OUTPUT.id]: {
       visible: activeLayer === LAYERS.CLEANUP.id || activeLayer === LAYERS.TEXT.id,
