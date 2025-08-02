@@ -1,11 +1,21 @@
 name: Daily Deploy to Production
 
+# Necesitamos permisos de escritura para poder hacer push
+defaults:
+  run:
+    shell: bash
+
 on:
   schedule:
     # Ejecuta los domingos a las 12:00 AM (medianoche) hora de República Dominicana (GMT-4)
     - cron: '0 4 * * 0'
   # También permite la ejecución manual
   workflow_dispatch:
+
+# Dar permisos explícitos al GITHUB_TOKEN
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   deploy:
@@ -22,12 +32,22 @@ jobs:
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
 
+      - name: Configure Git
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git config --global --add safe.directory /github/workspace
+
       - name: Merge develop into main
         run: |
-          # Asegurarse de tener las referencias remotas
-          git fetch --all
+          # Configurar el remote con el token
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           
-          # Cambiar a main
+          # Asegurarse de tener las referencias remotas
+          git fetch origin
+          
+          # Configurar las ramas
+          git config --global --add safe.directory /github/workspace
           git checkout main
           
           # Actualizar main
