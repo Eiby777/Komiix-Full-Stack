@@ -121,6 +121,7 @@ const useLayerHistory = () => {
 
   const saveState = (targetObject = null, status = null) => {
     if (!canvas || activeImageIndex < 0) return;
+    
     if (!checkObjectProperties(targetObject, status)) return;
     const currentState = updatePreviousObject(targetObject, status);
 
@@ -168,12 +169,14 @@ const useLayerHistory = () => {
     }
     else if (activeLayer === LAYERS.TEXT.id) {
       const text = configTextObject(updateObject, canvas, updateObject.fill, updateObject.id, updateObject);
-      text.layer = LAYERS.TEXT.id;
-      text.text = updateObject.text;
-      text.originalText = updateObject.originalText;
-      text.translatedText = updateObject.translatedText;
-      text.typeText = updateObject.typeText || 'Ninguno';
-      text.angle = updateObject.angle;
+      text.set({
+        text: updateObject.text,
+        originalText: updateObject.originalText,
+        translatedText: updateObject.translatedText,
+        typeText: updateObject.typeText || 'Ninguno',
+        angle: updateObject.angle,
+        layer: LAYERS.TEXT.id
+      });
       canvas.add(text);
       text.setCoords();
       canvas.discardActiveObject();
@@ -210,10 +213,10 @@ const useLayerHistory = () => {
         }
       }
     }
-    else if (layerHistory.length > 1 && !isToolActive(TOOLS.REDRAW.id)) {
+    else if (layerHistory.length > 0 && !isToolActive(TOOLS.REDRAW.id)) {
       const previousState = layerHistory.slice(0, -1);
       const lastHistory = layerHistory[layerHistory.length - 1];
-
+      
       setLayerState(activeLayer, activeImageIndex, previousState);
       setLayerRedoState(activeLayer, activeImageIndex, [
         lastHistory,
@@ -221,7 +224,7 @@ const useLayerHistory = () => {
       ]);
 
       if (lastHistory.status === ObjectStatus.ADD) {
-        const objectToRemove = canvas.getObjects().filter((obj) => obj.id === lastHistory.id);
+        const objectToRemove = canvas.getObjects().filter((obj) => obj.id === lastHistory.id);        
         canvas.remove(...objectToRemove);
         canvas.renderAll();
       }

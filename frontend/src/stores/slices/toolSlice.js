@@ -31,7 +31,6 @@ export const createToolSlice = (set, get) => ({
         }
       }
       
-      console.log("activeTools");
       // Manejar propiedades de textbox en canvas según herramientas activas
       handleTextToolsCanvas(state.activeTools, get);
     }),
@@ -141,19 +140,10 @@ function handleTextToolsCanvas(newActiveTools, get) {
 
   const textTools = [TOOLS.TEXT.id, TOOLS.TEXT_BOX.id, TOOLS.ADJUST_TEXT.id];
   
-  // Usar las nuevas herramientas activas que se pasan como parámetro
   const hasActiveTextTool = textTools.some(tool => newActiveTools.includes(tool));
   
-  console.log('Herramientas activas:', newActiveTools);
-  console.log('Tiene herramienta de texto activa:', hasActiveTextTool);
-  
-  // Iterar sobre todos los objetos del canvas
   canvasInstance.getObjects().forEach(obj => {
-    // Verificar si el objeto es un textbox
-    if (obj.type === 'textbox' || obj.type === 'i-text' || obj.type === 'text') {
-      console.log('Objeto encontrado:', obj.text);
-      console.log('Configurando evented/selectable a:', hasActiveTextTool);
-      
+    if (obj.type === 'textbox') {
       obj.set({
         evented: hasActiveTextTool,
         selectable: hasActiveTextTool

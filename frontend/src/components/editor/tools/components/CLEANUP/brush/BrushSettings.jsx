@@ -28,7 +28,7 @@ export default function BrushSettings() {
       {/* Slider: Brush Size */}
       <div className="mb-6">
         <label htmlFor="brushSize" className="block text-sm font-medium mb-1 text-gray-300">
-          Brush Size
+          Tamaño del Pincel
         </label>
         <input
           id="brushSize"
@@ -39,13 +39,13 @@ export default function BrushSettings() {
           onChange={handleBrushSizeChange}
           className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 accent-blue-600"
         />
-        <div className="text-sm mt-1 text-gray-400">Size: {selectedBrushSize}</div>
+        <div className="text-sm mt-1 text-gray-400">Tamaño: {selectedBrushSize}</div>
       </div>
 
       {/* Slider: Hardness */}
       <div className="mb-6">
         <label htmlFor="hardness" className="block text-sm font-medium mb-1 text-gray-300">
-          Hardness
+          Dureza
         </label>
         <input
           id="hardness"
@@ -56,13 +56,13 @@ export default function BrushSettings() {
           onChange={handleBrushHardnessChange}
           className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-600 accent-blue-600"
         />
-        <div className="text-sm mt-1 text-gray-400">Hardness: {selectedBrushHardness}</div>
+        <div className="text-sm mt-1 text-gray-400">Dureza: {selectedBrushHardness}</div>
       </div>
 
       {/* Color Picker: Brush Color */}
       <div>
         <label htmlFor="brushColor" className="block text-sm font-medium mb-1 text-gray-300">
-          Brush Color
+          Color del Pincel
         </label>
         <input
           id="brushColor"
