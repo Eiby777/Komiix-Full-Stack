@@ -8,7 +8,7 @@ import {
   faUsers, faCog, faQuestionCircle, faRocket
 } from '@fortawesome/free-solid-svg-icons';
 
-const DocsSidebar = ({ activeSection, setActiveSection, isSidebarOpen, setIsSidebarOpen }) => {
+const DocsSidebar = ({ activeSection, setActiveSection, isSidebarOpen, setIsSidebarOpen, isHeaderVisible }) => {
   const menuSections = [
     {
       id: 'getting-started',
@@ -66,9 +66,10 @@ const DocsSidebar = ({ activeSection, setActiveSection, isSidebarOpen, setIsSide
     <>
       {/* Desktop Sidebar */}
       <aside className={`
-        fixed top-20 left-0 h-[calc(100vh-5rem)] w-80 bg-white dark:bg-gray-800 
+        fixed left-0 w-80 bg-white dark:bg-gray-800 
         border-r border-gray-200 dark:border-gray-700 overflow-y-auto z-30
-        transform transition-transform duration-300 ease-in-out
+        transform transition-all duration-300 ease-in-out
+        ${isHeaderVisible ? 'top-20 h-[calc(100vh-5rem)]' : 'top-0 h-screen'}
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="p-6">

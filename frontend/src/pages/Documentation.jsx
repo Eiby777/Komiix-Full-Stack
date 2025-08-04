@@ -10,6 +10,18 @@ export default function Documentation() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeSection, setActiveSection] = useState('introduction');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+
+  // Hook para detectar cuando el header desaparece
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      setIsHeaderVisible(scrollTop < 80); // 80px es aproximadamente la altura del header
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <React.Fragment>
@@ -45,12 +57,15 @@ export default function Documentation() {
               setActiveSection={setActiveSection}
               isSidebarOpen={isSidebarOpen}
               setIsSidebarOpen={setIsSidebarOpen}
+              isHeaderVisible={isHeaderVisible}
             />
 
             {/* Main Content */}
             <main className="flex-1 lg:ml-80">
               {/* Mobile Menu Button */}
-              <div className="lg:hidden sticky top-20 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+              <div className={`lg:hidden sticky z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 transition-all duration-300 ${
+                isHeaderVisible ? 'top-20' : 'top-0'
+              }`}>
                 <button
                   onClick={() => setIsSidebarOpen(true)}
                   className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
