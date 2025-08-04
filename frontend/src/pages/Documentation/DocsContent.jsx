@@ -1,8 +1,8 @@
 import React, { createContext, useState } from 'react';
 import Introduction from './sections/Introduction.jsx';
 import FirstSteps from './sections/FirstSteps';
-/*import Dashboard from './sections/Dashboard';
-import AreasOverview from './sections/AreasOverview';
+import Dashboard from './sections/Dashboard';
+/*import AreasOverview from './sections/AreasOverview';
 import OriginalArea from './sections/OriginalArea';
 import AnnotationArea from './sections/AnnotationArea';
 import CleanupArea from './sections/CleanupArea';
@@ -35,33 +35,131 @@ const DocsContent = ({ activeSection, setActiveSection }) => {
       case 'dashboard':
         return <Dashboard />;
       case 'areas-overview':
-        return <AreasOverview />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Áreas de Trabajo - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'original':
-        return <OriginalArea />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Área Original - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'annotation':
-        return <AnnotationArea />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Área de Anotación - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'cleanup':
-        return <CleanupArea />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Área de Limpieza - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'translation':
-        return <TranslationArea />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Área de Traducción - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'export':
-        return <ExportArea />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Área de Exportación - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'annotation-tools':
-        return <AnnotationTools />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Herramientas de Anotación - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'cleanup-tools':
-        return <CleanupTools />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Herramientas de Limpieza - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'translation-tools':
-        return <TranslationTools />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Herramientas de Traducción - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'navigation-controls':
-        return <NavigationControls />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Controles de Navegación - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'use-cases':
-        return <UseCases />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Casos de Uso - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'best-practices':
-        return <BestPractices />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Mejores Prácticas - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'troubleshooting':
-        return <Troubleshooting />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Solución de Problemas - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       case 'glossary':
-        return <Glossary />;
+        return <div className="p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Glosario de Términos - En Desarrollo
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Esta sección estará disponible próximamente.
+          </p>
+        </div>;
       default:
         return <Introduction />;
     }

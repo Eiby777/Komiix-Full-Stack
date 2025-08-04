@@ -3,8 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faGraduationCap, faUserPlus, faFolderPlus, faImages, 
   faPlay, faCheckCircle, faExclamationTriangle, faLightbulb,
-  faRocket, faDownload, faUpload
+  faRocket, faDownload, faUpload, faTrash
 } from '@fortawesome/free-solid-svg-icons';
+import ClickableImage from '../components/ClickableImage';
 
 const FirstSteps = () => {
   return (
@@ -25,15 +26,17 @@ const FirstSteps = () => {
       </div>
 
       {/* Video Tutorial Placeholder */}
-      <div className="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl p-12 text-center mb-12">
-        <div className="text-gray-500 dark:text-gray-400">
-          <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <ClickableImage
+        isPlaceholder={true}
+        placeholderText="Video: Primeros Pasos con Komiix"
+        placeholderIcon={
+          <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
-          <p className="text-lg font-medium">Video: Primeros Pasos con Komiix</p>
-          <p className="text-sm mt-2">Tutorial paso a paso para nuevos usuarios (5 minutos)</p>
-        </div>
-      </div>
+        }
+        alt="Tutorial paso a paso para nuevos usuarios (5 minutos)"
+        className="mb-12"
+      />
 
       {/* Requisitos del Sistema */}
       <section className="mb-12">
@@ -161,15 +164,16 @@ const FirstSteps = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl p-8 text-center">
-            <div className="text-gray-500 dark:text-gray-400">
-              <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <ClickableImage
+            isPlaceholder={true}
+            placeholderText="GIF: Proceso de registro"
+            placeholderIcon={
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <p className="font-medium">GIF: Proceso de registro</p>
-              <p className="text-sm mt-2">Animación mostrando el flujo de registro completo</p>
-            </div>
-          </div>
+            }
+            alt="Animación mostrando el flujo de registro completo"
+          />
         </div>
       </section>
 
@@ -276,13 +280,12 @@ const FirstSteps = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl p-8 text-center">
-            <div className="text-gray-500 dark:text-gray-400">
-              <FontAwesomeIcon icon={faFolderPlus} className="w-16 h-16 mx-auto mb-4" />
-              <p className="font-medium">GIF: Creación de proyecto</p>
-              <p className="text-sm mt-2">Demostración completa del proceso de creación</p>
-            </div>
-          </div>
+          <ClickableImage
+            isPlaceholder={true}
+            placeholderText="GIF: Creación de proyecto"
+            placeholderIcon={<FontAwesomeIcon icon={faFolderPlus} className="w-16 h-16 mx-auto" />}
+            alt="Demostración completa del proceso de creación"
+          />
         </div>
       </section>
 
@@ -310,29 +313,24 @@ const FirstSteps = () => {
                 </span>
               </div>
               <div className="flex items-center space-x-3">
-                <FontAwesomeIcon icon={faDownload} className="w-5 h-5 text-blue-500" />
+                <FontAwesomeIcon icon={faTrash} className="w-5 h-5 text-red-500" />
                 <span className="text-gray-700 dark:text-gray-300">
-                  <strong>Exportar:</strong> Descarga el proyecto para backup
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <FontAwesomeIcon icon={faUpload} className="w-5 h-5 text-orange-500" />
-                <span className="text-gray-700 dark:text-gray-300">
-                  <strong>Cargar:</strong> Importa un proyecto exportado
+                  <strong>Eliminar:</strong> Borra el proyecto permanentemente
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl p-8 text-center">
-            <div className="text-gray-500 dark:text-gray-400">
-              <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <ClickableImage
+            isPlaceholder={true}
+            placeholderText="Imagen: Dashboard con proyectos"
+            placeholderIcon={
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
-              <p className="font-medium">Imagen: Dashboard con proyectos</p>
-              <p className="text-sm mt-2">Vista del dashboard mostrando proyectos creados</p>
-            </div>
-          </div>
+            }
+            alt="Vista del dashboard mostrando proyectos creados"
+          />
         </div>
       </section>
 
