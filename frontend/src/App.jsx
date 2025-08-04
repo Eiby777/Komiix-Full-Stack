@@ -10,6 +10,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ConfirmSignup from './pages/ConfirmSignup'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
+import Documentation from './pages/Documentation'
 import NotFound from './pages/NotFound'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -19,22 +20,17 @@ export default function App() {
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/editor/:projectId" 
-            element={
-              <ProtectedRoute>
-                <Editor />
-              </ProtectedRoute>
-            } 
-          />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/editor/:projectId" element={
+            <ProtectedRoute>
+              <Editor />
+            </ProtectedRoute>
+          } />
+          <Route path="/docs" element={<Documentation />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />

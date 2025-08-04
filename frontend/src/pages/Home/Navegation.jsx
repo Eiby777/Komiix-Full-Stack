@@ -65,6 +65,11 @@ const Navigation = ({ setShowAuthModal }) => {
     setIsMenuOpen(false);
   };
 
+  const handleDocsClick = () => {
+    navigate('/docs');
+    setIsMenuOpen(false);
+  };
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -83,6 +88,12 @@ const Navigation = ({ setShowAuthModal }) => {
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-4">
+          <button
+            onClick={handleDocsClick}
+            className="px-4 py-2 text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 font-medium transition-colors duration-200"
+          >
+            Documentación
+          </button>
           <button
             onClick={toggleTheme}
             className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
@@ -235,6 +246,12 @@ const Navigation = ({ setShowAuthModal }) => {
         {isMenuOpen && (
           <div className="absolute top-full left-0 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 md:hidden">
             <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
+              <button
+                onClick={handleDocsClick}
+                className="w-full text-left px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+              >
+                Documentación
+              </button>
               {isAuthenticated ? (
                 <button
                   onClick={handleDashboardClick}
