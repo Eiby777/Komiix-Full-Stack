@@ -23,6 +23,9 @@ const ImageModal = ({ isOpen, imageSrc, imageAlt, onClose }) => {
 
   if (!isOpen) return null;
 
+  // Detectar si es un video basado en la extensión del archivo
+  const isVideo = imageSrc && /\.(mp4|webm|ogg|mov)$/i.test(imageSrc);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay oscuro */}
@@ -42,15 +45,29 @@ const ImageModal = ({ isOpen, imageSrc, imageAlt, onClose }) => {
           <FontAwesomeIcon icon={faTimes} className="w-6 h-6" />
         </button>
 
-        {/* Contenedor de la imagen */}
+        {/* Contenedor de la imagen/video */}
         <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden">
-          {/* Imagen */}
-          <img
-            src={imageSrc}
-            alt={imageAlt}
-            className="max-w-full max-h-[90vh] object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {isVideo ? (
+            // Video con controles
+            <video
+              src={imageSrc}
+              className="max-w-full max-h-[90vh] object-contain"
+              controls
+              autoPlay
+              loop
+              muted
+              playsInline
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            // Imagen
+            <img
+              src={imageSrc}
+              alt={imageAlt}
+              className="max-w-full max-h-[90vh] object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
           
           {/* Overlay de información */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">

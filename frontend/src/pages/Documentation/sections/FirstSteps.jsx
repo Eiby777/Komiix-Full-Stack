@@ -167,7 +167,7 @@ const FirstSteps = () => {
           </div>
 
           <ClickableImage
-            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/introduction/register.gif"
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/introduction/register.mp4"
             isPlaceholder={false}
             placeholderText="GIF: Proceso de registro"
             placeholderIcon={

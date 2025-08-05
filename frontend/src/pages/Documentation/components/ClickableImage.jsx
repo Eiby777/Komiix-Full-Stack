@@ -19,6 +19,9 @@ const ClickableImage = ({
     }
   };
 
+  // Detectar si es un video basado en la extensión del archivo
+  const isVideo = src && /\.(mp4|webm|ogg|mov)$/i.test(src);
+
   return (
     <>
       <div 
@@ -43,6 +46,17 @@ const ClickableImage = ({
               <p className="text-sm mt-2">Haz clic para ver la imagen</p>
             </div>
           </div>
+        ) : isVideo ? (
+          // Video con reproducción automática y en bucle
+          <video
+            src={src}
+            className="w-full h-full object-cover"
+            autoPlay
+            loop
+            muted
+            playsInline
+            controls={false}
+          />
         ) : (
           // Imagen real
           <img
