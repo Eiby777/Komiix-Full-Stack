@@ -100,7 +100,8 @@ const Introduction = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/introduction/workspace.webp"
+            isPlaceholder={false}
             placeholderText="Imagen/GIF del workspace principal"
             placeholderIcon={
               <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
