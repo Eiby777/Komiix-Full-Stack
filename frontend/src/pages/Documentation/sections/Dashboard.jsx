@@ -234,7 +234,8 @@ const Dashboard = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/introduction/proyect_buttons.mp4"
+            isPlaceholder={false}
             placeholderText="GIF: Gestión de proyectos"
             placeholderIcon={<FontAwesomeIcon icon={faFolderPlus} className="w-16 h-16 mx-auto" />}
             alt="Demostración de creación y gestión de proyectos"

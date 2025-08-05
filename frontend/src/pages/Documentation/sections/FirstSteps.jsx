@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faGraduationCap, faUserPlus, faFolderPlus, faImages, 
+import {
+  faGraduationCap, faUserPlus, faFolderPlus, faImages,
   faPlay, faCheckCircle, faExclamationTriangle, faLightbulb,
   faRocket, faDownload, faUpload, faTrash
 } from '@fortawesome/free-solid-svg-icons';
@@ -107,8 +107,8 @@ const FirstSteps = () => {
                 Consejo de Rendimiento
               </h4>
               <p className="text-amber-700 dark:text-amber-200 text-sm">
-                Para mejor rendimiento, cierra otras pestañas pesadas y asegúrate de tener al menos 
-                2GB de RAM disponible. Los modelos de IA funcionan mejor en dispositivos con 
+                Para mejor rendimiento, cierra otras pestañas pesadas y asegúrate de tener al menos
+                2GB de RAM disponible. Los modelos de IA funcionan mejor en dispositivos con
                 hardware de aceleración gráfica.
               </p>
             </div>
@@ -131,7 +131,7 @@ const FirstSteps = () => {
               Registro Rápido con Google
             </h3>
             <p className="text-gray-700 dark:text-gray-300 mb-6">
-              Komiix utiliza Supabase para la autenticación, ofreciendo un proceso seguro y 
+              Komiix utiliza Supabase para la autenticación, ofreciendo un proceso seguro y
               confiable. El registro con Google es instantáneo y no requiere verificación adicional.
             </p>
 
@@ -236,7 +236,7 @@ const FirstSteps = () => {
                   Consejo para Manhwa
                 </p>
                 <p className="text-blue-700 dark:text-blue-200 text-sm">
-                  Si trabajas con manhwa (imágenes muy largas), usa primero la herramienta 
+                  Si trabajas con manhwa (imágenes muy largas), usa primero la herramienta
                   ImageMerge para cortar las páginas en secciones manejables con proporción 7:10.
                 </p>
               </div>
@@ -249,7 +249,7 @@ const FirstSteps = () => {
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Pasos para Crear el Proyecto
             </h3>
-            
+
             <div className="space-y-6">
               <div className="flex items-start space-x-4">
                 <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
@@ -284,7 +284,8 @@ const FirstSteps = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/introduction/create_proyect.mp4"
+            isPlaceholder={false}
             placeholderText="GIF: Creación de proyecto"
             placeholderIcon={<FontAwesomeIcon icon={faFolderPlus} className="w-16 h-16 mx-auto" />}
             alt="Demostración completa del proceso de creación"
@@ -304,7 +305,7 @@ const FirstSteps = () => {
         <div className="grid lg:grid-cols-2 gap-8 mb-8">
           <div>
             <p className="text-gray-700 dark:text-gray-300 mb-6">
-              Una vez creado tu proyecto, aparecerá en la lista del dashboard. Cada proyecto 
+              Una vez creado tu proyecto, aparecerá en la lista del dashboard. Cada proyecto
               muestra una vista previa de las imágenes subidas en modo collage y herramientas de gestión.
             </p>
 
@@ -325,7 +326,8 @@ const FirstSteps = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+          src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/introduction/workspace.webp"
+            isPlaceholder={false}
             placeholderText="Imagen: Dashboard con proyectos"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -349,7 +351,7 @@ const FirstSteps = () => {
               Sidebar Izquierdo
             </h3>
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-              Contiene todas las herramientas organizadas por área de trabajo. Cambia dinámicamente 
+              Contiene todas las herramientas organizadas por área de trabajo. Cambia dinámicamente
               según el área activa.
             </p>
             <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
@@ -364,7 +366,7 @@ const FirstSteps = () => {
               Canvas Central
             </h3>
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-              Aquí visualizas y editas una imagen a la vez. Utiliza Fabric.js para manipulación 
+              Aquí visualizas y editas una imagen a la vez. Utiliza Fabric.js para manipulación
               avanzada de objetos.
             </p>
             <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
@@ -379,7 +381,7 @@ const FirstSteps = () => {
               Panel de Configuración
             </h3>
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-              Sidebar derecho con opciones específicas de cada herramienta. Se oculta automáticamente 
+              Sidebar derecho con opciones específicas de cada herramienta. Se oculta automáticamente
               cuando no hay configuraciones.
             </p>
             <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
@@ -396,16 +398,16 @@ const FirstSteps = () => {
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
           ¿Qué Sigue?
         </h2>
-        
+
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-8">
           <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
-            ¡Felicidades! Has completado la configuración inicial. Ahora estás listo para explorar 
-            las cinco áreas de trabajo que transformarán tus imágenes de manga en traducciones 
+            ¡Felicidades! Has completado la configuración inicial. Ahora estás listo para explorar
+            las cinco áreas de trabajo que transformarán tus imágenes de manga en traducciones
             profesionales.
           </p>
-          
+
           <div className="grid md:grid-cols-2 gap-4">
-            <button 
+            <button
               onClick={() => setActiveSection('dashboard')}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
             >
@@ -414,7 +416,7 @@ const FirstSteps = () => {
                 <FontAwesomeIcon icon={faRocket} className="w-5 h-5" />
               </div>
             </button>
-            <button 
+            <button
               onClick={() => setActiveSection('areas-overview')}
               className="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
             >

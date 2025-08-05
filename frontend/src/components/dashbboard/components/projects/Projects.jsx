@@ -113,7 +113,7 @@ const Projects = ({
                                 </div>
                                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-blue-500/20 group-hover:from-blue-500/20 group-hover:to-blue-500/40 opacity-0 group-hover:opacity-100 transition-all duration-300" />
                                 <span className="absolute bottom-4 text-sm font-semibold text-gray-600 dark:text-gray-300 group-hover:text-blue-500 dark:group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                    New Project
+                                    Nuevo Proyecto
                                 </span>
                             </button>
 

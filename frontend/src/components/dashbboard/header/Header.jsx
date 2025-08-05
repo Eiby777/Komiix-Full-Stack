@@ -180,13 +180,13 @@ export default function Header({
               onClick={() => setShowSettingsModal(true)}
               className="block w-full text-left px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
             >
-              Settings
+              Configuración
             </button>
             <button
               onClick={handleLogout}
               className="block w-full text-left px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
             >
-              Logout
+              Cerrar sesión
             </button>
           </div>
         )}
