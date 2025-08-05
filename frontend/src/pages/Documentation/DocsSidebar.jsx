@@ -41,6 +41,7 @@ const DocsSidebar = ({ activeSection, setActiveSection, isSidebarOpen, setIsSide
         { id: 'annotation-tools', title: 'Herramientas de Anotación', icon: faSquareRegular },
         { id: 'cleanup-tools', title: 'Herramientas de Limpieza', icon: faPaintBrush },
         { id: 'translation-tools', title: 'Herramientas de Traducción', icon: faFont },
+        { id: 'editor-header', title: 'Header del Editor', icon: faLayerGroup },
         { id: 'navigation-controls', title: 'Controles de Navegación', icon: faHandPaper },
       ]
     },
@@ -50,7 +51,6 @@ const DocsSidebar = ({ activeSection, setActiveSection, isSidebarOpen, setIsSide
       icon: faUsers,
       items: [
         { id: 'use-cases', title: 'Casos de Uso', icon: faLightbulb },
-        { id: 'best-practices', title: 'Mejores Prácticas', icon: faUsers },
         { id: 'troubleshooting', title: 'Solución de Problemas', icon: faQuestionCircle },
         { id: 'glossary', title: 'Glosario de Términos', icon: faBookOpen },
       ]
