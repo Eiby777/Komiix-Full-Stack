@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faBook, faImage, faPalette, faLanguage, faDownload,
@@ -10,8 +10,10 @@ import {
   faDesktop, faMobile, faTablet, faLaptop, faGlobe, faUser, faUsers, faSuitcase
 } from '@fortawesome/free-solid-svg-icons';
 import ClickableImage from '../components/ClickableImage';
+import { DocsContext } from '../DocsContent';
 
 const UseCases = () => {
+  const { setActiveSection } = useContext(DocsContext);
   return (
     <div className="p-8">
       {/* Header */}
@@ -653,6 +655,44 @@ const UseCases = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Próximos Pasos */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          ¿Qué Sigue?
+        </h2>
+        
+        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-8">
+          <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
+            Ahora que conoces los casos de uso y aplicaciones prácticas, puedes explorar la 
+            sección de Solución de Problemas para aprender cómo resolver los desafíos más 
+            comunes que pueden surgir durante el proceso de scanlation.
+          </p>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <button 
+              onClick={() => setActiveSection('troubleshooting')}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <span>Explorar Solución de Problemas</span>
+                <FontAwesomeIcon icon={faRocket} className="w-5 h-5" />
+              </div>
+            </button>
+            <button 
+              onClick={() => setActiveSection('navigation-controls')}
+              className="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <span>Volver a Controles de Navegación</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </div>
+            </button>
           </div>
         </div>
       </section>

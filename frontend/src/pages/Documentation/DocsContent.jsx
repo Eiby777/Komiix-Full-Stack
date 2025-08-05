@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect, useRef } from 'react';
 import Introduction from './sections/Introduction.jsx';
 import FirstSteps from './sections/FirstSteps';
 import Dashboard from './sections/Dashboard';
@@ -21,11 +21,49 @@ import Glossary from './sections/Glossary';
 export const DocsContext = createContext();
 
 const DocsContent = ({ activeSection, setActiveSection }) => {
+  const contentRef = useRef(null);
+  
   // Context value that will be available to child components
   const contextValue = {
     activeSection,
     setActiveSection
   };
+
+  // Enhanced scroll to top when activeSection changes
+  useEffect(() => {
+    const scrollToTop = () => {
+      // Try multiple scroll methods for better compatibility
+      try {
+        // Method 1: Scroll the window
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Method 2: Scroll the content container if it exists
+        if (contentRef.current) {
+          contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Method 3: Scroll document element
+        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Method 4: Scroll body element
+        document.body.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (error) {
+        // Fallback to instant scroll if smooth scroll fails
+        window.scrollTo(0, 0);
+        if (contentRef.current) {
+          contentRef.current.scrollTop = 0;
+        }
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
+    };
+
+    // Use a small delay to ensure the component has rendered
+    const timeoutId = setTimeout(scrollToTop, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, [activeSection]);
+
   const renderContent = () => {
     switch (activeSection) {
       case 'introduction':
@@ -54,7 +92,7 @@ const DocsContent = ({ activeSection, setActiveSection }) => {
         return <TranslationTools />;
       case 'navigation-controls':
         return <NavigationControls />;
-      case 'editor-header':
+      case 'editor-header': // Panel de Control Principal
         return <EditorHeader />;
       case 'use-cases':
         return <UseCases />;
@@ -69,7 +107,10 @@ const DocsContent = ({ activeSection, setActiveSection }) => {
 
   return (
     <DocsContext.Provider value={contextValue}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg min-h-[calc(100vh-8rem)]">
+      <div 
+        ref={contentRef}
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-lg min-h-[calc(100vh-8rem)]"
+      >
         {renderContent()}
       </div>
     </DocsContext.Provider>

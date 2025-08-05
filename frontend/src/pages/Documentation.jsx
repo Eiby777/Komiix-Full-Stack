@@ -46,7 +46,7 @@ export default function Documentation() {
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
               <div 
-                className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
                 onClick={() => setIsSidebarOpen(false)}
               />
             )}
@@ -63,7 +63,7 @@ export default function Documentation() {
             {/* Main Content */}
             <main className="flex-1 lg:ml-80">
               {/* Mobile Menu Button */}
-              <div className={`lg:hidden sticky z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 transition-all duration-300 ${
+              <div className={`lg:hidden sticky z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 transition-all duration-300 ${
                 isHeaderVisible ? 'top-20' : 'top-0'
               }`}>
                 <button

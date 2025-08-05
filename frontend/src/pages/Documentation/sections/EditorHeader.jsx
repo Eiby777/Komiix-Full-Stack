@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faChevronLeft, faChevronRight, faTachometerAlt, faFileArchive, 
   faSave, faUpload, faChevronDown, faTimes, faImage,
   faPercent, faKeyboard, faMousePointer, faCog, faDesktop,
-  faLayerGroup, faUndo, faRedo, faFileImport, faFileExport
+  faLayerGroup, faUndo, faRedo, faFileImport, faFileExport, faRocket
 } from '@fortawesome/free-solid-svg-icons';
 import ClickableImage from '../components/ClickableImage';
+import { DocsContext } from '../DocsContent';
 
 const EditorHeader = () => {
+  const { setActiveSection } = useContext(DocsContext);
   return (
     <div className="p-8">
       {/* Header */}
@@ -18,10 +20,10 @@ const EditorHeader = () => {
         </div>
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
-            Header del Editor
+            Panel de Control Principal
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mt-2">
-            Panel de control principal para navegación y gestión de proyectos
+            Navegación, gestión y control de proyectos
           </p>
         </div>
       </div>
@@ -29,13 +31,13 @@ const EditorHeader = () => {
       {/* Video Tutorial Placeholder */}
       <ClickableImage
         isPlaceholder={true}
-        placeholderText="Video: Funciones del Header del Editor"
+        placeholderText="Video: Panel de Control Principal"
         placeholderIcon={
           <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
         }
-        alt="Tutorial del header del editor (8 minutos)"
+        alt="Tutorial del panel de control principal (8 minutos)"
         className="mb-12"
       />
 
@@ -500,6 +502,132 @@ const EditorHeader = () => {
                 <li>• Usa el dashboard para organizar proyectos</li>
               </ul>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Navigation Controls */}
+      <section className="mb-12">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
+          Navegación de Imágenes
+        </h2>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="grid lg:grid-cols-2 gap-8">
+            <div>
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Funcionalidades</h4>
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 dark:text-white">Botones de Navegación</h5>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Botones de anterior/siguiente para moverse entre imágenes. 
+                      Se deshabilitan automáticamente en los extremos de la lista.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 dark:text-white">Input de Navegación</h5>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Campo de texto para saltar directamente a una imagen específica. 
+                      Valida automáticamente el rango y se actualiza al perder el foco o presionar Enter.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 dark:text-white">Barra de Progreso</h5>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Muestra el progreso visual del proyecto con porcentaje de completado. 
+                      Se actualiza automáticamente al cambiar de imagen.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">4</div>
+                  <div>
+                    <h5 className="font-medium text-gray-900 dark:text-white">Indicadores de Estado</h5>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Muestra "Image X of Y" y el porcentaje de completado. 
+                      Se actualiza en tiempo real durante la navegación.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Características Técnicas</h4>
+              <div className="space-y-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                  <h5 className="font-medium text-blue-800 dark:text-blue-300 mb-2">Escalado Responsivo</h5>
+                  <p className="text-sm text-blue-700 dark:text-blue-200">
+                    Todos los elementos se escalan proporcionalmente basándose en la altura del header. 
+                    Factor de escala mínimo de 0.7 para mantener legibilidad.
+                  </p>
+                </div>
+
+                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                  <h5 className="font-medium text-green-800 dark:text-green-300 mb-2">Estados de Botones</h5>
+                  <p className="text-sm text-green-700 dark:text-green-200">
+                    Los botones cambian de color y se deshabilitan automáticamente cuando no hay 
+                    más imágenes en esa dirección. Transiciones suaves para mejor UX.
+                  </p>
+                </div>
+
+                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                  <h5 className="font-medium text-purple-800 dark:text-purple-300 mb-2">Validación de Input</h5>
+                  <p className="text-sm text-purple-700 dark:text-purple-200">
+                    El campo de texto valida automáticamente el rango (1 a total de imágenes) 
+                    y restaura el valor anterior si es inválido.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Próximos Pasos */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          ¿Qué Sigue?
+        </h2>
+        
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-8">
+          <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
+            Ahora que conoces el Panel de Control Principal, puedes explorar los Controles de Navegación 
+            para aprender sobre las herramientas avanzadas de navegación, zoom, desplazamiento y 
+            gestión de capas en el editor.
+          </p>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <button 
+              onClick={() => setActiveSection('navigation-controls')}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <span>Explorar Controles de Navegación</span>
+                <FontAwesomeIcon icon={faRocket} className="w-5 h-5" />
+              </div>
+            </button>
+            <button 
+              onClick={() => setActiveSection('translation-tools')}
+              className="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <span>Volver a Herramientas de Traducción</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </div>
+            </button>
           </div>
         </div>
       </section>

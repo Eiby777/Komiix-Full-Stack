@@ -66,8 +66,7 @@ const Introduction = () => {
             <h3 className="font-semibold text-blue-600 dark:text-blue-400 mb-2">Nuestra Misión</h3>
             <p className="text-gray-700 dark:text-gray-300">
               Democratizar las herramientas profesionales de scanlation, reduciendo el tiempo de 
-              trabajo de horas a minutos, mientras mantenemos la más alta calidad y respetamos 
-              el arte original de los mangakas.
+              trabajo de horas a minutos, mientras mantenemos la más alta calidad.
             </p>
           </div>
         </div>

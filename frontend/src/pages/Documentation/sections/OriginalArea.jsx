@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faImage, faHandPaper, faEye, faCheckCircle, 
   faLightbulb, faRocket, faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 import ClickableImage from '../components/ClickableImage';
+import { DocsContext } from '../DocsContent';
 
 const OriginalArea = () => {
+  const { setActiveSection } = useContext(DocsContext);
   return (
     <div className="p-8">
       {/* Header */}
@@ -100,37 +102,7 @@ const OriginalArea = () => {
             </div>
           </div>
 
-          {/* Vista Original */}
-          <div className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-600">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
-                <FontAwesomeIcon icon={faEye} className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Vista Original</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Sin modificaciones</p>
-              </div>
-            </div>
-            <p className="text-gray-700 dark:text-gray-300 mb-4">
-              En el Área Original, la imagen se muestra exactamente como fue cargada, sin 
-              ninguna anotación, limpieza o texto agregado. Es la vista más limpia para 
-              evaluar el trabajo original.
-            </p>
-            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <div className="flex items-center space-x-2">
-                <FontAwesomeIcon icon={faCheckCircle} className="w-4 h-4 text-green-500" />
-                <span>Imagen sin modificaciones</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <FontAwesomeIcon icon={faCheckCircle} className="w-4 h-4 text-green-500" />
-                <span>Calidad original preservada</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <FontAwesomeIcon icon={faCheckCircle} className="w-4 h-4 text-green-500" />
-                <span>Evaluación inicial del contenido</span>
-              </div>
-            </div>
-          </div>
+          
         </div>
       </section>
 
@@ -245,13 +217,19 @@ const OriginalArea = () => {
           </p>
           
           <div className="grid md:grid-cols-2 gap-4">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left">
+            <button 
+              onClick={() => setActiveSection('annotation')}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
               <div className="flex items-center justify-between">
                 <span>Continuar a Anotación</span>
                 <FontAwesomeIcon icon={faRocket} className="w-5 h-5" />
               </div>
             </button>
-            <button className="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left">
+            <button 
+              onClick={() => setActiveSection('annotation-tools')}
+              className="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
               <div className="flex items-center justify-between">
                 <span>Ver Herramientas de Anotación</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

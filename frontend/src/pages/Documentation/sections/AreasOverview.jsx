@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faWandMagicSparkles, faImage, faSquare as faSquareRegular, 
@@ -6,8 +6,10 @@ import {
   faCheckCircle, faLightbulb, faRocket, faLayerGroup
 } from '@fortawesome/free-solid-svg-icons';
 import ClickableImage from '../components/ClickableImage';
+import { DocsContext } from '../DocsContent';
 
 const AreasOverview = () => {
+  const { setActiveSection } = useContext(DocsContext);
   return (
     <div className="p-8">
       {/* Header */}
@@ -337,13 +339,19 @@ const AreasOverview = () => {
           </p>
           
           <div className="grid md:grid-cols-2 gap-4">
-            <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left">
+            <button 
+              onClick={() => setActiveSection('original')}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
               <div className="flex items-center justify-between">
                 <span>Explorar Área Original</span>
                 <FontAwesomeIcon icon={faRocket} className="w-5 h-5" />
               </div>
             </button>
-            <button className="border border-purple-600 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left">
+            <button 
+              onClick={() => setActiveSection('annotation-tools')}
+              className="border border-purple-600 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
               <div className="flex items-center justify-between">
                 <span>Ver Herramientas Detalladas</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

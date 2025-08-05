@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faFont, faBox, faPen, faSearch, faEye, faSliders, 
@@ -11,8 +11,10 @@ import {
   faExpand, faCompress, faCrop, faEyeSlash, faAdjust, faFillDrip
 } from '@fortawesome/free-solid-svg-icons';
 import ClickableImage from '../components/ClickableImage';
+import { DocsContext } from '../DocsContent';
 
 const TranslationTools = () => {
+  const { setActiveSection } = useContext(DocsContext);
   return (
     <div className="p-8">
       {/* Header */}
@@ -717,6 +719,44 @@ const TranslationTools = () => {
               </p>
             </div>
           </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Próximos Pasos */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          ¿Qué Sigue?
+        </h2>
+        
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-8">
+          <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
+            Ahora que dominas todas las herramientas de traducción, puedes explorar el 
+            Panel de Control Principal para aprender sobre la navegación entre imágenes, 
+            gestión de proyectos y funciones de guardado y exportación.
+          </p>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <button 
+              onClick={() => setActiveSection('editor-header')}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <span>Explorar Panel de Control</span>
+                <FontAwesomeIcon icon={faRocket} className="w-5 h-5" />
+              </div>
+            </button>
+            <button 
+              onClick={() => setActiveSection('translation')}
+              className="border border-purple-600 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <span>Volver al Área de Traducción</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </div>
+            </button>
           </div>
         </div>
       </section>

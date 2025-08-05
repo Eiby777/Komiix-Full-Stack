@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faExclamationTriangle, faCheckCircle, faTimes, faInfoCircle,
@@ -7,11 +7,14 @@ import {
   faEye, faEyeSlash, faLayerGroup, faFont, faPalette,
   faMagic, faBrush, faEraser, faClone, faFileImage,
   faFileArchive, faServer, faGlobe, faWifi,
-  faMemory, faHdd, faMicrochip, faDesktop, faMobile, faTablet
+  faMemory, faHdd, faMicrochip, faDesktop, faMobile, faTablet,
+  faRocket
 } from '@fortawesome/free-solid-svg-icons';
 import ClickableImage from '../components/ClickableImage';
+import { DocsContext } from '../DocsContent';
 
 const Troubleshooting = () => {
+  const { setActiveSection } = useContext(DocsContext);
   return (
     <div className="p-8">
       {/* Header */}
@@ -596,6 +599,44 @@ const Troubleshooting = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Próximos Pasos */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          ¿Qué Sigue?
+        </h2>
+        
+        <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl p-8">
+          <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
+            Ahora que conoces cómo resolver los problemas más comunes, puedes explorar el 
+            Glosario de Términos para familiarizarte con la terminología técnica y los 
+            conceptos específicos utilizados en Komiix y el mundo del scanlation.
+          </p>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <button 
+              onClick={() => setActiveSection('glossary')}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <span>Explorar Glosario de Términos</span>
+                <FontAwesomeIcon icon={faRocket} className="w-5 h-5" />
+              </div>
+            </button>
+            <button 
+              onClick={() => setActiveSection('use-cases')}
+              className="border border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <span>Volver a Casos de Uso</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </div>
+            </button>
           </div>
         </div>
       </section>

@@ -32,7 +32,7 @@ const ImageModal = ({ isOpen, imageSrc, imageAlt, onClose }) => {
       />
       
       {/* Contenedor del modal */}
-      <div className="relative z-10 max-w-4xl max-h-[90vh] mx-4">
+      <div className="relative z-10 max-w-7xl max-h-[95vh] mx-4">
         {/* Botón de cerrar */}
         <button
           onClick={onClose}
@@ -48,7 +48,7 @@ const ImageModal = ({ isOpen, imageSrc, imageAlt, onClose }) => {
           <img
             src={imageSrc}
             alt={imageAlt}
-            className="max-w-full max-h-[80vh] object-contain"
+            className="max-w-full max-h-[90vh] object-contain"
             onClick={(e) => e.stopPropagation()}
           />
           

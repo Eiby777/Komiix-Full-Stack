@@ -1,17 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faUndo, faRedo, faLayerGroup, faSearch, faCog, 
   faCheckCircle, faLightbulb, faRocket, faInfoCircle,
-  faMousePointer, faPalette, faExpand,
-  faCompress, faImage, faFileAlt, faArchive, faRuler,
-  faCrop, faMagic, faEye, faEyeSlash, faGear, faShield,
-  faNetworkWired, faFileCode, faArrowsAltH, faMinus,
-  faPlus, faRotateLeft, faTimes, faChevronUp, faChevronDown
+  faRuler,faMinus,faPlus, faRotateLeft
 } from '@fortawesome/free-solid-svg-icons';
 import ClickableImage from '../components/ClickableImage';
+import { DocsContext } from '../DocsContent';
 
 const NavigationControls = () => {
+  const { setActiveSection } = useContext(DocsContext);
   return (
     <div className="p-8">
       {/* Header */}
@@ -708,6 +706,44 @@ const NavigationControls = () => {
                 y aprovecha el historial de Undo/Redo para trabajar con confianza.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Próximos Pasos */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          ¿Qué Sigue?
+        </h2>
+        
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-8">
+          <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
+            Ahora que dominas los controles de navegación, puedes explorar los Casos de Uso 
+            para ver ejemplos prácticos de cómo aplicar todas las herramientas y técnicas 
+            que has aprendido en proyectos reales de scanlation.
+          </p>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            <button 
+              onClick={() => setActiveSection('use-cases')}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <span>Explorar Casos de Uso</span>
+                <FontAwesomeIcon icon={faRocket} className="w-5 h-5" />
+              </div>
+            </button>
+            <button 
+              onClick={() => setActiveSection('editor-header')}
+              className="border border-indigo-600 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <span>Volver al Panel de Control</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </div>
+            </button>
           </div>
         </div>
       </section>

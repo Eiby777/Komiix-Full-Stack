@@ -41,7 +41,7 @@ const DocsSidebar = ({ activeSection, setActiveSection, isSidebarOpen, setIsSide
         { id: 'annotation-tools', title: 'Herramientas de Anotación', icon: faSquareRegular },
         { id: 'cleanup-tools', title: 'Herramientas de Limpieza', icon: faPaintBrush },
         { id: 'translation-tools', title: 'Herramientas de Traducción', icon: faFont },
-        { id: 'editor-header', title: 'Header del Editor', icon: faLayerGroup },
+        { id: 'editor-header', title: 'Panel de Control Principal', icon: faLayerGroup },
         { id: 'navigation-controls', title: 'Controles de Navegación', icon: faHandPaper },
       ]
     },
@@ -60,6 +60,20 @@ const DocsSidebar = ({ activeSection, setActiveSection, isSidebarOpen, setIsSide
   const handleItemClick = (itemId) => {
     setActiveSection(itemId);
     setIsSidebarOpen(false); // Close mobile sidebar on selection
+    
+    // Force scroll to top after a brief delay to ensure state update
+    setTimeout(() => {
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+        document.body.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (error) {
+        // Fallback to instant scroll
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
+    }, 50);
   };
 
   return (

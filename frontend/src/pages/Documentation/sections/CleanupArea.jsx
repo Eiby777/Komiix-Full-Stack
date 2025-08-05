@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faPaintBrush, faEraser, faClone, faMagic, faPen, 
@@ -7,8 +7,10 @@ import {
   faUndo, faRedo, faTrash, faBrain, faWandMagicSparkles
 } from '@fortawesome/free-solid-svg-icons';
 import ClickableImage from '../components/ClickableImage';
+import { DocsContext } from '../DocsContent';
 
 const CleanupArea = () => {
+  const { setActiveSection } = useContext(DocsContext);
   return (
     <div className="p-8">
       {/* Header */}
@@ -492,13 +494,19 @@ const CleanupArea = () => {
           </p>
           
           <div className="grid md:grid-cols-2 gap-4">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left">
+            <button 
+              onClick={() => setActiveSection('translation')}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
               <div className="flex items-center justify-between">
                 <span>Continuar a Traducción</span>
                 <FontAwesomeIcon icon={faRocket} className="w-5 h-5" />
               </div>
             </button>
-            <button className="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left">
+            <button 
+              onClick={() => setActiveSection('translation-tools')}
+              className="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
               <div className="flex items-center justify-between">
                 <span>Ver Herramientas Detalladas</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

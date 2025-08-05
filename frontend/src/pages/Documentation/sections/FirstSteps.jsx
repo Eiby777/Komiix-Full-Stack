@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faGraduationCap, faUserPlus, faFolderPlus, faImages, 
@@ -6,8 +6,10 @@ import {
   faRocket, faDownload, faUpload, faTrash
 } from '@fortawesome/free-solid-svg-icons';
 import ClickableImage from '../components/ClickableImage';
+import { DocsContext } from '../DocsContent';
 
 const FirstSteps = () => {
+  const { setActiveSection } = useContext(DocsContext);
   return (
     <div className="p-8">
       {/* Header */}
@@ -79,11 +81,11 @@ const FirstSteps = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span className="text-gray-700 dark:text-gray-300">RAM: 4GB mínimo, 8GB recomendado</span>
+                <span className="text-gray-700 dark:text-gray-300">RAM: 2GB mínimo, 4GB recomendado</span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-gray-700 dark:text-gray-300">Almacenamiento: 2GB libres para proyectos</span>
+                <span className="text-gray-700 dark:text-gray-300">Almacenamiento: 500MB libres para proyectos</span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
@@ -165,7 +167,8 @@ const FirstSteps = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/introduction/register.gif"
+            isPlaceholder={false}
             placeholderText="GIF: Proceso de registro"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,7 +305,7 @@ const FirstSteps = () => {
           <div>
             <p className="text-gray-700 dark:text-gray-300 mb-6">
               Una vez creado tu proyecto, aparecerá en la lista del dashboard. Cada proyecto 
-              muestra una vista previa de la primera imagen y herramientas de gestión.
+              muestra una vista previa de las imágenes subidas en modo collage y herramientas de gestión.
             </p>
 
             <div className="space-y-4">
@@ -402,13 +405,19 @@ const FirstSteps = () => {
           </p>
           
           <div className="grid md:grid-cols-2 gap-4">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left">
+            <button 
+              onClick={() => setActiveSection('dashboard')}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
               <div className="flex items-center justify-between">
                 <span>Explorar el Dashboard</span>
                 <FontAwesomeIcon icon={faRocket} className="w-5 h-5" />
               </div>
             </button>
-            <button className="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left">
+            <button 
+              onClick={() => setActiveSection('areas-overview')}
+              className="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-6 py-3 rounded-lg font-medium transition-colors duration-200 text-left"
+            >
               <div className="flex items-center justify-between">
                 <span>Ver Áreas de Trabajo</span>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
