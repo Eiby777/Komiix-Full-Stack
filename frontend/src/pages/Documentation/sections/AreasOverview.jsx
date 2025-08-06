@@ -238,7 +238,8 @@ const AreasOverview = () => {
         </h2>
         
         <ClickableImage
-          isPlaceholder={true}
+          isPlaceholder={false}
+          src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/work_flow/diagram.webp"
           placeholderText="Diagrama: Flujo de Trabajo Completo"
           placeholderIcon={
             <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">

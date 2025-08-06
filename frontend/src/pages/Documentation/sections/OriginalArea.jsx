@@ -69,7 +69,7 @@ const OriginalArea = () => {
           Herramientas Disponibles
         </h2>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="w-full">
           {/* Herramienta Pan */}
           <div className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-600">
             <div className="flex items-center space-x-4 mb-4">
@@ -101,8 +101,6 @@ const OriginalArea = () => {
               </div>
             </div>
           </div>
-
-          
         </div>
       </section>
 

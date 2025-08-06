@@ -4,6 +4,11 @@
  * @returns {string} - Texto limpio.
  */
 const cleanText = (text) => {
+    // Safety check for undefined or null text
+    if (!text || typeof text !== 'string') {
+        return '';
+    }
+    
     return text
         .replace(/\n/g, ' ')
         .replace(/\s+/g, ' ')
@@ -117,8 +122,22 @@ const calculateFallbackCoordinates = (text, fontFamily, rect, ctx) => {
  */
 const calculateTextCoordinates = (canvas, relativePointer, textObject, isText = null, rect = null) => {
     // Extraer y preprocesar el texto
-    let text = textObject.text || '';
+    let text = textObject?.text || '';
+    
+    // Si el texto está vacío o es undefined, devolver valores por defecto centrados
+    if (!text || text.trim() === '') {
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        return {
+            top: centerY,
+            left: centerX,
+            width: 0,
+            height: 0,
+            fontSize: 12,
+        };
+    }
     text = cleanText(text);
+    
     const fontFamily = textObject.fontFamily || 'sans-serif';
 
     // Obtener contexto con willReadFrequently optimizado para lecturas múltiples
