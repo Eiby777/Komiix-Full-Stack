@@ -28,7 +28,7 @@ const FirstSteps = () => {
       </div>
 
       {/* Video Tutorial Placeholder */}
-      <ClickableImage
+      {/*<ClickableImage
         isPlaceholder={true}
         placeholderText="Video: Primeros Pasos con Komiix"
         placeholderIcon={
@@ -38,7 +38,7 @@ const FirstSteps = () => {
         }
         alt="Tutorial paso a paso para nuevos usuarios (5 minutos)"
         className="mb-12"
-      />
+      />*/}
 
       {/* Requisitos del Sistema */}
       <section className="mb-12">

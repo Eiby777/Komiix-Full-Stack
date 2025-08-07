@@ -31,7 +31,7 @@ const ExportArea = () => {
       </div>
 
       {/* Video Tutorial Placeholder */}
-      <ClickableImage
+      {/*<ClickableImage
         isPlaceholder={true}
         placeholderText="Video: Área de Exportación - Configuración y Formatos"
         placeholderIcon={
@@ -41,7 +41,7 @@ const ExportArea = () => {
         }
         alt="Tutorial completo del área de exportación y sus opciones (8 minutos)"
         className="mb-12"
-      />
+      />*/}
 
       {/* Propósito del Área de Exportación */}
       <section className="mb-12">
@@ -513,7 +513,8 @@ const ExportArea = () => {
         </h2>
         
         <ClickableImage
-          isPlaceholder={true}
+          isPlaceholder={false}
+          src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/work_flow/exportar.webp"
           placeholderText="Captura: Panel de Exportación del Editor"
           placeholderIcon={
             <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">

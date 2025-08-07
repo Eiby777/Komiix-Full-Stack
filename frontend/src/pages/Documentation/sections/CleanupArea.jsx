@@ -29,7 +29,7 @@ const CleanupArea = () => {
       </div>
 
       {/* Video Tutorial Placeholder */}
-      <ClickableImage
+      {/*<ClickableImage
         isPlaceholder={true}
         placeholderText="Video: Área de Limpieza - Eliminación y Restauración"
         placeholderIcon={
@@ -39,7 +39,7 @@ const CleanupArea = () => {
         }
         alt="Tutorial completo del área de limpieza y sus herramientas (10 minutos)"
         className="mb-12"
-      />
+      />*/}
 
       {/* Propósito del Área de Limpieza */}
       <section className="mb-12">
@@ -445,7 +445,8 @@ const CleanupArea = () => {
         </h2>
         
         <ClickableImage
-          isPlaceholder={true}
+          isPlaceholder={false}
+          src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/work_flow/Limpieza.webp"
           placeholderText="Captura: Área de Limpieza del Editor"
           placeholderIcon={
             <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">

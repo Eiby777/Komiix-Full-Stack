@@ -28,7 +28,7 @@ const NavigationControls = () => {
       </div>
 
       {/* Video Tutorial Placeholder */}
-      <ClickableImage
+      {/*<ClickableImage
         isPlaceholder={true}
         placeholderText="Video: Controles de Navegación - Menús Flotantes"
         placeholderIcon={
@@ -397,7 +397,8 @@ const NavigationControls = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/floating_menus/undo_redo.webp"
             placeholderText="Captura: Menú Undo/Redo"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -515,7 +516,8 @@ const NavigationControls = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/floating_menus/layers.webp"
             placeholderText="Captura: Selector de Capas"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -623,7 +625,8 @@ const NavigationControls = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/floating_menus/zoom.webp"
             placeholderText="Captura: Controles de Zoom"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">

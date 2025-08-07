@@ -138,7 +138,8 @@ const TranslationTools = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/translation/texto.webp"
             placeholderText="Captura: Configuración de Herramienta Texto"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,7 +240,8 @@ const TranslationTools = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/translation/traductor.webp"
             placeholderText="Captura: Panel de Caja de Traducción"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -338,7 +340,8 @@ const TranslationTools = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/translation/ocr.webp"
             placeholderText="Captura: Herramienta Dibujar Texto"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -437,7 +440,8 @@ const TranslationTools = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/translation/auto_text.webp"
             placeholderText="Captura: Herramienta Escanear Texto"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">

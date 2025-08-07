@@ -28,7 +28,7 @@ const AreasOverview = () => {
       </div>
 
       {/* Video Tutorial Placeholder */}
-      <ClickableImage
+      {/*<ClickableImage
         isPlaceholder={true}
         placeholderText="Video: Flujo de Trabajo Completo"
         placeholderIcon={
@@ -38,7 +38,7 @@ const AreasOverview = () => {
         }
         alt="Tutorial completo del flujo de trabajo de scanlation (12 minutos)"
         className="mb-12"
-      />
+      />*/}
 
       {/* Introducción */}
       <section className="mb-12">

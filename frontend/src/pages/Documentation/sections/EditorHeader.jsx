@@ -29,7 +29,7 @@ const EditorHeader = () => {
       </div>
 
       {/* Video Tutorial Placeholder */}
-      <ClickableImage
+      {/*<ClickableImage
         isPlaceholder={true}
         placeholderText="Video: Panel de Control Principal"
         placeholderIcon={

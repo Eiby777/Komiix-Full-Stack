@@ -27,7 +27,7 @@ const OriginalArea = () => {
       </div>
 
       {/* Video Tutorial Placeholder */}
-      <ClickableImage
+      {/*<ClickableImage
         isPlaceholder={true}
         placeholderText="Video: Área Original - Navegación Básica"
         placeholderIcon={
@@ -37,7 +37,7 @@ const OriginalArea = () => {
         }
         alt="Tutorial del área original y herramientas de navegación (3 minutos)"
         className="mb-12"
-      />
+      />*/}
 
       {/* Propósito del Área Original */}
       <section className="mb-12">
@@ -166,7 +166,8 @@ const OriginalArea = () => {
         </h2>
         
         <ClickableImage
-          isPlaceholder={true}
+          isPlaceholder={false}
+          src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/work_flow/original.webp"
           placeholderText="Captura: Área Original del Editor"
           placeholderIcon={
             <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">

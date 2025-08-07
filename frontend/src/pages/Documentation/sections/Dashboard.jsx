@@ -29,7 +29,7 @@ const Dashboard = () => {
       </div>
 
       {/* Video Tutorial Placeholder */}
-      <ClickableImage
+      {/*<ClickableImage
         isPlaceholder={true}
         placeholderText="Video: Navegando el Dashboard"
         placeholderIcon={
@@ -39,7 +39,7 @@ const Dashboard = () => {
         }
         alt="Tutorial completo del dashboard y gestión de proyectos (8 minutos)"
         className="mb-12"
-      />
+      />*/}
 
       {/* Estructura del Dashboard */}
       <section className="mb-12">

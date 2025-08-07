@@ -29,7 +29,7 @@ const AnnotationTools = () => {
       </div>
 
       {/* Video Tutorial Placeholder */}
-      <ClickableImage
+      {/*<ClickableImage
         isPlaceholder={true}
         placeholderText="Video: Herramientas de Anotación Detalladas"
         placeholderIcon={
@@ -39,7 +39,7 @@ const AnnotationTools = () => {
         }
         alt="Tutorial detallado de todas las herramientas de anotación (15 minutos)"
         className="mb-12"
-      />
+      />*/}
 
       {/* Introducción */}
       <section className="mb-12">
@@ -155,7 +155,8 @@ const AnnotationTools = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/annotation/anotation.webp"
             placeholderText="Captura: Panel de Configuración de Anotación"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -384,7 +385,8 @@ const AnnotationTools = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/annotation/annotation_auto.webp"
             placeholderText="Captura: Proceso de Detección Automática"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">

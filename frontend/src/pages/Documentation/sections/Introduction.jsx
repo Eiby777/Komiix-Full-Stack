@@ -25,7 +25,7 @@ const Introduction = () => {
         </div>
         
         {/* Placeholder para video/gif de introducción */}
-        <ClickableImage
+        {/*<ClickableImage
           isPlaceholder={true}
           placeholderText="Video de introducción a Komiix"
           placeholderIcon={
@@ -34,7 +34,7 @@ const Introduction = () => {
             </svg>
           }
           className="mb-8"
-        />
+        />*/}
       </div>
 
       {/* Historia del Proyecto */}

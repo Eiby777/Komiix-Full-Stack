@@ -31,7 +31,7 @@ const CleanupTools = () => {
       </div>
 
       {/* Video Tutorial Placeholder */}
-      <ClickableImage
+      {/*<ClickableImage
         isPlaceholder={true}
         placeholderText="Video: Herramientas de Limpieza Detalladas"
         placeholderIcon={
@@ -157,7 +157,8 @@ const CleanupTools = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/limpieza/pincel.webp"
             placeholderText="Captura: Panel de Configuración del Pincel"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -386,7 +387,8 @@ const CleanupTools = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/limpieza/clonador.webp"
             placeholderText="Captura: Proceso de Clonación"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -614,7 +616,8 @@ const CleanupTools = () => {
           </div>
 
           <ClickableImage
-            isPlaceholder={true}
+            isPlaceholder={false}
+            src="https://nipcrtpffrxguklitppt.supabase.co/storage/v1/object/public/documentation/detailed/limpieza/redibujo.webp"
             placeholderText="Captura: Proceso de Redibujado con IA"
             placeholderIcon={
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
