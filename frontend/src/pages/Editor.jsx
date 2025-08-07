@@ -31,7 +31,7 @@ export default function Editor() {
     checkImages();   
   }, []);
   
-  /*useEffect(() => {
+  useEffect(() => {
     const preventBrowserZoom = (e) => {
       if (e.ctrlKey) {
         e.preventDefault();
@@ -41,7 +41,7 @@ export default function Editor() {
     return () => {
       document.removeEventListener("wheel", preventBrowserZoom);
     };
-  }, []);*/
+  }, []);
   
   return (
     <>
