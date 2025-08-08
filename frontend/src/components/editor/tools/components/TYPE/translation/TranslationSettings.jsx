@@ -65,7 +65,19 @@ const TextboxSettings = ({ index = 0 }) => {
     canvasRef
   );
 
+  useEffect(() => {
+    const currentCanvas = canvasInstances[activeImageIndex];
+    canvasRef.current = currentCanvas;
   
+    if (currentCanvas) {
+      const currentTextboxes = detectTextboxesHandler(currentCanvas);
+      console.log(currentTextboxes);
+      setTextData([currentTextboxes]);
+      return setupCanvasListenersHandler(currentCanvas);
+    } else {
+      setTextData([[]]);
+    }
+  }, [activeImageIndex, canvasInstances, detectTextboxesHandler, setTextData, setupCanvasListenersHandler]);
 
   useEffect(() => {
     if (isTrackingChanges && selectedId && translatedText) {
