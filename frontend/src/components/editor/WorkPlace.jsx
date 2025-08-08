@@ -30,9 +30,9 @@ export default function EditorLayout() {
   }, [toggleTool]);
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex flex-col">
+    <div className="h-screen bg-[var(--background)] flex flex-col overflow-hidden">
       <Header />
-      <div className="flex-1 flex relative" style={{ paddingTop: headerHeight }}>
+      <div className="flex-1 flex relative overflow-hidden" style={{ paddingTop: headerHeight }}>
         <Toolbar />
         <EditorCanvas />
         <SettingsPanel />

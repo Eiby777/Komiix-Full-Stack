@@ -165,7 +165,7 @@ const TextSettings = () => {
     const buttonActiveStyle = "bg-blue-600 hover:bg-blue-700";
 
     return (
-        <div className="space-y-2 w-full max-h-full text-white rounded-lg bg-[#1a1a1a] p-2">
+        <div className="space-y-2 w-full text-white rounded-lg bg-[#1a1a1a] p-2">
             <FontFamilySelector
                 fontFamily={fontFamily}
                 setFontFamily={setFontFamily}

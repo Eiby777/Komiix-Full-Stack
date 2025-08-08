@@ -12,7 +12,7 @@ export default function useSeparatorDrag(panelRef, activeTools, heights, setHeig
     let startY;
     let startHeight0;
     let isDragging = false;
-    let panelHeight;
+    let panelRect;
     const padding = 16;
     const separatorHeight = 4;
 
@@ -20,7 +20,7 @@ export default function useSeparatorDrag(panelRef, activeTools, heights, setHeig
       if (!isDragging) return;
 
       const diff = e.clientY - startY;
-      const availableHeight = panelHeight - separatorHeight - 2 * padding;
+      const availableHeight = panelRect.height - separatorHeight - 2 * padding;
       const minHeight0 = 100;
       const minHeight1 = 116;
 
@@ -40,13 +40,27 @@ export default function useSeparatorDrag(panelRef, activeTools, heights, setHeig
       if (isDragging) {
         const tool0 = document.getElementById('tool-0');
         const tool1 = document.getElementById('tool-1');
-        if (tool0 && tool1 && panelHeight) {
-          const newHeight0 = tool0.offsetHeight;
-          const availableHeight = panelHeight - separatorHeight - 2 * padding;
-          const percentage = (newHeight0 / availableHeight) * 100;
-          const newHeights = [newHeight0, tool1.offsetHeight];
-          setHeights(newHeights); // Use the setter directly
-          // Always save heights under ['text', 'text-box'] key for consistency
+        if (tool0 && tool1 && panelRect) {
+          // Usar las alturas que ya están establecidas durante el arrastre
+          const currentHeight0 = tool0.clientHeight;
+          const currentHeight1 = tool1.clientHeight;
+          
+          const availableHeight = panelRect.height - separatorHeight - 2 * padding;
+          const minHeight0 = 100;
+          const minHeight1 = 116;
+          
+          // Asegurar que las alturas estén dentro de los límites
+          const clampedHeight0 = Math.max(minHeight0, Math.min(availableHeight - minHeight1, currentHeight0));
+          const clampedHeight1 = availableHeight - clampedHeight0;
+          
+          // Aplicar las alturas finales
+          tool0.style.height = `${clampedHeight0}px`;
+          tool1.style.height = `${clampedHeight1}px`;
+          
+          // Actualizar el estado
+          const percentage = (clampedHeight0 / availableHeight) * 100;
+          const newHeights = [clampedHeight0, clampedHeight1];
+          setHeights(newHeights);
           setToolsHeights(['text', 'text-box'], newHeights);
           setLastHeightPercentage(Math.max(10, Math.min(90, percentage)));
         }
@@ -60,11 +74,11 @@ export default function useSeparatorDrag(panelRef, activeTools, heights, setHeig
       e.preventDefault();
       isDragging = true;
       startY = e.clientY;
-      panelHeight = panelRef.current.offsetHeight;
+      panelRect = panelRef.current.getBoundingClientRect();
 
       const tool0 = document.getElementById('tool-0');
       if (tool0) {
-        startHeight0 = tool0.offsetHeight;
+        startHeight0 = tool0.clientHeight;
         tool0.style.transition = 'none';
       }
       const tool1 = document.getElementById('tool-1');

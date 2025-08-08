@@ -71,7 +71,6 @@ const TextboxSettings = ({ index = 0 }) => {
   
     if (currentCanvas) {
       const currentTextboxes = detectTextboxesHandler(currentCanvas);
-      console.log(currentTextboxes);
       setTextData([currentTextboxes]);
       return setupCanvasListenersHandler(currentCanvas);
     } else {
@@ -137,7 +136,7 @@ const TextboxSettings = ({ index = 0 }) => {
   });
 
   return (
-    <div className="space-y-2 w-full max-h-full text-white rounded-lg bg-[#1a1a1a] p-2">
+    <div className="space-y-2 w-full text-white rounded-lg bg-[#1a1a1a] p-2">
       <ColorTypeSelector selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
       <FilterControls
         filterText={filterText}

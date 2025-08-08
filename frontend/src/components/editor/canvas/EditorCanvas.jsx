@@ -11,7 +11,7 @@ export default function EditorCanvas() {
   return (
     <div
       className={`${isSettingsVisible ? 'w-[80%]' : 'w-full'
-        } overflow-auto transition-all duration-300`}
+        } transition-all duration-300 overflow-hidden`}
       id="div_editor"
     >
       <CanvasContainer images={images} isLoading={!imagesLoaded} />
