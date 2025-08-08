@@ -32,6 +32,7 @@ export default function SettingsPanel() {
       const newWidth = window.innerWidth - (parentWidth + toolbarWidth);
       const maxPanelWidth = 370; // Set a maximum width for the settings panel
       const calculatedWidth = Math.min(Math.max(newWidth, 0), maxPanelWidth);
+      
       setSettingsPanelWidth(calculatedWidth);
     };
 
@@ -56,6 +57,7 @@ export default function SettingsPanel() {
   if (activeToolsWithSettings.length === 0) return null;
 
   const toolsToRender = [...activeToolsWithSettings];
+
 
   return (
     <div

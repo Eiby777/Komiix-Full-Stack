@@ -65,37 +65,7 @@ const TextboxSettings = ({ index = 0 }) => {
     canvasRef
   );
 
-  useEffect(() => {
-    const currentCanvas = canvasInstances[activeImageIndex];
-    canvasRef.current = currentCanvas;
   
-    if (currentCanvas) {
-      const currentTextboxes = detectTextboxesHandler(currentCanvas);
-      const idCount = currentTextboxes.reduce((acc, item) => {
-        acc[item.id] = (acc[item.id] || 0) + 1;
-        return acc;
-      }, {});
-      const duplicates = Object.entries(idCount).filter(([_, count]) => count > 1);
-      if (duplicates.length > 0) {
-        console.warn('Duplicate IDs detected in canvas:', duplicates);
-        
-        const seenIds = new Set();
-        currentTextboxes.forEach((item) => {
-          if (seenIds.has(item.id)) {
-            item.id = generateUniqueId(); 
-          }
-          seenIds.add(item.id);
-        });
-      }
-      const uniqueTextboxes = Array.from(
-        new Map(currentTextboxes.map((item) => [item.id, item])).values()
-      );
-      setTextData([uniqueTextboxes]);
-      return setupCanvasListenersHandler(currentCanvas);
-    } else {
-      setTextData([[]]);
-    }
-  }, [activeImageIndex, canvasInstances, detectTextboxesHandler, setTextData, setupCanvasListenersHandler]);
 
   useEffect(() => {
     if (isTrackingChanges && selectedId && translatedText) {
