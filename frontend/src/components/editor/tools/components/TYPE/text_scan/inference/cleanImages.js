@@ -65,7 +65,8 @@ const cleanImages = async (
     );
 
     const tesseractResultsFlat = await ocrService.callOcrEndpoint(
-      recorteGroups
+      recorteGroups,
+      selectedLanguage
     );
 
     const downscaledResults = processOCRResults(tesseractResultsFlat, recorteMapping, croppedImages, GROUP_SIZE);

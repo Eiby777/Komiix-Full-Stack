@@ -70,7 +70,7 @@ class OcrService {
    * @returns {Promise<Object>} - The response data from the OCR endpoint.
    * @private
    */
-  async _callOcrApi(imageBase64, accessToken) {
+  async _callOcrApi(imageBase64, accessToken, language) {
     const response = await axios({
       method: 'post',
       url: `${domain}/api/ocr`,
@@ -79,7 +79,8 @@ class OcrService {
         'Authorization': `Bearer ${accessToken}`
       },
       data: {
-        image: imageBase64
+        image: imageBase64,
+        language: language
       }
     });
     return response.data;
@@ -120,13 +121,13 @@ class OcrService {
    * @returns {Promise<Object>} - The formatted OCR result for the recorte.
    * @private
    */
-  async _processSingleRecorte(recorte, accessToken) {
+  async _processSingleRecorte(recorte, accessToken, language) {
     try {
       this.onProgress({ status: "recognizing text", progress: 0 }); // Simulate Tesseract-like progress
 
       const imageBase64 = await recorte.toBase64();
       
-      const { results: ocrResults } = await this._callOcrApi(imageBase64, accessToken);
+      const { results: ocrResults } = await this._callOcrApi(imageBase64, accessToken, language);
       
       return this._formatOcrResult(ocrResults, recorte);
     } catch (error) {
@@ -154,7 +155,7 @@ class OcrService {
    * @returns {Promise<Array<Array<Object>>>} - Array of groups with formatted OCR results.
    * @throws {Error} - If the endpoint call fails or processing encounters an error.
    */
-  async callOcrEndpoint(recorteGroups) {
+  async callOcrEndpoint(recorteGroups, language) {
     try {
       this.processedRectangles = 0; // Reset for a new call
       this.totalRecortes = recorteGroups.reduce((sum, group) => sum + group.length, 0);
@@ -165,7 +166,7 @@ class OcrService {
       for (const group of recorteGroups) {
         const groupRecortes = group.map(r => new Recorte(r.image, r.id));
         const results = await Promise.all(
-          groupRecortes.map(recorte => this._processSingleRecorte(recorte, accessToken))
+          groupRecortes.map(recorte => this._processSingleRecorte(recorte, accessToken, language))
         );
         allGroupResults.push(results);
       }

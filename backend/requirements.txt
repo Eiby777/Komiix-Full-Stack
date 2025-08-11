@@ -75,3 +75,4 @@ paddlex[ocr]
 paddleocr @ git+https://github.com/PaddlePaddle/PaddleOCR.git
 paddlepaddle
 setuptools
+manga-ocr

@@ -6,10 +6,13 @@ import base64
 import cv2
 import numpy as np
 import time
+import tempfile
+import os
 from fastapi import APIRouter
 from dependencies.limiter import limiter
 from dependencies.auth import verify_jwt
-from paddleocr import PaddleOCR  
+from paddleocr import PaddleOCR
+from manga_ocr import MangaOcr  
 
 router = APIRouter()
 
@@ -23,9 +26,13 @@ model = PaddleOCR(
         ocr_version='PP-OCRv5'
 )
 
+# Inicializar MangaOCR para japonés
+manga_ocr_model = MangaOcr()
+
 # Modelo Pydantic para validación de entrada
 class OCRRequest(BaseModel):
     image: str  # Imagen en base64
+    language: str = "eng"  # Idioma por defecto inglés
 
 class BoundingBox(BaseModel):
     x0: float
@@ -87,47 +94,83 @@ async def ocr_service(
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Error al decodificar la imagen: {str(e)}")
 
-        # Ejecutar OCR
+        # Ejecutar OCR según el idioma
         start_time = time.time()
-        result = model.predict(img)
-        processing_time = time.time() - start_time
-
-        logger.info(f"OCR result format: {type(result)}")
         
-        # Formatear resultados - sabemos que el formato es result[0] con los datos directamente
-        ocr_results = []
-        first_result = result[0]
-        
-        rec_texts = first_result.get('rec_texts', [])
-        rec_scores = first_result.get('rec_scores', [])
-        rec_polys = first_result.get('rec_polys', [])
-        
-        logger.info(f"Found {len(rec_texts)} texts, {len(rec_scores)} scores, {len(rec_polys)} polygons")
-        
-        # Procesar cada texto detectado
-        for i in range(len(rec_texts)):
+        if ocr_request.language.lower() == 'jpn':
+            # Usar MangaOCR para japonés
+            logger.info("Using MangaOCR for Japanese text")
+            
+            # Guardar imagen temporalmente para MangaOCR
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
+                cv2.imwrite(tmp_file.name, img)
+                tmp_path = tmp_file.name
+            
             try:
-                text = str(rec_texts[i])
-                confidence = float(rec_scores[i])
+                # Procesar con MangaOCR
+                text = manga_ocr_model(tmp_path)
+                processing_time = time.time() - start_time
                 
-                # Convertir polígono a bounding box
-                polygon = rec_polys[i]
-                bbox = polygon_to_bbox(polygon)
-                
-                ocr_results.append({
+                # MangaOCR devuelve solo texto, crear resultado con bounding box completo
+                ocr_results = [{
                     "text": text,
-                    "confidence": confidence,
-                "bounding_box": {
-                    "x0": bbox[0],
-                    "y0": bbox[1],
-                    "x1": bbox[2],
-                    "y1": bbox[3]
-                }
-                })
+                    "confidence": 1.0,  # MangaOCR no proporciona confianza
+                    "bounding_box": {
+                        "x0": 0,
+                        "y0": 0,
+                        "x1": img.shape[1],
+                        "y1": img.shape[0]
+                    }
+                }]
                 
-            except Exception as e:
-                logger.error(f"Error processing result index {i}: {str(e)}")
-                continue
+                logger.info(f"MangaOCR result: {text}")
+                
+            finally:
+                # Limpiar archivo temporal
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
+        else:
+            # Usar PaddleOCR para otros idiomas
+            logger.info("Using PaddleOCR for non-Japanese text")
+            result = model.predict(img)
+            processing_time = time.time() - start_time
+
+            logger.info(f"OCR result format: {type(result)}")
+            
+            # Formatear resultados - sabemos que el formato es result[0] con los datos directamente
+            ocr_results = []
+            first_result = result[0]
+            
+            rec_texts = first_result.get('rec_texts', [])
+            rec_scores = first_result.get('rec_scores', [])
+            rec_polys = first_result.get('rec_polys', [])
+            
+            logger.info(f"Found {len(rec_texts)} texts, {len(rec_scores)} scores, {len(rec_polys)} polygons")
+            
+            # Procesar cada texto detectado
+            for i in range(len(rec_texts)):
+                try:
+                    text = str(rec_texts[i])
+                    confidence = float(rec_scores[i])
+                    
+                    # Convertir polígono a bounding box
+                    polygon = rec_polys[i]
+                    bbox = polygon_to_bbox(polygon)
+                    
+                    ocr_results.append({
+                        "text": text,
+                        "confidence": confidence,
+                        "bounding_box": {
+                            "x0": bbox[0],
+                            "y0": bbox[1],
+                            "x1": bbox[2],
+                            "y1": bbox[3]
+                        }
+                    })
+                    
+                except Exception as e:
+                    logger.error(f"Error processing result index {i}: {str(e)}")
+                    continue
 
         logger.info(f"Final OCR results: {ocr_results}")
         return {

@@ -1,12 +1,9 @@
 import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faArrowUpFromBracket, faDownload, faFileImage, faCog, 
+  faArrowUpFromBracket, faFileImage,
   faCheckCircle, faLightbulb, faRocket, faInfoCircle,
-  faMousePointer, faPalette, faLayerGroup, faExpand,
-  faCompress, faImage, faFileAlt, faArchive, faRuler,
-  faCrop, faMagic, faEye, faEyeSlash,
-  faGear, faShield, faNetworkWired, faFileCode, faArrowsAltH
+  faMousePointer
 } from '@fortawesome/free-solid-svg-icons';
 import ClickableImage from '../components/ClickableImage';
 import { DocsContext } from '../DocsContent';
