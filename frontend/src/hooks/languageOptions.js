@@ -1,16 +1,3 @@
-/**
- * Opciones de idiomas soportados por Tesseract
- * @constant {Array<Object>}
- */
-export const TESSERACT_LANGUAGE_OPTIONS = [
-  { value: 'eng', label: 'Inglés' },
-  { value: 'spa', label: 'Español' },
-  { value: 'chi_sim', label: 'Chino Simplificado' },
-  { value: 'chi_tra', label: 'Chino Tradicional' },
-  { value: 'jpn', label: 'Japonés' },
-  { value: 'kor', label: 'Coreano' }
-];
-
     /**
  * Opciones de idiomas soportados
  * @constant {Array<Object>}

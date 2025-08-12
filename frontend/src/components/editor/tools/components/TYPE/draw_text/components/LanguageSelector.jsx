@@ -1,5 +1,5 @@
 import React from 'react';
-import { TESSERACT_LANGUAGE_OPTIONS } from '../../../../../../../hooks/languageOptions';
+import { OCR_LANGUAGE_OPTIONS } from '../../../../../../../hooks/languageOptions';
 
 /**
  * @file LanguageSelector.jsx
@@ -18,7 +18,7 @@ export default function LanguageSelector({ language, setLanguage }) {
       onChange={(e) => setLanguage(e.target.value)}
       className="p-1.5 rounded-md bg-[#2a2a2a] text-white border border-white/10 focus:outline-none focus:border-white/30 text-sm transition-all duration-200 ease-in-out flex-grow"
     >
-      {TESSERACT_LANGUAGE_OPTIONS.map((option) => (
+      {OCR_LANGUAGE_OPTIONS.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
         </option>

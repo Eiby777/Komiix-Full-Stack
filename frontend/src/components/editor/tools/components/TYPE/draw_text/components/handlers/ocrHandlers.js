@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import processWithTesseract from '../../../../../handlers/useTesseract';
+import OcrService from '../../../text_scan/inference/ocr/callOCREndpoint';
 
 /**
  * Convierte un canvas a imagen binaria (blanco y negro) aplicando un umbral fijo
@@ -43,6 +43,7 @@ export const binarizeCanvas = (canvas) => {
 
 export function useOcrHandlers({ fabricCanvasRef, isOcrActive, language, setPredictedText }) {
     const debounceTimeoutRef = useRef(null);
+    const ocrService = useRef(new OcrService());
 
     const detectText = async () => {
         if (!isOcrActive || !fabricCanvasRef.current) return;
@@ -53,13 +54,13 @@ export function useOcrHandlers({ fabricCanvasRef, isOcrActive, language, setPred
         const ctx = tempCanvas.getContext('2d');
         ctx.drawImage(fabricCanvasRef.current.getElement(), 0, 0);
 
-        binarizeCanvas(tempCanvas);
+        //binarizeCanvas(tempCanvas);
 
         const dataUrl = tempCanvas.toDataURL('image/png');
         const croppedImages = [[{ image: dataUrl, id: 1, coords: {}, color: '' }]];
 
         try {
-            const results = await processWithTesseract(croppedImages, language, () => { }, () => { });
+            const results = await ocrService.current.callOcrEndpoint(croppedImages, language);
             const text = results[0][0]?.text || '';
             const textWithoutLineBreaks = text.replace(/\n/g, ' ');
             setPredictedText(textWithoutLineBreaks);
