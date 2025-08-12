@@ -29,8 +29,16 @@ RUN paddleocr install_hpi_deps cpu
 COPY . .
 
 # Create non-root user for security
-RUN useradd --create-home --shell /bin/bash app \
-    && chown -R app:app /app
+RUN useradd --create-home --shell /bin/bash app
+
+# Install NLTK and download required data for EasyNMT as the app user
+USER app
+RUN pip install nltk
+RUN python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('averaged_perceptron_tagger'); nltk.download('maxent_ne_chunker'); nltk.download('words'); nltk.download('stopwords'); nltk.download('omw-1.4')"
+
+# Change ownership of the app directory
+USER root
+RUN chown -R app:app /app
 USER app
 
 EXPOSE 8000

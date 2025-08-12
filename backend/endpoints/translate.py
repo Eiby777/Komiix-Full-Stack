@@ -8,12 +8,34 @@ from loguru import logger
 import httpx
 import json
 import os
+from easynmt import EasyNMT
 
 router = APIRouter()
 
 logger.info("Translate router loaded")
 LIBRETRANSLATE_URL = os.getenv("LIBRETRANSLATE_URL")
 logger.info(f"LibreTranslate URL: {LIBRETRANSLATE_URL}")
+
+# Initialize EasyNMT model for Japanese translations
+try:
+    easynmt_model = EasyNMT('opus-mt')
+    logger.info("EasyNMT opus-mt model loaded successfully")
+    
+    # Preload models with a test translation to avoid first-user latency
+    try:
+        test_text = ["こんにちは", "ありがとう"]
+        test_translation = easynmt_model.translate(
+            test_text, 
+            target_lang='es', 
+            source_lang='ja'
+        )
+        logger.info(f"EasyNMT models preloaded successfully. Test translation: {test_text} -> {test_translation}")
+    except Exception as e:
+        logger.warning(f"Failed to preload EasyNMT models (non-critical): {e}")
+        
+except Exception as e:
+    logger.error(f"Failed to load EasyNMT opus-mt model: {e}")
+    easynmt_model = None
 
 
 # Pydantic model for translation request
@@ -43,6 +65,44 @@ async def translate(request: Request, translate_request: TranslateRequest, paylo
 
     logger.info(f"User {payload.get('sub')} requested translation: {translate_request.source} to {translate_request.target}")
     
+    # Handle Japanese translations with EasyNMT
+    if translate_request.source == "ja" and easynmt_model:
+        try:
+            logger.info(f"Using EasyNMT for Japanese translation: {len(translate_request.q)} texts")
+            
+            # Ensure q is always an array for Japanese translations
+            if not isinstance(translate_request.q, list):
+                translate_request.q = [translate_request.q]
+            
+            # Translate using EasyNMT
+            translated_texts = easynmt_model.translate(
+                translate_request.q, 
+                target_lang=translate_request.target, 
+                source_lang=translate_request.source
+            )
+            
+            logger.info(f"EasyNMT translation successful for user {payload.get('sub')}")
+            
+            # Return the same format as input: array if input was array, string if input was string
+            return JSONResponse(content={
+                "translatedText": translated_texts,
+                "alternatives": []
+            })
+            
+        except Exception as e:
+            logger.error(f"EasyNMT translation error: {e}")
+            # Fallback to LibreTranslate for Japanese if EasyNMT fails
+            logger.info("Falling back to LibreTranslate for Japanese translation")
+            # Continue to LibreTranslate section below
+        else:
+            # If EasyNMT succeeds, return early
+            # Return the same format as input: array if input was array, string if input was string
+            return JSONResponse(content={
+                "translatedText": translated_texts,
+                "alternatives": []
+            })
+    
+    # Use LibreTranslate for other languages (including Japanese fallback)
     # Prepare request payload for LibreTranslate
     libre_payload = {
         "q": translate_request.q,

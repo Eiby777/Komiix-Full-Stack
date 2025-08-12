@@ -21,6 +21,9 @@ export const translateText = async (text, fromLang, toLang, setIsLoading) => {
       return { translatedText: text, alternatives: isArray ? text.map(() => []) : [] };
     }
 
+    // For Japanese translations, ensure text is always sent as an array
+    const requestText = fromLang === 'ja' ? (isArray ? text : [text]) : text;
+
     const { data: { session } } = await supabase.auth.getSession();
     const accesToken = session.access_token;
     const response = await fetch(domain + '/api/translate', {
@@ -30,7 +33,7 @@ export const translateText = async (text, fromLang, toLang, setIsLoading) => {
         'Authorization': `Bearer ${accesToken}`
       },
       body: JSON.stringify({
-        q: text,
+        q: requestText,
         source: fromLang,
         target: toLang,
         format: 'text',
@@ -49,6 +52,16 @@ export const translateText = async (text, fromLang, toLang, setIsLoading) => {
       throw new Error('No translatedText in response: ' + JSON.stringify(data));
     }
 
+    // Handle Japanese translation response (always returns array)
+    if (fromLang === 'ja') {
+      const translatedResult = {
+        translatedText: data.translatedText,
+        alternatives: data.alternatives || []
+      };
+      return translatedResult;
+    }
+
+    // Handle other languages (LibreTranslate response)
     const translatedResult = {
       translatedText: isArray ? data.translatedText : data.translatedText,
       alternatives: isArray ? data.alternatives || [] : data.alternatives || []
@@ -86,6 +99,19 @@ export const fetchTranslation = async (text, sourceLang, targetLang) => {
   }
 
   const isArray = Array.isArray(text);
+  
+  // For Japanese translations, ensure we always send an array
+  if (sourceLang === 'ja') {
+    const requestText = isArray ? text : [text];
+    const result = await translateText(requestText, sourceLang, targetLang);
+    
+    return {
+      translatedText: result.translatedText || requestText,
+      alternatives: result.alternatives || [],
+    };
+  }
+
+  // For other languages, use existing logic
   const result = await translateText(text, sourceLang, targetLang);
 
   return {

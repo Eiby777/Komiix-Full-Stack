@@ -28,9 +28,14 @@ const translateTexts = async (result, selectedLanguage, selectedTargetLanguage) 
         const sourceLang = selectedLanguage;
         const targetLang = selectedTargetLanguage;
 
-        const translationResult = await fetchTranslation(textsToTranslate, sourceLang, targetLang);
+        // Send texts array for translation
+        const requestTexts = textsToTranslate;
+        
+        const translationResult = await fetchTranslation(requestTexts, sourceLang, targetLang);
 
-        if (translationResult.translatedText.length === textsToTranslate.length) {
+        // Handle translation response (both EasyNMT and LibreTranslate now return the same format)
+        if (translationResult.translatedText && Array.isArray(translationResult.translatedText) && 
+            translationResult.translatedText.length === textsToTranslate.length) {
             translationResult.translatedText.forEach((translated, idx) => {
                 const { canvasIndex, itemIndex } = textMappings[idx];
                 result[canvasIndex][itemIndex].translatedText = translated;
