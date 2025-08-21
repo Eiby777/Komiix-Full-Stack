@@ -137,7 +137,7 @@ const Projects = ({
                                                 <div className="text-xl font-semibold">{project.name}</div>
                                                 <div className="text-sm">Status: {project.status}</div>
                                                 <div className="text-sm">
-                                                    Last Updated: {project.last_updated}
+                                                    Última actualización: {project.last_updated}
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-4">
