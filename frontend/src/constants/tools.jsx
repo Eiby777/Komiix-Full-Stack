@@ -171,6 +171,14 @@ export const TOOLS = {
     compatibleWith: [],
     shortcut: "T",
   },
+  EXPORT_TEXT: {
+    id: "export-text",
+    label: "Exportar/Importar Textos",
+    icon: FA_ExportIcon,
+    layer: LAYERS.TEXT.id,
+    hasSettings: false,
+    compatibleWith: [],
+  },
 };
 
 export const TOOL_GROUPS = {
@@ -193,6 +201,7 @@ export const TOOL_GROUPS = {
     TOOLS.PAN,
     TOOLS.TEXT_SCAN,
     TOOLS.ADJUST_TEXT,
+    TOOLS.EXPORT_TEXT,
   ],
   FINAL: [TOOLS.PAN, TOOLS.EXPORT],
 };
