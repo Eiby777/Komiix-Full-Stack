@@ -38,7 +38,7 @@ export default function Home() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: "http://localhost:5174",
+          redirectTo: "https://komiix.com",
         },
       });
       if (error) throw error;
