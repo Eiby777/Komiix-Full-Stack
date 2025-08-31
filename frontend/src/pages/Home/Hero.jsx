@@ -23,30 +23,30 @@ const Hero = ({ setShowAuthModal }) => {
           La plataforma más avanzada para scanlation y traducción de manga. Herramientas profesionales con IA integrada para detectar automáticamente globos de diálogo, limpiar imágenes y traducir texto. Diseñado específicamente por scanlators para optimizar tu flujo de trabajo.
         </p>
         
-        {/* Feature highlights cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12 max-w-5xl mx-auto">
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 text-center hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200">
-            <div className="text-2xl mb-2">✨</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm">Detección Automática</h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400">IA especializada en manga japonés, manhwa y manhua</p>
+        {/* Feature highlights cards - Mobile optimized */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-12 max-w-5xl mx-auto">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-3 md:p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 text-center hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200">
+            <div className="text-xl md:text-2xl mb-2">✨</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-xs md:text-sm">Detección IA</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 hidden md:block">IA especializada en manga japonés, manhwa y manhua</p>
           </div>
           
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 text-center hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200">
-            <div className="text-2xl mb-2">🎨</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm">Limpieza Avanzada</h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Herramientas de redibujo y cleanup profesional</p>
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-3 md:p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 text-center hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200">
+            <div className="text-xl md:text-2xl mb-2">🎨</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-xs md:text-sm">Limpieza</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 hidden md:block">Herramientas de redibujo y cleanup profesional</p>
           </div>
           
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 text-center hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200">
-            <div className="text-2xl mb-2">🌐</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm">OCR Multiidioma</h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Japonés, chino, coreano e inglés con 98% precisión</p>
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-3 md:p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 text-center hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200">
+            <div className="text-xl md:text-2xl mb-2">🌐</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-xs md:text-sm">OCR Multi</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 hidden md:block">Japonés, chino, coreano e inglés con 98% precisión</p>
           </div>
           
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 text-center hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200">
-            <div className="text-2xl mb-2">🔒</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm">100% Privado</h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Procesamiento local - tus proyectos nunca salen de tu dispositivo</p>
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-3 md:p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50 text-center hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200">
+            <div className="text-xl md:text-2xl mb-2">🔒</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-xs md:text-sm">100% Local</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 hidden md:block">Procesamiento local - tus proyectos nunca salen de tu dispositivo</p>
           </div>
         </div>
 
