@@ -119,7 +119,7 @@ export default function Home() {
         
         {/* Reduce render-blocking resources */}
         <link rel="preload" href="/critical.css" as="style" onLoad="this.onload=null;this.rel='stylesheet'" />
-        <noscript><link rel="stylesheet" href="/critical.css" /></noscript>
+        <noscript>{`<link rel="stylesheet" href="/critical.css" />`}</noscript>
         
         {/* Optimize JavaScript loading */}
         <script>

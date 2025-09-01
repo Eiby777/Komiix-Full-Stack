@@ -4,7 +4,8 @@ const ExportSection = ({
   exportFormat,
   setExportFormat,
   onExport,
-  onSwitchToImport
+  onSwitchToImport,
+  onCancel
 }) => {
   return (
     <div className="space-y-4">
@@ -42,7 +43,7 @@ const ExportSection = ({
 
       <div className="flex justify-center gap-4">
         <button
-          onClick={() => {/* Close modal */}}
+          onClick={onCancel}
           className="px-4 py-2 bg-gray-600/50 text-white/90 rounded-md hover:bg-gray-700/50 transition-colors duration-200"
         >
           Cancelar

@@ -40,10 +40,14 @@ const ExportTextTool = () => {
       canvasTexts.forEach(textData => {
         const textObject = canvas.getObjects().find(obj => obj.type === 'textbox' && obj.id === textData.id);
         if (textObject) {
+          // Handle different import formats
+          const importedOriginalText = textData.originalText || textData.text || '';
+          const importedTranslatedText = textData.translatedText || textData.text || '';
+
           textObject.set({
-            text: textData.translatedText || '',
-            originalText: textData.text || '',
-            translatedText: textData.translatedText || ''
+            text: importedTranslatedText, // Display the translated text
+            originalText: importedOriginalText,
+            translatedText: importedTranslatedText
           });
         }
       });
@@ -175,6 +179,7 @@ const ExportTextTool = () => {
             setExportFormat={setExportFormat}
             onExport={handleExport}
             onSwitchToImport={handleSwitchToImport}
+            onCancel={handleCloseModal}
           />
         ) : (
           <ImportSection

@@ -1,13 +1,14 @@
 // Utilidades generales para ExportTextTool
 
 export const generatePrompt = () => {
-  return `Por favor, traduce cada propiedad "text" en el JSON que te voy a proporcionar manteniendo exactamente el mismo formato y estructura. La traducción debe ser consistente a través de todos los canvases.
+  return `Por favor, traduce el contenido de texto al [ESCRIBIR IDIOMA DESTINO] en el JSON que te voy a proporcionar manteniendo exactamente el mismo formato y estructura. La traducción debe ir en la propiedad "translatedText".
 
 Instrucciones:
-1. Traduce únicamente la propiedad "text" de cada objeto
-2. Mantén todos los IDs y la estructura del JSON exactamente igual
-3. Retorna únicamente el JSON traducido sin explicaciones adicionales
-4. Asegúrate de que la traducción sea consistente en terminología`;
+1. Mantén la propiedad "originalText" sin cambios
+2. Traduce únicamente la propiedad "translatedText" de cada objeto
+3. Mantén todos los IDs y la estructura del JSON exactamente igual
+4. Retorna únicamente el JSON traducido sin explicaciones adicionales
+5. Asegúrate de que la traducción sea consistente en terminología`;
 };
 
 export const copyToClipboard = async (text) => {
@@ -39,7 +40,8 @@ export const extractTextsFromCanvas = (canvasInstances) => {
     const textObjects = canvas.getObjects().filter(obj => obj.type === 'textbox');
     return textObjects.map(obj => ({
       id: obj.id,
-      text: obj.originalText || obj.text
+      originalText: obj.originalText || obj.text,
+      translatedText: obj.translatedText || obj.text
     }));
   });
 };
