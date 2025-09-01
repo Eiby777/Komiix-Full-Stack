@@ -15,6 +15,7 @@ import {
   TextScanTool,
   ExportTool
 } from "../../../tools/components";
+import ExportTextTool from "../../../tools/components/TYPE/export_text";
 import { supabase } from "../../../../../lib/supabaseClient";
 import { memo, useState, useEffect } from "react";
 import { checkModel, deleteAllModels } from "../../../../../lib/localDB/modelDB";
@@ -146,6 +147,9 @@ const ToolsContainer = memo(({ currentImageIndex }) => {
       )}
       {activeTools.includes(TOOLS.EXPORT.id) && (
         <ExportTool />
+      )}
+      {activeTools.includes(TOOLS.EXPORT_TEXT.id) && (
+        <ExportTextTool />
       )}
     </>
   );

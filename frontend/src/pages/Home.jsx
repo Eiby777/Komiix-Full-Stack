@@ -57,8 +57,8 @@ export default function Home() {
     <React.Fragment>
       <Helmet>
         <html lang="es" />
-        <title>Komiix - Herramientas Profesionales de Scanlation y Traducción de Manga</title>
-        <meta name="description" content="Plataforma gratuita de scanlation con IA para traducir y editar manga. Herramientas profesionales de detección automática, limpieza y traducción de globos de diálogo. Flujo de trabajo optimizado para scanlators." />
+        <title>Komiix - Herramientas de Scanlation con IA para Manga</title>
+        <meta name="description" content="Plataforma gratuita de scanlation con IA para traducir manga. Detección automática de globos, limpieza y OCR multiidioma. Flujo optimizado para scanlators." />
         <meta name="keywords" content="scanlation, traducción manga, edición manga, herramientas scanlator, IA manga, traducción automática, limpieza manga, globos diálogo, OCR japonés, editor manga online" />
         <meta name="author" content="Komiix Team" />
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
@@ -106,8 +106,42 @@ export default function Home() {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://discord.gg" />
         <meta name="google-site-verification" content="your-google-site-verification-code" />
+        
+        {/* Critical resources preload for mobile performance */}
         <link rel="preload" as="image" href="/hero-image.webp" />
         <link rel="preload" as="font" href="/fonts/inter-var.woff2" type="font/woff2" crossOrigin="anonymous" />
+        
+        {/* Mobile performance optimizations */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Komiix" />
+        
+        {/* Reduce render-blocking resources */}
+        <link rel="preload" href="/critical.css" as="style" onLoad="this.onload=null;this.rel='stylesheet'" />
+        <noscript>{`<link rel="stylesheet" href="/critical.css" />`}</noscript>
+        
+        {/* Optimize JavaScript loading */}
+        <script>
+          {`
+            // Performance optimization: Defer non-critical JavaScript
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js');
+              });
+            }
+            
+            // Preload critical images
+            const criticalImages = ['/hero-image.webp', '/logo.png'];
+            criticalImages.forEach(src => {
+              const link = document.createElement('link');
+              link.rel = 'preload';
+              link.as = 'image';
+              link.href = src;
+              document.head.appendChild(link);
+            });
+          `}
+        </script>
         
         {/* Structured Data JSON-LD */}
         <script type="application/ld+json">
