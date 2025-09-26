@@ -11,8 +11,13 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     ccache \
     curl \
+    cmake \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
+
+# Create models directory and download the translation model
+RUN mkdir -p /app/models
+RUN curl -L -o /app/models/LFM2-350M-ENJP-MT-Q8_0.gguf https://huggingface.co/LiquidAI/LFM2-350M-ENJP-MT-GGUF/resolve/main/LFM2-350M-ENJP-MT-Q8_0.gguf
 
 # Upgrade pip
 RUN pip install --upgrade pip
@@ -30,11 +35,6 @@ COPY . .
 
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash app
-
-# Install NLTK and download required data for EasyNMT as the app user
-USER app
-RUN pip install nltk
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('averaged_perceptron_tagger'); nltk.download('maxent_ne_chunker'); nltk.download('words'); nltk.download('stopwords'); nltk.download('omw-1.4')"
 
 # Change ownership of the app directory
 USER root

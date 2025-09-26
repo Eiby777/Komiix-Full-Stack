@@ -8,7 +8,7 @@ from loguru import logger
 import httpx
 import json
 import os
-from easynmt import EasyNMT
+from llama_cpp import Llama
 
 router = APIRouter()
 
@@ -16,26 +16,31 @@ logger.info("Translate router loaded")
 LIBRETRANSLATE_URL = os.getenv("LIBRETRANSLATE_URL")
 logger.info(f"LibreTranslate URL: {LIBRETRANSLATE_URL}")
 
-# Initialize EasyNMT model for Japanese translations
+# Initialize Llama model for Japanese to English translations
+MODEL_PATH = "/app/models/LFM2-350M-ENJP-MT-Q8_0.gguf"
 try:
-    easynmt_model = EasyNMT('opus-mt')
-    logger.info("EasyNMT opus-mt model loaded successfully")
-    
-    # Preload models with a test translation to avoid first-user latency
+    llama_model = Llama(model_path=MODEL_PATH, n_ctx=512, n_threads=4)
+    logger.info("Llama model for Japanese to English translation loaded successfully")
+
+    # Preload model with a test translation to avoid first-user latency
     try:
-        test_text = ["こんにちは", "ありがとう"]
-        test_translation = easynmt_model.translate(
-            test_text, 
-            target_lang='es', 
-            source_lang='ja'
-        )
-        logger.info(f"EasyNMT models preloaded successfully. Test translation: {test_text} -> {test_translation}")
+        llama_model.reset()
+        test_text = "こんにちは"
+        test_messages = [
+            {"role": "system", "content": "Translate to English."},
+            {"role": "user", "content": test_text}
+        ]
+        test_output = llama_model.create_chat_completion(messages=test_messages, max_tokens=50, stop=["\n"])
+        test_translation = test_output['choices'][0]['message']['content'].strip()
+        logger.info(f"Llama model preloaded successfully. Test translation: {test_text} -> {test_translation}")
+        # Reset after preload to clear KV cache for future requests
+        llama_model.reset()
     except Exception as e:
-        logger.warning(f"Failed to preload EasyNMT models (non-critical): {e}")
-        
+        logger.warning(f"Failed to preload Llama model (non-critical): {e}")
+
 except Exception as e:
-    logger.error(f"Failed to load EasyNMT opus-mt model: {e}")
-    easynmt_model = None
+    logger.error(f"Failed to load Llama model: {e}")
+    llama_model = None
 
 
 # Pydantic model for translation request
@@ -65,42 +70,92 @@ async def translate(request: Request, translate_request: TranslateRequest, paylo
 
     logger.info(f"User {payload.get('sub')} requested translation: {translate_request.source} to {translate_request.target}")
     
-    # Handle Japanese translations with EasyNMT
-    if translate_request.source == "ja" and easynmt_model:
+    # Handle Japanese translations with Llama
+    if translate_request.source == "ja" and llama_model:
         try:
-            logger.info(f"Using EasyNMT for Japanese translation: {len(translate_request.q)} texts")
-            
-            # Ensure q is always an array for Japanese translations
-            if not isinstance(translate_request.q, list):
-                translate_request.q = [translate_request.q]
-            
-            # Translate using EasyNMT
-            translated_texts = easynmt_model.translate(
-                translate_request.q, 
-                target_lang=translate_request.target, 
-                source_lang=translate_request.source
-            )
-            
-            logger.info(f"EasyNMT translation successful for user {payload.get('sub')}")
-            
-            # Return the same format as input: array if input was array, string if input was string
-            return JSONResponse(content={
-                "translatedText": translated_texts,
-                "alternatives": []
-            })
-            
+            logger.info(f"Using Llama for Japanese translation: {len(translate_request.q) if isinstance(translate_request.q, list) else 1} texts")
+
+            # Ensure q is always an array for translations
+            texts = translate_request.q if isinstance(translate_request.q, list) else [translate_request.q]
+
+            # Step 1: Translate Japanese to English using Llama
+            english_translations = []
+            for text in texts:
+                llama_model.reset()  # Reset KV cache for each translation
+                messages = [
+                    {"role": "system", "content": "Translate to English."},
+                    {"role": "user", "content": text}
+                ]
+                output = llama_model.create_chat_completion(messages=messages, max_tokens=200, stop=["\n"])
+                translation = output['choices'][0]['message']['content'].strip()
+                english_translations.append(translation)
+
+            logger.info(f"Llama Japanese->English translation successful for user {payload.get('sub')}")
+
+            # Step 2: If target is English, return the Llama results directly
+            if translate_request.target == "en":
+                return JSONResponse(content={
+                    "translatedText": english_translations if isinstance(translate_request.q, list) else english_translations[0],
+                    "alternatives": []
+                })
+
+            # Step 3: If target is not English, translate English->target using LibreTranslate
+            logger.info(f"Translating English to {translate_request.target} using LibreTranslate for user {payload.get('sub')}")
+
+            libre_payload = {
+                "q": english_translations,
+                "source": "en",
+                "target": translate_request.target,
+                "format": translate_request.format,
+                "alternatives": translate_request.alternatives,
+            }
+            if translate_request.api_key:
+                libre_payload["api_key"] = translate_request.api_key
+
+            # Use LibreTranslate for English to target language
+            async with httpx.AsyncClient() as client:
+                try:
+                    response = await client.post(LIBRETRANSLATE_TRANSLATE_URL, json=libre_payload, timeout=10.0)
+                    response.raise_for_status()
+                    libre_result = response.json()
+                except httpx.HTTPStatusError as e:
+                    logger.error(f"LibreTranslate error: {e.response.status_code} - {e.response.text}")
+                    raise HTTPException(
+                        status_code=status.HTTP_502_BAD_GATEWAY,
+                        detail=f"Translation service error: {e.response.text}"
+                    )
+                except httpx.RequestError as e:
+                    logger.error(f"Failed to connect to LibreTranslate: {str(e)}")
+                    raise HTTPException(
+                        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                        detail="Translation service unavailable"
+                    )
+                except json.JSONDecodeError:
+                    logger.error("Invalid response from LibreTranslate")
+                    raise HTTPException(
+                        status_code=status.HTTP_502_BAD_GATEWAY,
+                        detail="Invalid response from translation service"
+                    )
+
+            # Validate LibreTranslate response
+            if "translatedText" not in libre_result:
+                logger.error(f"Unexpected response from LibreTranslate: {libre_result}")
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail="Invalid translation response"
+                )
+
+            logger.info(f"Pipeline translation successful for user {payload.get('sub')}: Japanese -> English -> {translate_request.target}")
+            response = {"translatedText": libre_result["translatedText"]}
+            if "alternatives" in libre_result:
+                response["alternatives"] = libre_result["alternatives"]
+            return JSONResponse(content=response)
+
         except Exception as e:
-            logger.error(f"EasyNMT translation error: {e}")
-            # Fallback to LibreTranslate for Japanese if EasyNMT fails
+            logger.error(f"Llama translation error: {e}")
+            # Fallback to LibreTranslate for Japanese if Llama fails
             logger.info("Falling back to LibreTranslate for Japanese translation")
             # Continue to LibreTranslate section below
-        else:
-            # If EasyNMT succeeds, return early
-            # Return the same format as input: array if input was array, string if input was string
-            return JSONResponse(content={
-                "translatedText": translated_texts,
-                "alternatives": []
-            })
     
     # Use LibreTranslate for other languages (including Japanese fallback)
     # Prepare request payload for LibreTranslate
