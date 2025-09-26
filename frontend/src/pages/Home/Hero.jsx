@@ -20,7 +20,7 @@ const Hero = ({ setShowAuthModal }) => {
           Revoluciona tu Scanlation con IA
         </h1>
         <p className="text-xl md:text-2xl text-gray-700 mb-10 max-w-3xl mx-auto dark:text-gray-300" itemProp="description">
-          La plataforma más avanzada para scanlation y traducción de manga. Herramientas profesionales con IA integrada para detectar automáticamente globos de diálogo, limpiar imágenes y traducir texto. Diseñado específicamente por scanlators para optimizar tu flujo de trabajo.
+          
         </p>
         
         {/* Feature highlights cards - Mobile optimized */}

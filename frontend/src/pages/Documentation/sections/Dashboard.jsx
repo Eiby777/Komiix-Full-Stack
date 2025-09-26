@@ -148,15 +148,7 @@ const Dashboard = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <FontAwesomeIcon icon={faExclamationTriangle} className="w-5 h-5 text-amber-500 mt-1" />
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">Límite de Rendimiento</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Evita saturar el navegador durante la edición
-                    </p>
-                  </div>
-                </div>
+                
               </div>
             </div>
 

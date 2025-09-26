@@ -81,11 +81,11 @@ const FirstSteps = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span className="text-gray-700 dark:text-gray-300">RAM: 2GB mínimo, 4GB recomendado</span>
+                <span className="text-gray-700 dark:text-gray-300">RAM: 1GB mínimo, 2GB recomendado</span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-gray-700 dark:text-gray-300">Almacenamiento: 500MB libres para proyectos</span>
+                <span className="text-gray-700 dark:text-gray-300">Almacenamiento: Deja libre al menos 100MB</span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
@@ -93,7 +93,7 @@ const FirstSteps = () => {
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                <span className="text-gray-700 dark:text-gray-300">Resolución: 1366x768 mínima</span>
+                <span className="text-gray-700 dark:text-gray-300">Resolución: 1366x768 mínima (Recomendable)</span>
               </div>
             </div>
           </div>
