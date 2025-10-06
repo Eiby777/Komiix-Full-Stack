@@ -62,14 +62,14 @@ const convertBlobToCanvas = (blobUrl) => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         const image = new Image();
-        image.src = blobUrl.src;
+        image.src = blobUrl.src || blobUrl;
         image.onload = () => {
             canvas.width = image.naturalWidth;
             canvas.height = image.naturalHeight;
             ctx.drawImage(image, 0, 0);
             resolve(canvas);
         };
-        image.onerror = () => console.error('Error loading image:', blobUrl.src);
+        image.onerror = () => console.error('Error loading image:', blobUrl);
     });
 };
 

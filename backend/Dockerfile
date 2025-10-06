@@ -9,26 +9,27 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     libgl1-mesa-glx \
     libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
     ccache \
     curl \
     cmake \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
+# Install UV
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
+
 # Create models directory and download the translation model
 RUN mkdir -p /app/models
 RUN curl -L -o /app/models/LFM2-350M-ENJP-MT-Q8_0.gguf https://huggingface.co/LiquidAI/LFM2-350M-ENJP-MT-GGUF/resolve/main/LFM2-350M-ENJP-MT-Q8_0.gguf
 
-# Upgrade pip
-RUN pip install --upgrade pip
-
-# Copy requirements first for better caching
-COPY requirements.txt .
-#RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install -r requirements.txt
-
-# Install paddleocr dependencies
-RUN paddleocr install_hpi_deps cpu
+# Copy pyproject.toml first for better caching
+COPY pyproject.toml .
+RUN uv sync --no-install-project
 
 # Copy application code
 COPY . .
@@ -44,4 +45,4 @@ USER app
 EXPOSE 8000
 
 # Use exec form and proper signal handling
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["uv", "run", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

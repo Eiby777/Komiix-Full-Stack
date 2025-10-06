@@ -14,6 +14,7 @@ import { getUser } from "../../../../../../hooks/useAuth";
 import createMaskOverlay from "./handlers/createMaskOverlay";
 import useLayerHistory from "../../../../floating-menus/components/UndoRedoMenu/handlers/fabricHistoryManager";
 import { useParams } from "react-router-dom";
+import { loadAndCleanImage } from "../../../handlers/loadAndCleanImage";
 
 // Constants for canvas configuration
 
@@ -168,17 +169,25 @@ const RedrawTool = ({ currentImageIndex }) => {
       }
 
       const getImageIndex = (index) => (shouldRedrawCurrent ? currentImageIndex : index);
-      const imagesArray = canvasToProcess.map((canvas, index) => {
+      const imagesArray = await Promise.all(canvasToProcess.map(async (canvas, index) => {
         const maskData = masks[index];
         const imageIndex = getImageIndex(index);
-        const image = images[imageIndex];
+        const imageBuffer = images[imageIndex].image;
+        const imageBlob = new Blob([imageBuffer], { type: "image/png" });
+        const imageUrl = URL.createObjectURL(imageBlob);
+        const image = imageUrl;
+        
+        // Aplicar el proceso de limpieza a la imagen original
+        const cleanedCanvas = await loadAndCleanImage(canvas, image);
+        const cleanedImageBase64 = cleanedCanvas.toDataURL();
+        
         return {
-          image: arrayBufferToBase64(image.image),
+          image: cleanedImageBase64,
           mask: maskData?.mask64 || null,
           positions: maskData?.positions || null,
           filename: `${imageIndex}.png`,
         };
-      });
+      }));
 
       const totalValidImages = imagesArray.filter((img) => img.mask !== null).length;
       setProgress({ initialized: false, totalImages: totalValidImages, completedImages: 0 });

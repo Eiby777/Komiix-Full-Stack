@@ -17,10 +17,55 @@ LIBRETRANSLATE_URL = os.getenv("LIBRETRANSLATE_URL")
 logger.info(f"LibreTranslate URL: {LIBRETRANSLATE_URL}")
 
 # Initialize Llama model for Japanese to English translations
-MODEL_PATH = "/app/models/LFM2-350M-ENJP-MT-Q8_0.gguf"
+import subprocess
+
+def download_model(model_url, local_path):
+    """Download model from Hugging Face if it doesn't exist locally"""
+    try:
+        logger.info(f"Downloading model from {model_url} to {local_path}")
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        # Use curl to download
+        result = subprocess.run([
+            "curl", "-L", "-o", local_path, model_url
+        ], capture_output=True, text=True)
+        if result.returncode == 0:
+            logger.info(f"Model downloaded successfully to {local_path}")
+            return True
+        else:
+            logger.error(f"Failed to download model: {result.stderr}")
+            return False
+    except Exception as e:
+        logger.error(f"Error downloading model: {e}")
+        return False
+
+# Determine model path - try Docker path first, then local path
+MODEL_URL = "https://huggingface.co/LiquidAI/LFM2-350M-ENJP-MT-GGUF/resolve/main/LFM2-350M-ENJP-MT-Q8_0.gguf"
+DOCKER_MODEL_PATH = "/app/models/LFM2-350M-ENJP-MT-Q8_0.gguf"
+LOCAL_MODEL_PATH = os.path.expanduser("~/.cache/komiix/models/LFM2-350M-ENJP-MT-Q8_0.gguf")
+
+if os.path.exists(DOCKER_MODEL_PATH):
+    MODEL_PATH = DOCKER_MODEL_PATH
+    logger.info("Using Docker model path")
+elif os.path.exists(LOCAL_MODEL_PATH):
+    MODEL_PATH = LOCAL_MODEL_PATH
+    logger.info("Using local cached model path")
+else:
+    logger.info("Model not found locally, downloading...")
+    if download_model(MODEL_URL, LOCAL_MODEL_PATH):
+        MODEL_PATH = LOCAL_MODEL_PATH
+        logger.info("Using newly downloaded model path")
+    else:
+        MODEL_PATH = None
+        logger.error("Failed to download model, Llama translation will be unavailable")
+
 try:
-    llama_model = Llama(model_path=MODEL_PATH, n_ctx=512, n_threads=4)
-    logger.info("Llama model for Japanese to English translation loaded successfully")
+    if MODEL_PATH:
+        llama_model = Llama(model_path=MODEL_PATH, n_ctx=512, n_threads=4)
+        logger.info("Llama model for Japanese to English translation loaded successfully")
+    else:
+        llama_model = None
+        logger.error("No model path available, Llama model not loaded")
 
     # Preload model with a test translation to avoid first-user latency
     try:

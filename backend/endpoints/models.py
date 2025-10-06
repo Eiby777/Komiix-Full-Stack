@@ -88,46 +88,54 @@ async def get_model_file(model_key: str) -> StreamingResponse:
         file_path = FULL_MODELS_DIR / file_name
         cache_key = f"model:{model_key}:{version}"
 
-        # Intentar obtener desde Redis
+        # Intentar obtener desde Redis (opcional)
+        cached_data = None
         try:
             cached_data = await redis.get(cache_key)
-            if cached_data:
-                logger.info(f"Cache hit for {file_name}, serving from Redis")
-                hasher = hashlib.sha256()
-                hasher.update(cached_data)
-                actual_checksum = hasher.hexdigest()
-                
-                if actual_checksum == checksum:
-                    # Verificar que el archivo en disco no ha cambiado
-                    if file_path.exists():
-                        async with aiofiles.open(file_path, mode="rb") as f:
-                            disk_data = await f.read()
-                            disk_hasher = hashlib.sha256()
-                            disk_hasher.update(disk_data)
-                            disk_checksum = disk_hasher.hexdigest()
-                            
-                            if disk_checksum != checksum:
-                                logger.warning(f"File on disk has changed for {file_name}: expected {checksum}, got {disk_checksum}")
-                                await redis.delete(cache_key)
-                                raise HTTPException(
-                                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                    detail="File on disk has changed"
-                                )
-                    
-                    return StreamingResponse(
-                        content=iter([cached_data]),
-                        media_type="application/zip",
-                        headers={
-                            "Content-Disposition": f"attachment; filename={file_name}",
-                            "ETag": f"{version}",
-                            "Cache-Control": "no-cache",
-                        }
-                    )
-                else:
-                    logger.error(f"Cache integrity check failed for {file_name}: expected {checksum}, got {actual_checksum}")
-                    await redis.delete(cache_key)
         except Exception as e:
-            logger.error(f"Error checking Redis cache: {str(e)}")
+            logger.warning(f"Redis not available, skipping cache check: {str(e)}")
+
+        if cached_data:
+            logger.info(f"Cache hit for {file_name}, serving from Redis")
+            hasher = hashlib.sha256()
+            hasher.update(cached_data)
+            actual_checksum = hasher.hexdigest()
+
+            if actual_checksum == checksum:
+                # Verificar que el archivo en disco no ha cambiado
+                if file_path.exists():
+                    async with aiofiles.open(file_path, mode="rb") as f:
+                        disk_data = await f.read()
+                        disk_hasher = hashlib.sha256()
+                        disk_hasher.update(disk_data)
+                        disk_checksum = disk_hasher.hexdigest()
+
+                        if disk_checksum != checksum:
+                            logger.warning(f"File on disk has changed for {file_name}: expected {checksum}, got {disk_checksum}")
+                            try:
+                                await redis.delete(cache_key)
+                            except Exception as e:
+                                logger.warning(f"Redis not available, skipping cache delete: {str(e)}")
+                            raise HTTPException(
+                                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail="File on disk has changed"
+                            )
+
+                return StreamingResponse(
+                    content=iter([cached_data]),
+                    media_type="application/zip",
+                    headers={
+                        "Content-Disposition": f"attachment; filename={file_name}",
+                        "ETag": f"{version}",
+                        "Cache-Control": "no-cache",
+                    }
+                )
+            else:
+                logger.error(f"Cache integrity check failed for {file_name}: expected {checksum}, got {actual_checksum}")
+                try:
+                    await redis.delete(cache_key)
+                except Exception as e:
+                    logger.warning(f"Redis not available, skipping cache delete: {str(e)}")
 
         # Si no está en cache o la cache está corrupta, servir desde disco
         if not file_path.is_file():
@@ -149,8 +157,11 @@ async def get_model_file(model_key: str) -> StreamingResponse:
                         detail="File integrity check failed"
                     )
 
-                # Almacenar en Redis si la verificación es exitosa
-                await redis.set(cache_key, file_data)
+                # Almacenar en Redis si la verificación es exitosa (opcional)
+                try:
+                    await redis.set(cache_key, file_data)
+                except Exception as e:
+                    logger.warning(f"Redis not available, skipping cache storage: {str(e)}")
 
             return StreamingResponse(
                 content=stream_file(file_path, checksum),
@@ -266,7 +277,10 @@ async def get_model_fragments(request: Request, model_key: str, payload: dict = 
     try:
         async with aiofiles.open(key_path, mode="rb") as f:
             encryption_key = await f.read()
-        await redis.setex(session_key, 3600, encryption_key)  # Clave válida por 1 hora
+        try:
+            await redis.setex(session_key, 3600, encryption_key)  # Clave válida por 1 hora
+        except Exception as e:
+            logger.warning(f"Redis not available, skipping session key storage: {str(e)}")
     except FileNotFoundError:
         logger.error(f"Encryption key file not found: {key_path}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Encryption key file not found")
@@ -287,8 +301,24 @@ async def get_encryption_key(request: Request, session_key: str, payload: dict =
     try:
         encryption_key = await redis.get(session_key)
         if not encryption_key:
-            logger.error(f"Encryption key not found or expired: {session_key}")
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Encryption key not found or expired")
+            # Fallback: parse session_key to get model_key and read from file
+            parts = session_key.split(':')
+            if len(parts) >= 2 and parts[0] == 'encryption_key':
+                model_key = parts[1]
+                key_path = FRAGMENTS_DIR / model_key / "key" / f"{model_key}_key.bin"
+                try:
+                    async with aiofiles.open(key_path, mode="rb") as f:
+                        encryption_key = await f.read()
+                    logger.info(f"Retrieved encryption key from file for {model_key}")
+                except FileNotFoundError:
+                    logger.error(f"Encryption key file not found: {key_path}")
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Encryption key not found")
+                except Exception as e:
+                    logger.error(f"Error reading encryption key file: {str(e)}")
+                    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving encryption key")
+            else:
+                logger.error(f"Invalid session key format: {session_key}")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid session key")
         return StreamingResponse(
             content=iter([encryption_key]),
             media_type="application/octet-stream",

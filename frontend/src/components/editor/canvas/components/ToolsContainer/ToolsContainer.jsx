@@ -24,8 +24,6 @@ import { getRequiredModels, areToolModelsReady, handleModelComplete, checkIfMode
 
 //deleteAllModels();
 
-
-
 const ToolsContainer = memo(({ currentImageIndex }) => {
   const { activeTools} = useEditorStore();
   const [modelStatus, setModelStatus] = useState({

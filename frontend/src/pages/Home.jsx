@@ -19,6 +19,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const currentUrl = window.location.href.replace(/\/$/, '');
+
   useEffect(() => {
     // Listen for auth state changes (e.g., after login or OAuth redirect)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -38,7 +40,7 @@ export default function Home() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: "https://komiix.com",
+          redirectTo: currentUrl,
         },
       });
       if (error) throw error;

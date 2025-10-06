@@ -11,20 +11,13 @@ import os
 from fastapi import APIRouter
 from dependencies.limiter import limiter
 from dependencies.auth import verify_jwt
-from paddleocr import PaddleOCR
-from manga_ocr import MangaOcr  
+from manga_ocr import MangaOcr
+from onnxocr.onnx_paddleocr import ONNXPaddleOcr
 
 router = APIRouter()
 
-# Inicializar el modelo OCR
-model = PaddleOCR( 
-        use_doc_orientation_classify=False, # Disables document orientation classification model via this parameter
-        use_doc_unwarping=False, # Disables text image rectification model via this parameter
-        use_textline_orientation=False, # Disables text line orientation classification model via this parameter
-        text_detection_model_name='PP-OCRv5_server_det',
-        text_recognition_model_name='PP-OCRv5_server_rec',
-        ocr_version='PP-OCRv5'
-)
+# Inicializar el modelo OCR Onnx
+model = ONNXPaddleOcr(use_angle_cls=True, use_gpu=False)
 
 # Inicializar MangaOCR para japonés
 manga_ocr_model = MangaOcr()
@@ -130,33 +123,23 @@ async def ocr_service(
                 if os.path.exists(tmp_path):
                     os.unlink(tmp_path)
         else:
-            # Usar PaddleOCR para otros idiomas
-            logger.info("Using PaddleOCR for non-Japanese text")
-            result = model.predict(img)
+            # Usar OnnxOCR para otros idiomas
+            logger.info("Using OnnxOCR for non-Japanese text")
+            result = model.ocr(img)
             processing_time = time.time() - start_time
 
             logger.info(f"OCR result format: {type(result)}")
-            
-            # Formatear resultados - sabemos que el formato es result[0] con los datos directamente
+
+            # Formatear resultados
             ocr_results = []
-            first_result = result[0]
-            
-            rec_texts = first_result.get('rec_texts', [])
-            rec_scores = first_result.get('rec_scores', [])
-            rec_polys = first_result.get('rec_polys', [])
-            
-            logger.info(f"Found {len(rec_texts)} texts, {len(rec_scores)} scores, {len(rec_polys)} polygons")
-            
-            # Procesar cada texto detectado
-            for i in range(len(rec_texts)):
+            for line in result[0]:
                 try:
-                    text = str(rec_texts[i])
-                    confidence = float(rec_scores[i])
-                    
-                    # Convertir polígono a bounding box
-                    polygon = rec_polys[i]
+                    # bounding_box is numpy array of shape (4, 2)
+                    polygon = line[0]
                     bbox = polygon_to_bbox(polygon)
-                    
+                    text = line[1][0]
+                    confidence = float(line[1][1])
+
                     ocr_results.append({
                         "text": text,
                         "confidence": confidence,
@@ -167,9 +150,9 @@ async def ocr_service(
                             "y1": bbox[3]
                         }
                     })
-                    
+
                 except Exception as e:
-                    logger.error(f"Error processing result index {i}: {str(e)}")
+                    logger.error(f"Error processing result: {str(e)}")
                     continue
 
         logger.info(f"Final OCR results: {ocr_results}")
