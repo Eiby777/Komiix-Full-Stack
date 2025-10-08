@@ -42,28 +42,30 @@ export const updateConfigTypeTexts = (textObject, property, value, typeText) => 
 };
 
 export const handleFontChange = (font, textObject, fabricCanvas, setFontFamily, saveState, canvasInstances, canvasObjectStatus) => {
-  console.log("handleFontChange")
-  console.log(textObject);
   if (!textObject) return;
-console.log(canvasObjectStatus);
   const typeText = textObject.typeText || "Ninguno";
   setFontFamily(font);
 
-
   canvasInstances.forEach((canvas, index) => {
     if (!canvasObjectStatus[index]) return;
-    console.log(canvasObjectStatus[index]);
     const objects = canvas.getObjects();
-    const textBoxes = objects.filter(
-      (obj) => obj.type === 'textbox' && obj.typeText === typeText
-    );
-    console.log(textBoxes);
+
+    let textBoxes = [];
+
+    if (typeText === "Ninguno") {
+      textBoxes = objects.filter(
+        (obj) => obj.type === 'textbox' && (obj.typeText === "Ninguno" || !obj.typeText)
+      );
+    } else {
+      textBoxes = objects.filter(
+        (obj) => obj.type === 'textbox' && obj.typeText === typeText
+      );
+    }
+
     if (!textBoxes.length) return;
 
     textBoxes.forEach((textBox) => {
-      console.log(textBox);
       if (font !== undefined && font !== null) {
-        console.log("font", font);
         textBox.set('fontFamily', font);
         textBox.setCoords();
       }
@@ -72,7 +74,6 @@ console.log(canvasObjectStatus);
     canvas.requestRenderAll();
   });
 
-  // Update the config and save state
   updateConfigTypeTexts(textObject, 'fontFamily', font, typeText);
   fabricCanvas.requestRenderAll();
   saveState(textObject, ObjectStatus.UPDATE);
