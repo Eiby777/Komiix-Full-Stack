@@ -69,6 +69,15 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     return name;
   };
 
+  // Función para convertir blob a base64 data URL con MIME correcto
+  const blobToBase64 = async (blob) => {
+    const arrayBuffer = await blob.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    const binaryString = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('');
+    const base64 = btoa(binaryString);
+    return `data:font/woff2;base64,${base64}`;
+  };
+
   // Función simplificada para cargar fuente desde blob local
   const loadFontFromBlob = async (fontName, fontBlob) => {
     const escapedFontName = escapeFontName(fontName);
@@ -84,20 +93,15 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
         return escapedFontName;
       }
 
-      // Crear URL del blob y FontFace
-      const fontUrl = URL.createObjectURL(fontBlob);
-      const fontFace = new FontFace(escapedFontName, `url(${fontUrl})`);
+      // Convertir blob a base64 para compatibilidad con Chrome
+      const base64Data = await blobToBase64(fontBlob);
+      const fontFace = new FontFace(escapedFontName, `url(${base64Data})`);
 
       // Agregar y cargar la fuente
       document.fonts.add(fontFace);
       await fontFace.load();
 
       console.log('Font loaded successfully from local storage:', fontName);
-
-      // Limpiar el blob URL después de un breve delay
-      setTimeout(() => {
-        URL.revokeObjectURL(fontUrl);
-      }, 1000);
 
       return escapedFontName;
 
