@@ -20,8 +20,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean
 
 # Install UV
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.local/bin:$PATH"
+RUN pip install uv
 
 # Create models directory and download the translation model
 RUN mkdir -p /app/models
