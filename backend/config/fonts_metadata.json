@@ -432,5 +432,47 @@
         "filename": "Arial.woff",
         "version": "1.0.0",
         "hash": "a8b2efb850dcfb88cfb44d51815d80c4e0635178e076981bf607e5c30f8a0bc0"
+    },
+    {
+        "id": "FNT063",
+        "name": "CCVictorySpeechW00-Regular",
+        "filename": "CCVictorySpeech-W00-Regular.woff2",
+        "version": "1.0.0",
+        "hash": "dc7d9c56312fe682d51288fe1b70c44556a0d761cdaf05c937847722f29bc9d6"
+    },
+    {
+        "id": "FNT064",
+        "name": "Chinacat",
+        "filename": "chinrg__.woff2",
+        "version": "1.0.0",
+        "hash": "73e7589ccfc7a104066737984190be9ef29b7124ca77c0fe945858ab429740bf"
+    },
+    {
+        "id": "FNT065",
+        "name": "I Want My TTR!",
+        "filename": "iwantv2.woff2",
+        "version": "1.0.0",
+        "hash": "9da752f9a9faeb73c61783cf263e21ce6017e4d6f8ee8b17332a2688cc79aa7b"
+    },
+    {
+        "id": "FNT066",
+        "name": "Kennebunkport",
+        "filename": "kennebunkport.woff2",
+        "version": "1.0.0",
+        "hash": "7393017823942c573a5ad5214e32d40184a7cff62d39e2f2a9e2d443f60e975c"
+    },
+    {
+        "id": "FNT067",
+        "name": "Laffayette Comic Pro",
+        "filename": "Laffayette_Comic_Pro.woff2",
+        "version": "1.0.0",
+        "hash": "fceb9726e498ec2cf97f5d3506ab090795a91d02fb8b9adce0c82b8d31ece9dd"
+    },
+    {
+        "id": "FNT068",
+        "name": "New Wild Words",
+        "filename": "NewWildWordsRoman.woff2",
+        "version": "1.0.0",
+        "hash": "1075bf7065833a83662e4622804e7a72067e4489f19991fbf981ebe64711563d"
     }
 ]
