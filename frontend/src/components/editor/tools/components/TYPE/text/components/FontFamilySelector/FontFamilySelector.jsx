@@ -78,7 +78,6 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     return `data:font/woff2;base64,${base64}`;
   };
 
-  // Función simplificada para cargar fuente desde blob local
   const loadFontFromBlob = async (fontName, fontBlob) => {
     const escapedFontName = escapeFontName(fontName);
 
@@ -93,17 +92,50 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
         return escapedFontName;
       }
 
-      // Convertir blob a base64 para compatibilidad con Chrome
-      const base64Data = await blobToBase64(fontBlob);
-      const fontFace = new FontFace(escapedFontName, `url(${base64Data})`);
+      // Asegurarse de que el blob tenga el MIME type correcto
+      const fontBlobWithType = new Blob([fontBlob], { type: 'font/woff2' });
+      const blobUrl = URL.createObjectURL(fontBlobWithType);
 
-      // Agregar y cargar la fuente
-      document.fonts.add(fontFace);
-      await fontFace.load();
+      try {
+        // Crear FontFace con el formato especificado
+        const fontFace = new FontFace(
+          escapedFontName,
+          `url(${blobUrl})`,
+          {
+            display: 'swap', // Mejora la carga
+            weight: 'normal',
+            style: 'normal'
+          }
+        );
 
-      console.log('Font loaded successfully from local storage:', fontName);
+        // Agregar y cargar la fuente
+        document.fonts.add(fontFace);
+        await fontFace.load();
 
-      return escapedFontName;
+        console.log('Font loaded successfully from local storage:', fontName);
+
+        // NO revocar el blob URL inmediatamente - esperar a que se use
+        // URL.revokeObjectURL(blobUrl); // ← Comentar esta línea
+
+        return escapedFontName;
+
+      } catch (fontFaceError) {
+        // Si falla con Blob URL, intentar con base64 como fallback
+        console.warn('Blob URL failed, trying base64:', fontFaceError);
+        URL.revokeObjectURL(blobUrl);
+
+        const base64Data = await blobToBase64(fontBlobWithType);
+        const fontFace = new FontFace(
+          escapedFontName,
+          `url(${base64Data})`,
+          { display: 'swap' }
+        );
+
+        document.fonts.add(fontFace);
+        await fontFace.load();
+
+        return escapedFontName;
+      }
 
     } catch (error) {
       console.error('Error loading font from blob:', error);
