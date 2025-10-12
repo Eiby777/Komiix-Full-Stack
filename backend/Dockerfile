@@ -26,8 +26,8 @@ RUN pip install uv
 RUN mkdir -p /app/models
 RUN curl -L -o /app/models/LFM2-350M-ENJP-MT-Q8_0.gguf https://huggingface.co/LiquidAI/LFM2-350M-ENJP-MT-GGUF/resolve/main/LFM2-350M-ENJP-MT-Q8_0.gguf
 
-# Copy pyproject.toml first for better caching
-COPY pyproject.toml .
+# Copy pyproject.toml and uv.lock first for better caching
+COPY pyproject.toml uv.lock ./
 RUN uv sync --no-install-project
 
 # Copy application code
