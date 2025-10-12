@@ -94,15 +94,16 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     if (!selectedOption || !textObject) return;
 
     const fontName = selectedOption.fontName;
+    const fontId = selectedOption.value; // Use the ID from the option
 
-    console.log('Loading font:', fontName);
+    console.log('Loading font:', fontName, 'ID:', fontId);
 
     try {
       setLoading(true);
 
-      // Get font URL from backend
-      const fontUrl = await getFontUrl(fontName);
-      
+      // Get font URL from backend using font ID
+      const fontUrl = await getFontUrl(fontId);
+
       // Load font via CSS @font-face
       const finalFontName = await loadFontFromUrl(fontName, fontUrl);
 

@@ -207,11 +207,12 @@ async def verify_jwt_token(token: str):
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
-@router.get("/font-url/{font_name}", tags=["Fonts"])
+@router.get("/font-url/{font_id}", tags=["Fonts"])
 @limiter.limit("10/minute")
-async def get_font_url(request: Request, font_name: str, token: str = None):
+async def get_font_url(request: Request, font_id: str, token: str = None):
     """
     Serves font file directly for CSS @font-face loading
+    Uses font ID instead of name to avoid URL encoding issues
     Accepts JWT token as query parameter for browser font loading
     """
     # Try to get token from query parameter first (for browser font loading)
@@ -219,18 +220,30 @@ async def get_font_url(request: Request, font_name: str, token: str = None):
         # Manually verify the token
         try:
             payload = await verify_jwt_token(token)
-            logger.info(f"User {payload.get('sub')} requested font {font_name} via token")
+            logger.info(f"User {payload.get('sub')} requested font {font_id} via token")
         except Exception as e:
-            logger.error(f"Invalid token for font {font_name}: {e}")
+            logger.error(f"Invalid token for font {font_id}: {e}")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     else:
         # Fallback to dependency injection for API calls
         try:
             from dependencies.auth import verify_jwt
             payload = await verify_jwt(request)
-            logger.info(f"User {payload.get('sub')} requested font {font_name}")
+            logger.info(f"User {payload.get('sub')} requested font {font_id}")
         except Exception as e:
-            logger.error(f"No authentication provided for font {font_name}: {e}")
+            logger.error(f"No authentication provided for font {font_id}: {e}")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
 
-    return await get_font_file(font_name)
+    # Find font by ID instead of name
+    font_info = None
+    for font in FONT_METADATA:
+        if font["id"].lower() == font_id.lower():
+            font_info = font
+            break
+
+    if not font_info:
+        logger.error(f"Invalid font ID requested: {font_id}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid font ID requested")
+
+    # Use the font name for the actual file serving
+    return await get_font_file(font_info["name"])
