@@ -49,18 +49,9 @@
     "vite": "^6.3.5",
     "vite-bundle-analyzer": "^0.7.0"
   },
-  "resolutions": {
-    "glob": "^9.0.0",
-    "rimraf": "^4.0.0",
-    "inflight": "^2.0.0",
-    "are-we-there-yet": "^3.0.0",
-    "gauge": "^4.0.0",
-    "domexception": "^5.0.0",
-    "abab": "^3.0.0"
-  },
   "engines": {
     "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "bun": ">=1.0.0"
   },
   "browserslist": [
     "> 1%",

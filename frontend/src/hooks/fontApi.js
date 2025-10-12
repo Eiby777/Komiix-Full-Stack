@@ -33,24 +33,39 @@ export const fetchFontList = async () => {
     }
 };
   
-export const fetchFontFile = async (fontName) => {
+export const getFontUrl = async (fontName) => {
     try {
         const { data: { session } } = await supabase.auth.getSession();
-        const accesToken = session?.access_token;
-        
-        if (!accesToken) {
+        const accessToken = session?.access_token;
+
+        if (!accessToken) {
             throw new Error('No hay sesión activa');
         }
-        
+
         if (!fontName) {
             throw new Error('No se especificó el nombre de la fuente');
         }
 
-        const response = await fetch(`${domain}/api/get-font/${encodeURIComponent(fontName)}`, {
+        // Return the direct font URL with token as query parameter for browser font loading
+        return `${domain}/api/font-url/${encodeURIComponent(fontName)}?token=${encodeURIComponent(accessToken)}`;
+    } catch (error) {
+        console.error('Error en getFontUrl:', error);
+        throw error;
+    }
+};
+
+// Legacy function for backward compatibility - now returns blob from URL
+export const fetchFontFile = async (fontName) => {
+    try {
+        const fontUrl = await getFontUrl(fontName);
+        const { data: { session } } = await supabase.auth.getSession();
+        const accessToken = session?.access_token;
+
+        // For legacy compatibility, make direct request with Authorization header
+        const response = await fetch(`${domain}/api/font-url/${encodeURIComponent(fontName)}`, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accesToken}`
+                'Authorization': `Bearer ${accessToken}`
             }
         });
 

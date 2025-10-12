@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from dependencies.limiter import limiter
 import aiofiles
 from dependencies.auth import verify_jwt
@@ -9,6 +9,7 @@ from redis.asyncio import Redis
 import hashlib
 from loguru import logger
 import json
+from urllib.parse import quote
 
 router = APIRouter()
 
@@ -94,9 +95,12 @@ async def get_font_file(font_name: str) -> StreamingResponse:
                     content=iter([cached_data]),
                     media_type="font/woff2",
                     headers={
-                        "Content-Disposition": f"attachment; filename={file_name}",
+                        "Content-Disposition": f"inline; filename={file_name}",
                         "ETag": f"{version}",
                         "Cache-Control": "public, max-age=31536000",  # 1 año para clientes
+                        "Access-Control-Allow-Origin": "*",
+                        "Access-Control-Allow-Headers": "Authorization, Content-Type",
+                        "Access-Control-Allow-Methods": "GET, OPTIONS"
                     }
                 )
             else:
@@ -146,9 +150,12 @@ async def get_font_file(font_name: str) -> StreamingResponse:
             content=iter([file_data]),
             media_type="font/woff2",
             headers={
-                "Content-Disposition": f"attachment; filename={file_name}",
+                "Content-Disposition": f"inline; filename={file_name}",
                 "ETag": f"{version}",
                 "Cache-Control": "public, max-age=31536000",  # 1 año para clientes
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Authorization, Content-Type",
+                "Access-Control-Allow-Methods": "GET, OPTIONS"
             }
         )
     except FileNotFoundError:
@@ -161,11 +168,6 @@ async def get_font_file(font_name: str) -> StreamingResponse:
         logger.error(f"Error processing file {file_path}: {str(e)}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
-@router.get("/get-font/{font_name}", tags=["Fonts"], dependencies=[Depends(verify_jwt)])
-@limiter.limit("10/minute")
-async def get_font(request: Request, font_name: str, payload: dict = Depends(verify_jwt)):
-    logger.info(f"User {payload.get('sub')} requested font {font_name}")
-    return await get_font_file(font_name)
 
 @router.get("/font-list", tags=["Fonts"], dependencies=[Depends(verify_jwt)])
 @limiter.limit("10/minute")
@@ -188,3 +190,47 @@ async def get_font_list(request: Request, payload: dict = Depends(verify_jwt)) -
     
     logger.info(f"Returning list of {len(font_list)} fonts")
     return font_list
+
+async def verify_jwt_token(token: str):
+    """Helper function to verify JWT token from query parameter"""
+    try:
+        from jose import jwt
+        from config.supabase_config import SupabaseConfig
+
+        payload = jwt.decode(
+            token,
+            SupabaseConfig.SUPABASE_JWT_SECRET,
+            algorithms=["HS256"],
+            audience="authenticated"
+        )
+        return payload
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+@router.get("/font-url/{font_name}", tags=["Fonts"])
+@limiter.limit("10/minute")
+async def get_font_url(request: Request, font_name: str, token: str = None):
+    """
+    Serves font file directly for CSS @font-face loading
+    Accepts JWT token as query parameter for browser font loading
+    """
+    # Try to get token from query parameter first (for browser font loading)
+    if token:
+        # Manually verify the token
+        try:
+            payload = await verify_jwt_token(token)
+            logger.info(f"User {payload.get('sub')} requested font {font_name} via token")
+        except Exception as e:
+            logger.error(f"Invalid token for font {font_name}: {e}")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    else:
+        # Fallback to dependency injection for API calls
+        try:
+            from dependencies.auth import verify_jwt
+            payload = await verify_jwt(request)
+            logger.info(f"User {payload.get('sub')} requested font {font_name}")
+        except Exception as e:
+            logger.error(f"No authentication provided for font {font_name}: {e}")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
+
+    return await get_font_file(font_name)

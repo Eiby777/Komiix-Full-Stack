@@ -46,33 +46,34 @@ export const handleFontChange = (font, textObject, fabricCanvas, setFontFamily, 
   const typeText = textObject.typeText || "Ninguno";
   setFontFamily(font);
 
-  canvasInstances.forEach((canvas, index) => {
-    if (!canvasObjectStatus[index]) return;
-    const objects = canvas.getObjects();
+  // If typeText is "Ninguno" or doesn't exist, only change the specific textObject
+  if (typeText === "Ninguno") {
+    if (font !== undefined && font !== null) {
+      textObject.set('fontFamily', font);
+      textObject.setCoords();
+    }
+  } else {
+    // For other typeText values, change all matching objects
+    canvasInstances.forEach((canvas, index) => {
+      if (!canvasObjectStatus[index]) return;
+      const objects = canvas.getObjects();
 
-    let textBoxes = [];
-
-    if (typeText === "Ninguno") {
-      textBoxes = objects.filter(
-        (obj) => obj.type === 'textbox' && (obj.typeText === "Ninguno" || !obj.typeText)
-      );
-    } else {
-      textBoxes = objects.filter(
+      const textBoxes = objects.filter(
         (obj) => obj.type === 'textbox' && obj.typeText === typeText
       );
-    }
 
-    if (!textBoxes.length) return;
+      if (!textBoxes.length) return;
 
-    textBoxes.forEach((textBox) => {
-      if (font !== undefined && font !== null) {
-        textBox.set('fontFamily', font);
-        textBox.setCoords();
-      }
+      textBoxes.forEach((textBox) => {
+        if (font !== undefined && font !== null) {
+          textBox.set('fontFamily', font);
+          textBox.setCoords();
+        }
+      });
+
+      canvas.requestRenderAll();
     });
-
-    canvas.requestRenderAll();
-  });
+  }
 
   updateConfigTypeTexts(textObject, 'fontFamily', font, typeText);
   fabricCanvas.requestRenderAll();

@@ -1,5 +1,5 @@
 # frontend/Dockerfile
-FROM node:20-alpine AS builder
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
@@ -7,15 +7,10 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++
 
 # Copy package files first for better caching
-COPY package*.json ./
-
-# Configure npm for optimization
-RUN npm config set fetch-retry-maxtimeout 600000
-RUN npm config set fetch-retry-mintimeout 10000
-RUN npm config set fetch-timeout 600000
+COPY package*.json bun.lock ./
 
 # Install all dependencies including devDependencies for build
-RUN npm ci --no-audit --no-fund
+RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -34,7 +29,7 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV VITE_BUILD_CHUNKS="true"
 
 # Build with optimizations
-RUN npm run build
+RUN bun run build
 
 # Compress static files
 RUN find dist -type f \( -name "*.js" -o -name "*.css" -o -name "*.wasm" \) -exec gzip -k {} \;
