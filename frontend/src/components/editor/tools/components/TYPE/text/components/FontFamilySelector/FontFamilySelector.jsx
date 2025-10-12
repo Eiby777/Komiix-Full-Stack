@@ -16,14 +16,14 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     const loadFonts = async () => {
       try {
         setLoading(true);
-        // Fetch font list directly from API, no local caching
+        // Fetch font list directly from API - IDs only for management
         const fonts = await fetchFontList();
         const options = fonts
           .map(font => ({
-            value: font.id,
-            label: font.name,
-            fontName: font.name,
-            version: font.version || '1.0'
+            value: font.id,        // ID for management
+            label: font.name,      // Name for display only
+            fontId: font.id,       // Keep ID reference
+            fontName: font.name    // Keep name for compatibility
           }))
           .sort((a, b) => a.label.localeCompare(b.label));
         setFontOptions(options);
@@ -37,30 +37,23 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     loadFonts();
   }, []);
 
-  const escapeFontName = (name) => {
-    if (/[\s!"#$%&'()*+,.\/:;<=>?@\[\]\\^`{|}~]/.test(name)) {
-      return `'${name.replace(/'/g, "\\'")}'`;
-    }
-    return name;
-  };
-
-  const loadFontFromUrl = async (fontName, fontUrl) => {
-    const escapedFontName = escapeFontName(fontName);
+  const loadFontFromUrl = async (fontId, fontUrl) => {
+    console.info('Loading font from URL:', fontId, fontUrl);
 
     try {
-      // Check if font already loaded in DOM
+      // Check if font already loaded in DOM by ID
       const existingFont = Array.from(document.fonts).find(font =>
-        font.family === escapedFontName || font.family === fontName
+        font.family === fontId && font.status === 'loaded'
       );
 
-      if (existingFont && existingFont.status === 'loaded') {
-        console.log('Font already loaded in DOM:', fontName);
-        return escapedFontName;
+      if (existingFont) {
+        console.log('Font already loaded in DOM:', fontId);
+        return fontId;
       }
 
-      // Create FontFace with backend URL
+      // Create FontFace with font ID as family name
       const fontFace = new FontFace(
-        escapedFontName,
+        fontId, // Use ID as font family name
         `url(${fontUrl})`,
         {
           display: 'swap',
@@ -73,11 +66,11 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
       document.fonts.add(fontFace);
       await fontFace.load();
 
-      console.log('Font loaded successfully from URL:', fontName);
-      return escapedFontName;
+      console.log('Font loaded successfully from URL:', fontId);
+      return fontId;
 
     } catch (error) {
-      console.error('Error loading font from URL:', error);
+      console.error('Error loading font from URL:', fontId, error);
       throw error;
     }
   };
@@ -93,38 +86,40 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
   const handleChange = async (selectedOption) => {
     if (!selectedOption || !textObject) return;
 
-    const fontName = selectedOption.fontName;
-    const fontId = selectedOption.value; // Use the ID from the option
+    const fontId = selectedOption.value; // ID for management
+    const fontName = selectedOption.label; // Name for display only
 
-    console.log('Loading font:', fontName, 'ID:', fontId);
+    console.log('Loading font by ID:', fontId, 'Display name:', fontName);
 
     try {
       setLoading(true);
 
-      // Get font URL from backend using font ID
+      // Get font URL from backend using font ID only
       const fontUrl = await getFontUrl(fontId);
 
-      // Load font via CSS @font-face
-      const finalFontName = await loadFontFromUrl(fontName, fontUrl);
+      // Load font via CSS @font-face using ID
+      const finalFontId = await loadFontFromUrl(fontId, fontUrl);
 
       const canvasObjectStatus = await updateCanvasObjectStatus();
-      // Apply font to canvas object
-      await handleFontChange(finalFontName, textObject, fabricCanvas, setFontFamily, saveState, canvasInstances, canvasObjectStatus);
+      // Apply font to canvas object using ID as font family
+      await handleFontChange(finalFontId, textObject, fabricCanvas, setFontFamily, saveState, canvasInstances, canvasObjectStatus);
 
-      // Update state
+      // Store ONLY fontId in the text object - names are unreliable
+      textObject.set('fontId', fontId);
+
+      // Update state with display name for UI
       setFontFamily(fontName);
 
-      console.log('Font change completed successfully:', fontName);
+      console.log('Font change completed successfully - ID:', fontId);
 
     } catch (error) {
-      console.error('Error in font change process:', error);
+      console.error('Error in font change process for ID:', fontId, error);
 
       // Fallback: try to use the font without loading it
       try {
-        const fallbackFontName = escapeFontName(fontName);
-        await handleFontChange(fallbackFontName, textObject, fabricCanvas, setFontFamily, saveState);
+        await handleFontChange(fontId, textObject, fabricCanvas, setFontFamily, saveState);
         setFontFamily(fontName);
-        console.log('Applied font as fallback:', fallbackFontName);
+        console.log('Applied font as fallback:', fontId);
       } catch (fallbackError) {
         console.error('Fallback font application also failed:', fallbackError);
         // In case of total error, keep the previous font
@@ -209,9 +204,12 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     return name.replace(/^['"]|['"]$/g, '').trim();
   };
 
-  const selectedOption = fontOptions.find(option =>
-    normalizeFontName(option.fontName) === normalizeFontName(fontFamily)
-  ) || null;
+  // Find selected option by fontId only - names are unreliable
+  const selectedOption = textObject && textObject.fontId
+    ? fontOptions.find(option => option.value === textObject.fontId) || null
+    : null;
+
+  // ID-based selection only - no name comparisons
 
   return (
     <div className="flex items-center w-full gap-1 sm:gap-2 min-w-0" title="Font Family">

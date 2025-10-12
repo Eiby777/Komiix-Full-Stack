@@ -93,7 +93,7 @@ export default function Header() {
         hasInitialLoad.current = true;
         const project = await getProjectById(projectId, user.id);
         if (project) {
-          handleLoadImportedFile(project.savefile, canvasInstances, setShowLoadModal, activeLayer, setCanvasObjectStatus);
+          handleLoadImportedFile(project, canvasInstances, setShowLoadModal, activeLayer, setCanvasObjectStatus);
         }
       }
       return;
@@ -119,6 +119,20 @@ export default function Header() {
       });
       return cloneCanvases;
     };
+
+    const extractUsedFontIds = () => {
+      const usedFontIds = new Set();
+      canvasInstances.forEach((canvas) => {
+        const objects = canvas.getObjects();
+        objects.forEach((obj) => {
+          if (obj.type === 'textbox' && obj.fontId) {
+            usedFontIds.add(obj.fontId);
+          }
+        });
+      });
+      return Array.from(usedFontIds);
+    };
+
     const addIds = (canvases) => {
       canvases.forEach((canvas, canvasIndex) => {
         const currentCanvasObjects = canvasInstances[canvasIndex].getObjects();
@@ -130,10 +144,13 @@ export default function Header() {
           object.originalText = currentCanvasObjects[(objectIndex + 1)]?.originalText ?? null;
           object.translatedText = currentCanvasObjects[(objectIndex + 1)]?.translatedText ?? null;
           object.typeText = currentCanvasObjects[(objectIndex + 1)]?.typeText ?? null;
+          object.fontId = currentCanvasObjects[(objectIndex + 1)]?.fontId ?? null;
         });
       });
+
       return canvases;
     };
+
     const cloneCanvases = await handleCloneCanvases();
 
     const parentContainer = document.getElementById("div_canvases");
@@ -144,21 +161,35 @@ export default function Header() {
       data: canvas.toJSON(),
       parentDimensions: { width: parentWidth, height: parentHeight }
     }));
+
     const canvasInstancesDataWithIds = addIds(canvasInstancesData);
-    return canvasInstancesDataWithIds;
+    const usedFonts = extractUsedFontIds();
+
+    // Return both canvas data and used fonts
+    return { canvasData: canvasInstancesDataWithIds, usedFonts };
   };
 
   const handleSaveLocal = async () => {
-    const canvasInstancesDataWithIds = await save();
+    const { canvasData, usedFonts } = await save();
     const user = await getUser();
-    await updateProject(projectId, user.id, { savefile: canvasInstancesDataWithIds, lastUpdated: new Date().toISOString() });
+    await updateProject(projectId, user.id, {
+      savefile: canvasData,
+      usedFonts: usedFonts,
+      lastUpdated: new Date().toISOString()
+    });
   };
 
   const handleExport = async () => {
-    const canvasInstancesDataWithIds = await save();
+    const { canvasData, usedFonts } = await save();
+
+    const exportData = {
+      canvasData: canvasData,
+      usedFonts: usedFonts,
+      exportedAt: new Date().toISOString()
+    };
 
     const a = document.createElement('a');
-    const data = JSON.stringify(canvasInstancesDataWithIds);
+    const data = JSON.stringify(exportData);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const date = new Date();

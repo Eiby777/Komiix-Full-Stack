@@ -2,7 +2,7 @@ import createRectangleObject from '../../tools/components/ANNOTATION/rectangle/c
 import { createImageObject } from '../../tools/components/CLEANUP/brush/TemplateBrush';
 import { configTextObject } from '../../tools/components/TYPE/text/handlers/textObjectHandlers';
 import { LAYERS } from '../../../../constants/layers';
-import { fetchFontFile } from '../../../../hooks/fontApi';
+import { getFontUrl } from '../../../../hooks/fontApi';
 
 /**
  * Recalculates the positions of objects on the canvas after resizing the container.
@@ -63,6 +63,23 @@ const handleCreateObject = (item, object, canvas, currentWidth, currentHeight, a
             typeText: object.typeText,
             angle: object.angle
         });
+
+        // Set fontId - this is the primary identifier
+        if (object.fontId) {
+            obj.set('fontId', object.fontId);
+            console.log('Setting fontId for object:', object.fontId);
+        }
+
+        // Set fontFamily for display only - derived from fontId when needed
+        if (object.fontFamily) {
+            // Escape font name for CSS if it contains special characters
+            const escapedFontName = object.fontFamily.includes(' ') || object.fontFamily.includes('!') || object.fontFamily.includes('\'')
+                ? `'${object.fontFamily.replace(/'/g, "\\'")}'`
+                : object.fontFamily;
+            obj.set('fontFamily', escapedFontName);
+
+        }
+
         if (activeLayer !== LAYERS.TEXT.id && activeLayer !== LAYERS.OUTPUT.id) {
             obj.set({ opacity: 0, selectable: false, evented: false });
         }else{
@@ -85,49 +102,73 @@ const getParentContainerDimensions = () => {
 };
 
 /**
- * Extracts unique font families from the project data and loads them.
+ * Loads fonts by their IDs for project loading - ID-based management only.
  */
-const loadProjectFonts = async (data) => {
-    const fontsToNotLoad = ['Arial', 'Times New Roman', 'Courier New', 'Verdana', 'Georgia'];
-    // Extract unique font families from all Textbox objects in the project data
-    const fontSet = new Set();
-    data.forEach(item => {
-        const objects = item.data.objects || [];
-        objects.forEach(obj => {
-            if (obj.type === 'Textbox' && obj.fontFamily && !fontsToNotLoad.includes(obj.fontFamily)) {
-                fontSet.add(obj.fontFamily);
+const loadProjectFonts = async (usedFontIds = []) => {
+    if (!usedFontIds || usedFontIds.length === 0) {
+        console.log('No font IDs to load for this project');
+        return;
+    }
+
+    console.log('Loading fonts by IDs:', usedFontIds);
+
+    try {
+        // Get font list to map IDs to names
+        const { fetchFontList } = await import('../../../../hooks/fontApi');
+        const fontList = await fetchFontList();
+
+        const loadPromises = usedFontIds.map(async (fontId) => {
+            try {
+                // Find font info by ID only
+                const fontInfo = fontList.find(font => font.id === fontId);
+                if (!fontInfo) {
+                    console.warn(`Font ID ${fontId} not found in font list, skipping`);
+                    return;
+                }
+
+                // Check if font is already loaded by ID
+                const existingFont = Array.from(document.fonts).find(font =>
+                    font.family === fontId && font.status === 'loaded'
+                );
+
+
+                if (existingFont) {
+                    console.log(`Font ID ${fontId} already loaded, skipping`);
+                    return;
+                }
+
+                // Get the font URL using ID only
+                const fontUrl = await getFontUrl(fontId);
+
+                // Create FontFace with font ID as family name for consistency
+                const fontFace = new FontFace(
+                    fontId, // Use ID as font family name
+                    `url(${fontUrl})`,
+                    {
+                        display: 'swap',
+                        weight: 'normal',
+                        style: 'normal'
+                    }
+                );
+
+                // Add and load the font
+                document.fonts.add(fontFace);
+                await fontFace.load();
+
+                console.log(`Font loaded successfully: ID ${fontId}`);
+
+            } catch (error) {
+                console.error(`Error loading font ID ${fontId}:`, error);
+                // Continue with other fonts even if one fails
             }
         });
-    });
 
-    const fontsToLoad = Array.from(fontSet);
-    const loadPromises = fontsToLoad.map(async (fontName) => {
-        try {
-            const fontData = await fetchFontFile(fontName);
-            const fontBlob = new Blob([fontData], { type: 'font/woff2' });
-            const fontUrl = URL.createObjectURL(fontBlob);
-            
-            // Create dynamic @font-face rule
-            const fontFace = `
-                @font-face {
-                    font-family: "${fontName}";
-                    src: url(${fontUrl}) format('woff2');
-                }
-            `;
-            
-            // Add the font-face to the document
-            const styleSheet = document.createElement('style');
-            styleSheet.textContent = fontFace;
-            document.head.appendChild(styleSheet);
-            
-            // Wait for the font to load
-            await document.fonts.load(`16px "${fontName}"`);
-        } catch (error) {
-            console.error(`Error loading font ${fontName}:`, error);
-        }
-    });
+        await Promise.all(loadPromises);
+        console.log('All project fonts loaded successfully');
 
-    await Promise.all(loadPromises);
+    } catch (error) {
+        console.error('Error loading project fonts:', error);
+    }
 };
 
 /**
@@ -167,10 +208,10 @@ const handleLoadImportedFile = async (
     activeLayer,
     setCanvasObjectStatus
 ) => {
-    const processData = async (data) => {
+    const processData = async (data, usedFontIds = null) => {
         // Load all fonts before processing the canvas data
-        await loadProjectFonts(data);
-        
+        await loadProjectFonts(usedFontIds);
+
         const { width, height } = getParentContainerDimensions();
         processCanvasData(
             data,
@@ -189,12 +230,15 @@ const handleLoadImportedFile = async (
             let data = null;
             try {
                 data = JSON.parse(e.target.result);
+                // Check if it's an exported file with usedFonts
+                if (data.canvasData && data.usedFonts) {
+                    processData(data.canvasData, data.usedFonts);
+                } else {
+                    processData(data);
+                }
             } catch (error) {
                 console.error('Error al cargar datos de fabric:', error);
                 return;
-            }
-            if (data) {
-                processData(data);
             }
         };
         reader.onerror = (error) => {
@@ -202,7 +246,11 @@ const handleLoadImportedFile = async (
         };
         reader.readAsText(file);
     } else if (file) {
-        processData(file);
+        if (file.usedFonts) {
+            processData(file.savefile, file.usedFonts);
+        } else {
+            processData(file.savefile || file);
+        }
     }
 };
 
