@@ -102,7 +102,7 @@ const getParentContainerDimensions = () => {
 };
 
 /**
- * Loads fonts by their IDs for project loading - ID-based management only.
+ * Loads fonts by their IDs for project loading - uses new caching system
  */
 const loadProjectFonts = async (usedFontIds = []) => {
     if (!usedFontIds || usedFontIds.length === 0) {
@@ -110,64 +110,16 @@ const loadProjectFonts = async (usedFontIds = []) => {
         return;
     }
 
-    console.log('Loading fonts by IDs:', usedFontIds);
+    console.log('Preloading fonts by IDs:', usedFontIds);
 
     try {
-        // Get font list to map IDs to names
-        const { fetchFontList } = await import('../../../../hooks/fontApi');
-        const fontList = await fetchFontList();
-
-        const loadPromises = usedFontIds.map(async (fontId) => {
-            try {
-                // Find font info by ID only
-                const fontInfo = fontList.find(font => font.id === fontId);
-                if (!fontInfo) {
-                    console.warn(`Font ID ${fontId} not found in font list, skipping`);
-                    return;
-                }
-
-                // Check if font is already loaded by ID
-                const existingFont = Array.from(document.fonts).find(font =>
-                    font.family === fontId && font.status === 'loaded'
-                );
-
-
-                if (existingFont) {
-                    console.log(`Font ID ${fontId} already loaded, skipping`);
-                    return;
-                }
-
-                // Get the font URL using ID only
-                const fontUrl = await getFontUrl(fontId);
-
-                // Create FontFace with font ID as family name for consistency
-                const fontFace = new FontFace(
-                    fontId, // Use ID as font family name
-                    `url(${fontUrl})`,
-                    {
-                        display: 'swap',
-                        weight: 'normal',
-                        style: 'normal'
-                    }
-                );
-
-                // Add and load the font
-                document.fonts.add(fontFace);
-                await fontFace.load();
-
-                console.log(`Font loaded successfully: ID ${fontId}`);
-
-            } catch (error) {
-                console.error(`Error loading font ID ${fontId}:`, error);
-                // Continue with other fonts even if one fails
-            }
-        });
-
-        await Promise.all(loadPromises);
-        console.log('All project fonts loaded successfully');
+        // Use the new preloadProjectFonts function from fontApi
+        const { preloadProjectFonts } = await import('../../../../hooks/fontApi');
+        await preloadProjectFonts(usedFontIds);
 
     } catch (error) {
-        console.error('Error loading project fonts:', error);
+        console.error('Error preloading project fonts:', error);
+        // Don't throw - allow project to load even if font preloading fails
     }
 };
 

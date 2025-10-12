@@ -5,6 +5,7 @@ import { handleFontChange } from '../../handlers/textSettingsHandlers';
 import { fetchFontList, getFontUrl } from '../../../../../../../../hooks/fontApi';
 import { useEditorStore } from '../../../../../../../../stores/editorStore';
 import useLayerHistory from '../../../../../../floating-menus/components/UndoRedoMenu/handlers/fabricHistoryManager';
+const { loadFont } = '../../../../../../../../utils/fontManager';
 
 const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanvas }) => {
   const [fontOptions, setFontOptions] = useState([]);
@@ -37,40 +38,18 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     loadFonts();
   }, []);
 
-  const loadFontFromUrl = async (fontId, fontUrl) => {
-    console.info('Loading font from URL:', fontId, fontUrl);
+  const loadFontFromCache = async (fontId) => {
+    console.info('Loading font from cache:', fontId);
 
     try {
-      // Check if font already loaded in DOM by ID
-      const existingFont = Array.from(document.fonts).find(font =>
-        font.family === fontId && font.status === 'loaded'
-      );
+      
+      const loadedFontId = await loadFont(fontId);
 
-      if (existingFont) {
-        console.log('Font already loaded in DOM:', fontId);
-        return fontId;
-      }
-
-      // Create FontFace with font ID as family name
-      const fontFace = new FontFace(
-        fontId, // Use ID as font family name
-        `url(${fontUrl})`,
-        {
-          display: 'swap',
-          weight: 'normal',
-          style: 'normal'
-        }
-      );
-
-      // Add and load the font
-      document.fonts.add(fontFace);
-      await fontFace.load();
-
-      console.log('Font loaded successfully from URL:', fontId);
-      return fontId;
+      console.log('Font loaded successfully from cache:', fontId);
+      return loadedFontId;
 
     } catch (error) {
-      console.error('Error loading font from URL:', fontId, error);
+      console.error('Error loading font from cache:', fontId, error);
       throw error;
     }
   };
@@ -94,11 +73,8 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     try {
       setLoading(true);
 
-      // Get font URL from backend using font ID only
-      const fontUrl = await getFontUrl(fontId);
-
-      // Load font via CSS @font-face using ID
-      const finalFontId = await loadFontFromUrl(fontId, fontUrl);
+      // Load font using FontManager (handles caching automatically)
+      const finalFontId = await loadFontFromCache(fontId);
 
       const canvasObjectStatus = await updateCanvasObjectStatus();
       // Apply font to canvas object using ID as font family
