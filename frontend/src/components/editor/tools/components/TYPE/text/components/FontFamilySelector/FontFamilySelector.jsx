@@ -5,7 +5,7 @@ import { handleFontChange } from '../../handlers/textSettingsHandlers';
 import { fetchFontList, getFontUrl } from '../../../../../../../../hooks/fontApi';
 import { useEditorStore } from '../../../../../../../../stores/editorStore';
 import useLayerHistory from '../../../../../../floating-menus/components/UndoRedoMenu/handlers/fabricHistoryManager';
-const { loadFont } = '../../../../../../../../utils/fontManager';
+import fontManager from '../../../../../../../../lib/fontManager';
 
 const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanvas }) => {
   const [fontOptions, setFontOptions] = useState([]);
@@ -42,8 +42,8 @@ const FontFamilySelector = ({ fontFamily, setFontFamily, textObject, fabricCanva
     console.info('Loading font from cache:', fontId);
 
     try {
-      
-      const loadedFontId = await loadFont(fontId);
+
+      const loadedFontId = await fontManager.loadFont(fontId);
 
       console.log('Font loaded successfully from cache:', fontId);
       return loadedFontId;

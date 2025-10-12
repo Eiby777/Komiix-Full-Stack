@@ -64,18 +64,16 @@ class FontManager {
    */
   async isFontCached(fontId) {
     try {
-      // First, check if font exists in cache (readonly)
-      const cachedFont = await getFont(fontId);
-      if (!cachedFont) return false;
-
-      // Get font info from backend
+      // Get font info from backend first
       const fontInfo = await this.getFontInfo(fontId);
       if (!fontInfo) {
-        console.warn(`Font ${fontId} no longer exists in backend, removing from cache`);
-        // Remove in separate transaction to avoid mixing readonly/readwrite
-        setTimeout(() => this.removeFont(fontId), 0);
+        console.warn(`Font ${fontId} no longer exists in backend`);
         return false;
       }
+
+      // Check if font exists in cache (readonly)
+      const cachedFont = await getFont(fontId);
+      if (!cachedFont) return false;
 
       // Check version and hash (normalize to uppercase)
       const cachedHash = cachedFont.hash ? cachedFont.hash.toUpperCase() : '';

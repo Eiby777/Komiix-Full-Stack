@@ -2,271 +2,253 @@ import { openDB, deleteDB } from 'idb';
 
 /**
  * Font Database Manager for IndexedDB-based font caching
- * Handles font storage, retrieval, and cache management
+ * Optimized version with improved error handling and performance
  */
 
-// Singleton database promise
-let dbPromise = null;
+// Configuration constants
+const CONFIG = {
+  DB_NAME: 'fontDB',
+  DB_VERSION: 1,
+  STORES: {
+    FONTS: 'fonts',
+    METADATA: 'metadata'
+  },
+  DEFAULT_MAX_STORAGE: 50 * 1024 * 1024, // 50MB
+  METADATA_KEY: 'globalStats'
+};
 
-// Database configuration
-const DB_NAME = 'fontDB';
-const DB_VERSION = 1;
-const FONT_STORE = 'fonts';
-const METADATA_STORE = 'metadata';
-
-// Font record structure:
-// {
-//   id: 'FNT001',           // Font ID (primary key)
-//   name: 'Milky Week',     // Display name
-//   version: '1.0.0',       // Version from backend
-//   hash: 'sha256...',     // Integrity hash
-//   blob: Blob,            // Font file as blob
-//   blobUrl: string,       // Blob URL (recreated on demand)
-//   lastUsed: timestamp,   // For LRU eviction
-//   downloadedAt: timestamp, // For cache management
-//   size: number           // File size in bytes
-// }
-
-// Metadata record structure:
-// {
-//   key: 'globalStats',
-//   totalSize: number,      // Total size of all cached fonts
-//   fontCount: number,      // Number of cached fonts
-//   lastSync: timestamp,    // Last sync with backend
-//   maxStorage: number      // Maximum allowed storage (bytes)
-// }
+// Singleton database instance
+let dbInstance = null;
 
 /**
- * Initialize the font database
+ * Creates default metadata object
+ */
+const createDefaultMetadata = () => ({
+  key: CONFIG.METADATA_KEY,
+  totalSize: 0,
+  fontCount: 0,
+  lastSync: null,
+  maxStorage: CONFIG.DEFAULT_MAX_STORAGE
+});
+
+/**
+ * Initialize the font database with proper error handling
  */
 const initDB = async () => {
-  if (!dbPromise) {
-    try {
-      dbPromise = openDB(DB_NAME, DB_VERSION, {
-        upgrade(db) {
-          // Fonts store
-          if (!db.objectStoreNames.contains(FONT_STORE)) {
-            const fontStore = db.createObjectStore(FONT_STORE, { keyPath: 'id' });
-            fontStore.createIndex('byVersion', 'version');
-            fontStore.createIndex('byLastUsed', 'lastUsed');
-            fontStore.createIndex('byDownloadedAt', 'downloadedAt');
-          }
+  if (dbInstance) return dbInstance;
 
-          // Metadata store
-          if (!db.objectStoreNames.contains(METADATA_STORE)) {
-            db.createObjectStore(METADATA_STORE, { keyPath: 'key' });
-          }
-        },
-      });
-    } catch (error) {
-      console.error('Error initializing font database:', error);
-      throw new Error('Failed to initialize font database');
-    }
+  try {
+    dbInstance = await openDB(CONFIG.DB_NAME, CONFIG.DB_VERSION, {
+      upgrade(db) {
+        // Create fonts store
+        if (!db.objectStoreNames.contains(CONFIG.STORES.FONTS)) {
+          const fontStore = db.createObjectStore(CONFIG.STORES.FONTS, { keyPath: 'id' });
+          fontStore.createIndex('byVersion', 'version');
+          fontStore.createIndex('byLastUsed', 'lastUsed');
+          fontStore.createIndex('byDownloadedAt', 'downloadedAt');
+        }
+
+        // Create metadata store
+        if (!db.objectStoreNames.contains(CONFIG.STORES.METADATA)) {
+          db.createObjectStore(CONFIG.STORES.METADATA, { keyPath: 'key' });
+        }
+      },
+    });
+    
+    return dbInstance;
+  } catch (error) {
+    console.error('Failed to initialize font database:', error);
+    throw new Error('Database initialization failed');
   }
-  return dbPromise;
 };
 
 /**
- * Get database instance
+ * Ensures database is initialized before operations
  */
-const getDB = async () => {
-  return await initDB();
+const ensureDB = async () => {
+  if (!dbInstance) {
+    await initDB();
+  }
+  return dbInstance;
 };
 
 /**
- * Get global metadata
+ * Generic error handler with auto-initialization
  */
-const getMetadata = async () => {
-  const db = await getDB();
-  const tx = db.transaction(METADATA_STORE, 'readonly');
-  const store = tx.objectStore(METADATA_STORE);
-  return await store.get('globalStats') || {
-    key: 'globalStats',
-    totalSize: 0,
-    fontCount: 0,
-    lastSync: null,
-    maxStorage: 50 * 1024 * 1024 // 50MB default
-  };
+const withErrorHandling = async (operation, operationName = 'Database operation') => {
+  try {
+    return await operation();
+  } catch (error) {
+    console.warn(`${operationName} failed, attempting DB initialization...`);
+    await initDB();
+    return await operation();
+  }
 };
 
 /**
- * Update global metadata
+ * Get global metadata with caching
  */
-const updateMetadata = async (updates) => {
-  const db = await getDB();
+const getMetadata = () => withErrorHandling(async () => {
+  const db = await ensureDB();
+  const metadata = await db.get(CONFIG.STORES.METADATA, CONFIG.METADATA_KEY);
+  return metadata || createDefaultMetadata();
+}, 'Get metadata');
+
+/**
+ * Update global metadata efficiently
+ */
+const updateMetadata = (updates) => withErrorHandling(async () => {
+  const db = await ensureDB();
   const current = await getMetadata();
-  const updated = { ...current, ...updates };
-
-  const tx = db.transaction(METADATA_STORE, 'readwrite');
-  const store = tx.objectStore(METADATA_STORE);
-  await store.put(updated);
-  await tx.done;
-};
+  await db.put(CONFIG.STORES.METADATA, { ...current, ...updates });
+}, 'Update metadata');
 
 /**
  * Check if font exists in cache
  */
-const hasFont = async (fontId) => {
-  const db = await getDB();
-  const tx = db.transaction(FONT_STORE, 'readonly');
-  const store = tx.objectStore(FONT_STORE);
-  const font = await store.get(fontId);
-  return !!font;
-};
+const hasFont = (fontId) => withErrorHandling(async () => {
+  const db = await ensureDB();
+  const count = await db.countFromIndex(CONFIG.STORES.FONTS, 'id', fontId);
+  return count > 0;
+}, 'Check font existence');
 
 /**
  * Get font from cache
  */
-const getFont = async (fontId) => {
-  const db = await getDB();
-  const tx = db.transaction(FONT_STORE, 'readonly');
-  const store = tx.objectStore(FONT_STORE);
-  return await store.get(fontId);
-};
+const getFont = (fontId) => withErrorHandling(async () => {
+  const db = await ensureDB();
+  return await db.get(CONFIG.STORES.FONTS, fontId);
+}, 'Get font');
 
 /**
- * Store font in cache
+ * Store font in cache with atomic transaction
  */
-const storeFont = async (fontData) => {
-  const db = await getDB();
-  const tx = db.transaction([FONT_STORE, METADATA_STORE], 'readwrite');
+const storeFont = (fontData) => withErrorHandling(async () => {
+  const db = await ensureDB();
+  const tx = db.transaction([CONFIG.STORES.FONTS, CONFIG.STORES.METADATA], 'readwrite');
 
-  // Store font
-  const fontStore = tx.objectStore(FONT_STORE);
-  await fontStore.put(fontData);
+  try {
+    // Store font
+    await tx.objectStore(CONFIG.STORES.FONTS).put(fontData);
 
-  // Update metadata
-  const metadata = await getMetadata();
-  const updatedMetadata = {
-    ...metadata,
-    totalSize: metadata.totalSize + fontData.size,
-    fontCount: metadata.fontCount + 1
-  };
+    // Update metadata
+    const metadataStore = tx.objectStore(CONFIG.STORES.METADATA);
+    const currentMetadata = await metadataStore.get(CONFIG.METADATA_KEY) || createDefaultMetadata();
+    await metadataStore.put({
+      ...currentMetadata,
+      totalSize: currentMetadata.totalSize + fontData.size,
+      fontCount: currentMetadata.fontCount + 1
+    });
 
-  const metadataStore = tx.objectStore(METADATA_STORE);
-  await metadataStore.put(updatedMetadata);
-
-  await tx.done;
-};
+    await tx.done;
+  } catch (error) {
+    tx.abort();
+    throw error;
+  }
+}, 'Store font');
 
 /**
  * Update font's last used timestamp
  */
-const updateFontLastUsed = async (fontId) => {
-  const db = await getDB();
-  const tx = db.transaction(FONT_STORE, 'readwrite');
-  const store = tx.objectStore(FONT_STORE);
-
-  const font = await store.get(fontId);
+const updateFontLastUsed = (fontId) => withErrorHandling(async () => {
+  const db = await ensureDB();
+  const font = await db.get(CONFIG.STORES.FONTS, fontId);
+  
   if (font) {
     font.lastUsed = Date.now();
-    await store.put(font);
+    await db.put(CONFIG.STORES.FONTS, font);
   }
-
-  await tx.done;
-};
+}, 'Update font timestamp');
 
 /**
- * Delete font from cache
+ * Delete font from cache with cleanup
  */
-const deleteFont = async (fontId) => {
-  const db = await getDB();
-  const tx = db.transaction([FONT_STORE, METADATA_STORE], 'readwrite');
+const deleteFont = (fontId) => withErrorHandling(async () => {
+  const db = await ensureDB();
+  const tx = db.transaction([CONFIG.STORES.FONTS, CONFIG.STORES.METADATA], 'readwrite');
 
-  // Get font size before deletion
-  const fontStore = tx.objectStore(FONT_STORE);
-  const font = await fontStore.get(fontId);
+  try {
+    const fontStore = tx.objectStore(CONFIG.STORES.FONTS);
+    const font = await fontStore.get(fontId);
 
-  if (font) {
-    // Revoke blob URL if exists
-    if (font.blobUrl) {
-      URL.revokeObjectURL(font.blobUrl);
+    if (font) {
+      // Cleanup blob URL
+      if (font.blobUrl) {
+        URL.revokeObjectURL(font.blobUrl);
+      }
+
+      // Delete font
+      await fontStore.delete(fontId);
+
+      // Update metadata
+      const metadataStore = tx.objectStore(CONFIG.STORES.METADATA);
+      const currentMetadata = await metadataStore.get(CONFIG.METADATA_KEY) || createDefaultMetadata();
+      await metadataStore.put({
+        ...currentMetadata,
+        totalSize: Math.max(0, currentMetadata.totalSize - font.size),
+        fontCount: Math.max(0, currentMetadata.fontCount - 1)
+      });
     }
 
-    // Delete font
-    await fontStore.delete(fontId);
-
-    // Update metadata
-    const metadata = await getMetadata();
-    const updatedMetadata = {
-      ...metadata,
-      totalSize: Math.max(0, metadata.totalSize - font.size),
-      fontCount: Math.max(0, metadata.fontCount - 1)
-    };
-
-    const metadataStore = tx.objectStore(METADATA_STORE);
-    await metadataStore.put(updatedMetadata);
+    await tx.done;
+  } catch (error) {
+    tx.abort();
+    throw error;
   }
-
-  await tx.done;
-};
-
-/**
- * Delete fonts database entirely
- */
+}, 'Delete font');
 
 /**
  * Get all cached fonts
  */
-const getAllFonts = async () => {
-  const db = await getDB();
-  const tx = db.transaction(FONT_STORE, 'readonly');
-  const store = tx.objectStore(FONT_STORE);
-  return await store.getAll();
-};
+const getAllFonts = () => withErrorHandling(async () => {
+  const db = await ensureDB();
+  return await db.getAll(CONFIG.STORES.FONTS);
+}, 'Get all fonts');
 
 /**
- * Get fonts by IDs
+ * Get fonts by IDs with parallel fetching
  */
-const getFontsByIds = async (fontIds) => {
-  const db = await getDB();
-  const tx = db.transaction(FONT_STORE, 'readonly');
-  const store = tx.objectStore(FONT_STORE);
+const getFontsByIds = (fontIds) => withErrorHandling(async () => {
+  const db = await ensureDB();
+  const fonts = await Promise.all(
+    fontIds.map(id => db.get(CONFIG.STORES.FONTS, id))
+  );
+  return fonts.filter(Boolean); // Remove undefined entries
+}, 'Get fonts by IDs');
 
-  const fonts = [];
-  for (const fontId of fontIds) {
-    const font = await store.get(fontId);
-    if (font) {
-      fonts.push(font);
+/**
+ * Revoke blob URLs for fonts
+ */
+const revokeBlobUrls = (fonts) => {
+  fonts.forEach(font => {
+    if (font?.blobUrl) {
+      URL.revokeObjectURL(font.blobUrl);
     }
-  }
-
-  return fonts;
+  });
 };
 
 /**
  * Clear all cached fonts
  */
-const clearAllFonts = async () => {
-  const db = await getDB();
-  const tx = db.transaction([FONT_STORE, METADATA_STORE], 'readwrite');
-
-  // Get all fonts to revoke blob URLs
-  const fontStore = tx.objectStore(FONT_STORE);
-  const fonts = await fontStore.getAll();
-
-  // Revoke all blob URLs
-  fonts.forEach(font => {
-    if (font.blobUrl) {
-      URL.revokeObjectURL(font.blobUrl);
-    }
-  });
-
-  // Clear stores
-  await fontStore.clear();
-
-  // Reset metadata
-  const metadataStore = tx.objectStore(METADATA_STORE);
-  await metadataStore.put({
-    key: 'globalStats',
-    totalSize: 0,
-    fontCount: 0,
-    lastSync: null,
-    maxStorage: 50 * 1024 * 1024
-  });
-
-  await tx.done;
-};
+const clearAllFonts = () => withErrorHandling(async () => {
+  const db = await ensureDB();
+  const tx = db.transaction([CONFIG.STORES.FONTS, CONFIG.STORES.METADATA], 'readwrite');
+  
+  try {
+    // Get and cleanup fonts
+    const fonts = await tx.objectStore(CONFIG.STORES.FONTS).getAll();
+    revokeBlobUrls(fonts);
+    
+    // Clear stores
+    await tx.objectStore(CONFIG.STORES.FONTS).clear();
+    await tx.objectStore(CONFIG.STORES.METADATA).put(createDefaultMetadata());
+    
+    await tx.done;
+  } catch (error) {
+    tx.abort();
+    throw error;
+  }
+}, 'Clear all fonts');
 
 /**
  * Get storage usage statistics
@@ -277,7 +259,8 @@ const getStorageStats = async () => {
     totalSize: metadata.totalSize,
     fontCount: metadata.fontCount,
     maxStorage: metadata.maxStorage,
-    usagePercentage: (metadata.totalSize / metadata.maxStorage) * 100
+    usagePercentage: (metadata.totalSize / metadata.maxStorage) * 100,
+    availableSpace: metadata.maxStorage - metadata.totalSize
   };
 };
 
@@ -285,33 +268,47 @@ const getStorageStats = async () => {
  * Set maximum storage limit
  */
 const setMaxStorage = async (maxBytes) => {
-  const metadata = await getMetadata();
-  await updateMetadata({
-    ...metadata,
-    maxStorage: maxBytes
-  });
+  if (maxBytes <= 0) {
+    throw new Error('Max storage must be a positive number');
+  }
+  await updateMetadata({ maxStorage: maxBytes });
 };
 
 /**
- * Delete database entirely
+ * Delete database entirely with cleanup
  */
 const deleteFontDB = async () => {
-  // Get all fonts to revoke blob URLs before deletion
   try {
     const fonts = await getAllFonts();
-    fonts.forEach(font => {
-      if (font.blobUrl) {
-        URL.revokeObjectURL(font.blobUrl);
-      }
-    });
+    revokeBlobUrls(fonts);
   } catch (error) {
-    console.warn('Error cleaning up blob URLs during DB deletion:', error);
+    console.warn('Error cleaning up during DB deletion:', error);
   }
-
-  await deleteDB(DB_NAME);
-  dbPromise = null;
+  
+  await deleteDB(CONFIG.DB_NAME);
+  dbInstance = null;
 };
 
+/**
+ * Get least recently used fonts for cache eviction
+ */
+const getLRUFonts = (limit = 10) => withErrorHandling(async () => {
+  const db = await ensureDB();
+  const tx = db.transaction(CONFIG.STORES.FONTS, 'readonly');
+  const index = tx.objectStore(CONFIG.STORES.FONTS).index('byLastUsed');
+  
+  const fonts = [];
+  let cursor = await index.openCursor();
+  
+  while (cursor && fonts.length < limit) {
+    fonts.push(cursor.value);
+    cursor = await cursor.continue();
+  }
+  
+  return fonts;
+}, 'Get LRU fonts');
+
+// Export public API
 export {
   initDB,
   hasFont,
@@ -319,7 +316,6 @@ export {
   storeFont,
   updateFontLastUsed,
   deleteFont,
-  deleteAllFonts,
   getAllFonts,
   getFontsByIds,
   clearAllFonts,
@@ -327,5 +323,6 @@ export {
   setMaxStorage,
   deleteFontDB,
   getMetadata,
-  updateMetadata
+  updateMetadata,
+  getLRUFonts
 };
