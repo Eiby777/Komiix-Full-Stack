@@ -5,7 +5,7 @@ from typing import Tuple
 class MangaOCRConfig:
     """Configuration for Manga OCR model"""
 
-    def __init__(self, model_dir: str = "model_onnx"):
+    def __init__(self, model_dir: str = "manga_ocr_japanese/model_onnx"):
         self.model_dir = model_dir
         self._load_config()
 

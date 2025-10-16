@@ -6,7 +6,7 @@ from .model import MangaOCRModel
 class MangaOCR:
     """Main Manga OCR class"""
 
-    def __init__(self, model_dir: str = "model_onnx"):
+    def __init__(self, model_dir: str = "manga_ocr_japanese/model_onnx"):
         self.config = MangaOCRConfig(model_dir)
         self.preprocessor = MangaOCRPreprocessor(
             image_size=self.config.image_size,
@@ -24,7 +24,7 @@ class MangaOCR:
         return text
 
     @classmethod
-    def from_image_path(cls, image_path: str, model_dir: str = "model_onnx") -> str:
+    def from_image_path(cls, image_path: str, model_dir: str = "manga_ocr_japanese/model_onnx") -> str:
         """Process image from file path"""
         image = Image.open(image_path).convert('RGB')
         ocr = cls(model_dir)
