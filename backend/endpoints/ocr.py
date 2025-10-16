@@ -11,7 +11,7 @@ import os
 from fastapi import APIRouter
 from dependencies.limiter import limiter
 from dependencies.auth import verify_jwt
-from manga_ocr import MangaOcr
+from manga_ocr_japanese import MangaOCR
 from onnxocr.onnx_paddleocr import ONNXPaddleOcr
 
 router = APIRouter()
@@ -19,8 +19,7 @@ router = APIRouter()
 # Inicializar el modelo OCR Onnx
 model = ONNXPaddleOcr(use_angle_cls=True, use_gpu=False)
 
-# Inicializar MangaOCR para japonés
-manga_ocr_model = MangaOcr()
+# MangaOCR will be initialized per request for Japanese
 
 # Modelo Pydantic para validación de entrada
 class OCRRequest(BaseModel):
@@ -101,7 +100,7 @@ async def ocr_service(
             
             try:
                 # Procesar con MangaOCR
-                text = manga_ocr_model(tmp_path)
+                text = MangaOCR.from_image_path(tmp_path)
                 processing_time = time.time() - start_time
                 
                 # MangaOCR devuelve solo texto, crear resultado con bounding box completo
