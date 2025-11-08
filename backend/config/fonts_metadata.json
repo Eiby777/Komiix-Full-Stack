@@ -474,5 +474,12 @@
         "filename": "NewWildWordsRoman.woff2",
         "version": "1.0.0",
         "hash": "1075bf7065833a83662e4622804e7a72067e4489f19991fbf981ebe64711563d"
+    },
+    {
+        "id": "FNT069",
+        "name": "NorB Casual Heavy",
+        "filename": "NorB_Casual_Heavy.woff2",
+        "version": "1.0.0",
+        "hash": "60eac48905e62477c58c212862a418a0ae776cd7e0b10851b14ae7ff92d5367b"
     }
 ]
