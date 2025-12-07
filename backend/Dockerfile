@@ -22,9 +22,11 @@ RUN apt-get update && apt-get install -y \
 # Install UV
 RUN pip install uv
 
-# Create models directory and download the translation model
-RUN mkdir -p /app/models
-RUN curl -L -o /app/models/LFM2-350M-ENJP-MT-Q8_0.gguf https://huggingface.co/LiquidAI/LFM2-350M-ENJP-MT-GGUF/resolve/main/LFM2-350M-ENJP-MT-Q8_0.gguf
+# Create directories for new structure
+RUN mkdir -p /app/assets/ml_models /app/data
+
+# Download the translation model to new location
+RUN curl -L -o /app/assets/ml_models/LFM2-350M-ENJP-MT-Q8_0.gguf https://huggingface.co/LiquidAI/LFM2-350M-ENJP-MT-GGUF/resolve/main/LFM2-350M-ENJP-MT-Q8_0.gguf
 
 # Copy pyproject.toml and uv.lock first for better caching
 COPY pyproject.toml uv.lock ./
@@ -43,5 +45,5 @@ USER app
 
 EXPOSE 8000
 
-# Use exec form and proper signal handling
-CMD ["uv", "run", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Use exec form and proper signal handling - updated to use app.main
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

@@ -1,0 +1,1 @@
+"""Komiix Backend Application"""

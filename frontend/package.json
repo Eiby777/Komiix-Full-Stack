@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build --mode production",
-    "build:analyze": "vite build --mode production && npx vite-bundle-analyzer dist/stats.html",
+    "build:analyze": "vite build --mode production && bunx vite-bundle-analyzer dist/stats.html",
     "preview": "vite preview",
     "build:chunks": "VITE_BUILD_CHUNKS=true vite build"
   },
@@ -19,6 +19,8 @@
     "@supabase/supabase-js": "^2.47.16",
     "@tailwindcss/postcss": "^4.0.1",
     "axios": "^1.10.0",
+    "baseline-browser-mapping": "^2.9.4",
+    "caniuse-lite": "^1.0.30001759",
     "fabric": "^6.5.4",
     "idb": "^8.0.2",
     "immer": "^10.1.1",

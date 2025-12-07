@@ -1,5 +1,5 @@
 # frontend/Dockerfile
-FROM oven/bun:1-alpine AS builder
+FROM docker.io/oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
@@ -35,7 +35,7 @@ RUN bun run build
 RUN find dist -type f \( -name "*.js" -o -name "*.css" -o -name "*.wasm" \) -exec gzip -k {} \;
 
 # Production stage optimized for WASM
-FROM nginx:alpine
+FROM docker.io/library/nginx:alpine
 
 # Install required packages
 RUN apk add --no-cache curl brotli

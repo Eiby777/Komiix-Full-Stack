@@ -37,7 +37,7 @@ const handleCreateObject = (item, object, canvas, currentWidth, currentHeight, a
             if (activeLayer === LAYERS.ORIGINAL.id || activeLayer === LAYERS.ANNOTATION.id) {
                 image.set({ opacity: 0, selectable: false, evented: false });
             }
-            else{
+            else {
                 image.set({ opacity: 1, selectable: false, evented: false });
             }
             image.id = object.id;
@@ -82,7 +82,7 @@ const handleCreateObject = (item, object, canvas, currentWidth, currentHeight, a
 
         if (activeLayer !== LAYERS.TEXT.id && activeLayer !== LAYERS.OUTPUT.id) {
             obj.set({ opacity: 0, selectable: false, evented: false });
-        }else{
+        } else {
             obj.set({ opacity: 1, selectable: true, evented: true });
         }
         canvas.add(obj);
@@ -161,6 +161,10 @@ const handleLoadImportedFile = async (
     setCanvasObjectStatus
 ) => {
     const processData = async (data, usedFontIds = null) => {
+        if (!data) {
+            console.log('No data to process');
+            return;
+        }
         // Load all fonts before processing the canvas data
         await loadProjectFonts(usedFontIds);
 
@@ -201,7 +205,7 @@ const handleLoadImportedFile = async (
         if (file.usedFonts) {
             processData(file.savefile, file.usedFonts);
         } else {
-            processData(file.savefile || file);
+            processData(file.savefile);
         }
     }
 };
