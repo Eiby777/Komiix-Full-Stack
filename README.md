@@ -3,6 +3,9 @@
 
 ![Komiix Banner](https://via.placeholder.com/1200x300?text=Komiix+AI+Manga+Translator)
 
+> 🌐 **¡Pruébalo GRATIS ahora mismo en la web oficial!**  
+> 👉 [www.komiix.com](https://www.komiix.com)
+
 **Komiix** es una herramienta web avanzada diseñada para revolucionar el mundo del *scanlation*. Utilizando inteligencia artificial de última generación, automatiza el tedioso proceso de limpiar, traducir y editar mangas y manhwas, permitiendo a los traductores enfocarse en la calidad lingüística y creativa.
 
 Esta aplicación combina un potente **Backend en Python** (FastAPI) para el procesamiento pesado de IA con un **Frontend en React** altamente interactivo para la edición fina.
