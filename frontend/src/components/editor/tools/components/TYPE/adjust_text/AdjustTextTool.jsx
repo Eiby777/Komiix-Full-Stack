@@ -118,10 +118,12 @@ const AdjustTextTool = ({ currentImageIndex }) => {
         const checkRect = (relativePointer) => {
             // Buscar todos los objetos de tipo rectángulo
             const rects = canvas.getObjects().filter(obj => obj.type === 'rect');
+            const TEXT_COLOR = '#FFFF00';
+            const containingRects = [];
 
-            // Verificar cada rectángulo para ver si contiene el puntero
+            // 1. Encontrar todos los rectángulos que contienen el puntero
             for (const rect of rects) {
-                const { left, top, width, height } = rect;
+                const { left, top, width, height, stroke } = rect;
                 const right = left + width;
                 const bottom = top + height;
 
@@ -131,18 +133,26 @@ const AdjustTextTool = ({ currentImageIndex }) => {
                     relativePointer.y >= top &&
                     relativePointer.y <= bottom) {
 
-                    // Devolver las coordenadas del rectángulo: [x1, y1, x2, y2]
-                    return {
+                    containingRects.push({
                         x1: left,
                         y1: top,
                         x2: right,
                         y2: bottom,
-                        object: rect // Opcional: incluir el objeto rectángulo completo
-                    };
+                        object: rect,
+                        isTextRect: stroke?.toUpperCase() === TEXT_COLOR
+                    });
                 }
             }
 
-            return null; // No se encontró ningún rectángulo que contenga el puntero
+            if (containingRects.length === 0) return null;
+            if (containingRects.length === 1) return containingRects[0];
+
+            // 2. Priorizar globos sobre texto
+            // Si hay más de uno, buscamos primero uno que NO sea de texto (un globo)
+            const bubbleRect = containingRects.find(r => !r.isTextRect);
+
+            // Si encontramos un globo, lo devolvemos; si no (todos son de texto), devolvemos el primero
+            return bubbleRect || containingRects[0];
         }
 
         const handleMouseDown = async (options) => {
