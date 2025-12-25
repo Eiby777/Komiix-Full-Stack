@@ -78,6 +78,7 @@ dependencies = [
     "setuptools",
     "llama-cpp-python==0.3.16",
     "scikit-image",
+    "pyphen>=0.14.0",
 ]
 
 [tool.hatch.metadata]

@@ -5,12 +5,12 @@ import base64
 import cv2
 import numpy as np
 import time
-import tempfile
 import os
+from PIL import Image
 
 from app.api.deps import limiter, verify_jwt
 from app.schemas.ocr import OCRRequest, OCRResponse, BoundingBox
-from lib.manga_ocr import MangaOCR
+from lib.manga_ocr import MangaOCR, TextDetector
 from lib.onnx_ocr.onnx_paddleocr import ONNXPaddleOcr
 
 router = APIRouter()
@@ -18,7 +18,25 @@ router = APIRouter()
 # Initialize ONNX OCR model
 model = ONNXPaddleOcr(use_angle_cls=True, use_gpu=False)
 
-# MangaOCR will be initialized per request for Japanese
+# Initialize TextDetector and MangaOCR for Japanese (lazy initialization)
+_text_detector = None
+_manga_ocr = None
+
+
+def get_text_detector():
+    """Lazy initialization of TextDetector"""
+    global _text_detector
+    if _text_detector is None:
+        _text_detector = TextDetector()
+    return _text_detector
+
+
+def get_manga_ocr():
+    """Lazy initialization of MangaOCR"""
+    global _manga_ocr
+    if _manga_ocr is None:
+        _manga_ocr = MangaOCR()
+    return _manga_ocr
 
 
 def polygon_to_bbox(polygon):
@@ -69,37 +87,64 @@ async def ocr_service(
         start_time = time.time()
         
         if ocr_request.language.lower() == 'jpn':
-            # Use MangaOCR for Japanese
-            logger.info("Using MangaOCR for Japanese text")
+            # Use TextDetector + MangaOCR for Japanese
+            logger.info("Using TextDetector + MangaOCR for Japanese text")
             
-            # Save image temporarily for MangaOCR
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
-                cv2.imwrite(tmp_file.name, img)
-                tmp_path = tmp_file.name
+            # Convert CV2 image (BGR) to PIL Image (RGB)
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            pil_image = Image.fromarray(img_rgb)
             
-            try:
-                # Process with MangaOCR
-                text = MangaOCR.from_image_path(tmp_path)
-                processing_time = time.time() - start_time
+            # Get detector and OCR instances
+            detector = get_text_detector()
+            manga_ocr = get_manga_ocr()
+            
+            # Detect text regions with absolute coordinates
+            text_blocks = detector(pil_image)
+            logger.info(f"Detected {len(text_blocks)} text blocks")
+            
+            ocr_results = []
+            img_width, img_height = pil_image.size
+            padding = 5  # Padding around detected regions
+            
+            for block in text_blocks:
+                x1, y1, x2, y2 = block.xyxy
                 
-                # MangaOCR returns only text, create result with full bounding box
-                ocr_results = [{
-                    "text": text,
-                    "confidence": 1.0,  # MangaOCR doesn't provide confidence
-                    "bounding_box": {
-                        "x0": 0,
-                        "y0": 0,
-                        "x1": img.shape[1],
-                        "y1": img.shape[0]
-                    }
-                }]
+                # Add padding and clamp to image bounds
+                x1 = max(0, int(x1) - padding)
+                y1 = max(0, int(y1) - padding)
+                x2 = min(img_width, int(x2) + padding)
+                y2 = min(img_height, int(y2) + padding)
                 
-                logger.info(f"MangaOCR result: {text}")
+                # Skip if region is too small
+                if (x2 - x1) < 10 or (y2 - y1) < 10:
+                    logger.debug(f"Skipping small region: {x1},{y1},{x2},{y2}")
+                    continue
                 
-            finally:
-                # Clean up temporary file
-                if os.path.exists(tmp_path):
-                    os.unlink(tmp_path)
+                # Crop the detected region
+                cropped = pil_image.crop((x1, y1, x2, y2))
+                
+                # Run OCR on cropped region
+                try:
+                    text = manga_ocr(cropped)
+                    
+                    if text and text.strip():
+                        ocr_results.append({
+                            "text": text,
+                            "confidence": block.confidence,
+                            "bounding_box": {
+                                "x0": x1,
+                                "y0": y1,
+                                "x1": x2,
+                                "y1": y2
+                            }
+                        })
+                        logger.debug(f"OCR result for block: {text}")
+                except Exception as e:
+                    logger.error(f"Error running OCR on block {block.xyxy}: {e}")
+                    continue
+            
+            processing_time = time.time() - start_time
+            logger.info(f"MangaOCR processed {len(ocr_results)} text regions")
         else:
             # Use OnnxOCR for other languages
             logger.info("Using OnnxOCR for non-Japanese text")

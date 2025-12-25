@@ -1,4 +1,4 @@
-import calculateTextCoordinates from "../../../../handlers/calculateTextCoordinates";
+import calculateTextCoordinates from "../../../../../../../hooks/textCoordinatesApi";
 import { calculateRelativeObjectPosition } from "../../../../handlers/calculatePositions";
 import { loadAndCleanImage } from "../../../../handlers/loadAndCleanImage";
 
@@ -24,9 +24,13 @@ import { loadAndCleanImage } from "../../../../handlers/loadAndCleanImage";
 const adjustTexts = async (canvasInstances, translatedResult, images, dimensionImages, setIsLoading, activeImageIndex) => {
     const handleText = async (object, canvas, cropCanvas, cropX, cropY, croppedPointer, canvasIndex, rect) => {
         try {
-            const updatedText = calculateTextCoordinates(cropCanvas, croppedPointer, {
+            // Get font ID (use default if not available)
+            const fontId = object.fontId || object.fontFamily || 'default';
+
+            // Call async API to calculate text coordinates
+            const updatedText = await calculateTextCoordinates(cropCanvas, croppedPointer, {
                 text: object.translatedText,
-            }, object.isText, rect);
+            }, object.isText, rect, fontId);
 
             if (!updatedText) {
                 console.warn(`No se pudieron calcular las coordenadas para el objeto ${object.id}`);
@@ -64,8 +68,8 @@ const adjustTexts = async (canvasInstances, translatedResult, images, dimensionI
     };
 
     // If canvasInstances has only one canvas, use activeImageIndex as the canvasIndex
-    const indicesToProcess = canvasInstances.length === 1 
-        ? [activeImageIndex] 
+    const indicesToProcess = canvasInstances.length === 1
+        ? [activeImageIndex]
         : translatedResult.map((_, index) => index);
 
     const updatedResults = await Promise.all(

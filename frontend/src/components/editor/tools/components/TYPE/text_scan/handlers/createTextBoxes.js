@@ -1,5 +1,5 @@
 import { configTextObject } from "../../text/handlers/textObjectHandlers";
-import { cleanText as handleCleanText } from "../../../../handlers/calculateTextCoordinates";
+import { cleanText as handleCleanText } from "../../../../../../../hooks/textCoordinatesApi";
 import { v4 as uuidv4 } from "uuid";
 import ObjectStatus from "../../../../../floating-menus/components/UndoRedoMenu/handlers/enumObjectRequests";
 
@@ -49,14 +49,14 @@ const createTextBoxes = (result, canvasInstances, colorToTypeTextMap, saveState)
         "#000000",
         id
       );
-      textObject.set({ 
-        text: cleanTranslatedText || cleanText, 
+      textObject.set({
+        text: cleanTranslatedText || cleanText,
         originalText: cleanText,
         translatedText: cleanTranslatedText,
         textAlign: "center",
         fontSize: det.fontSize,
         typeText: typeText || 'Ninguno',
-       });
+      });
 
       canvas.add(textObject);
       canvas.bringObjectToFront(textObject);

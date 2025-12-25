@@ -1,5 +1,5 @@
 import fetchTranslation from "../components/TranslationLogic";
-import { cleanText as handleCleanText } from "../../../../handlers/calculateTextCoordinates";
+import { cleanText as handleCleanText } from "../../../../../../../hooks/textCoordinatesApi";
 
 /**
  * Translates texts detected in the canvas using the given language settings.
@@ -30,11 +30,11 @@ const translateTexts = async (result, selectedLanguage, selectedTargetLanguage) 
 
         // Send texts array for translation
         const requestTexts = textsToTranslate;
-        
+
         const translationResult = await fetchTranslation(requestTexts, sourceLang, targetLang);
 
         // Handle translation response (both EasyNMT and LibreTranslate now return the same format)
-        if (translationResult.translatedText && Array.isArray(translationResult.translatedText) && 
+        if (translationResult.translatedText && Array.isArray(translationResult.translatedText) &&
             translationResult.translatedText.length === textsToTranslate.length) {
             translationResult.translatedText.forEach((translated, idx) => {
                 const { canvasIndex, itemIndex } = textMappings[idx];

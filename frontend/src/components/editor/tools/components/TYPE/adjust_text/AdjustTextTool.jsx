@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useEditorStore } from '../../../../../../stores/editorStore';
 import PlusTool from '../../ANNOTATION/plus';
-import calculateTextCoordinates from '../../../handlers/calculateTextCoordinates';
+import calculateTextCoordinates from '../../../../../../hooks/textCoordinatesApi';
 import { loadAndCleanImage } from '../../../handlers/loadAndCleanImage';
 import { calculateRelativePointer, calculateRelativeObjectPosition } from '../../../handlers/calculatePositions';
 
@@ -54,13 +54,13 @@ const AdjustTextTool = ({ currentImageIndex }) => {
                 // Aplicar offset a las coordenadas del rectángulo (asegurando que no salgan de los límites)
                 cropX = Math.max(0, relativeRectX1 - offset);
                 cropY = Math.max(0, relativeRectY1 - offset);
-                
+
                 // Calcular ancho y alto con el offset (doble offset porque es para ambos lados)
                 const rectWidth = relativeRectX2 - relativeRectX1;
                 const rectHeight = relativeRectY2 - relativeRectY1;
                 cropWidth = Math.min(rectWidth + (2 * offset), image.width - cropX);
                 cropHeight = Math.min(rectHeight + (2 * offset), image.height - cropY);
-                
+
                 // Ajustar si el recorte excede los límites de la imagen
                 if (cropX + cropWidth > image.width) {
                     cropX = Math.max(0, image.width - cropWidth);
@@ -112,25 +112,25 @@ const AdjustTextTool = ({ currentImageIndex }) => {
                 y: relativePointer.y - cropY,
             };
 
-            return {croppedPointer, cropX, cropY, cropCanvas};
+            return { croppedPointer, cropX, cropY, cropCanvas };
         }
 
         const checkRect = (relativePointer) => {
             // Buscar todos los objetos de tipo rectángulo
             const rects = canvas.getObjects().filter(obj => obj.type === 'rect');
-            
+
             // Verificar cada rectángulo para ver si contiene el puntero
             for (const rect of rects) {
                 const { left, top, width, height } = rect;
                 const right = left + width;
                 const bottom = top + height;
-                
+
                 // Verificar si el puntero está dentro de los límites del rectángulo
-                if (relativePointer.x >= left && 
-                    relativePointer.x <= right && 
-                    relativePointer.y >= top && 
+                if (relativePointer.x >= left &&
+                    relativePointer.x <= right &&
+                    relativePointer.y >= top &&
                     relativePointer.y <= bottom) {
-                    
+
                     // Devolver las coordenadas del rectángulo: [x1, y1, x2, y2]
                     return {
                         x1: left,
@@ -141,7 +141,7 @@ const AdjustTextTool = ({ currentImageIndex }) => {
                     };
                 }
             }
-            
+
             return null; // No se encontró ningún rectángulo que contenga el puntero
         }
 
@@ -151,50 +151,61 @@ const AdjustTextTool = ({ currentImageIndex }) => {
                 canvas.discardActiveObject();
                 canvas.requestRenderAll();
             } else if (options.e.ctrlKey && selectedObject) {
-                const pointer = canvas.getPointer(options.e);
-                const relativePointer = calculateRelativePointer(pointer, canvas, dimensionImages[currentImageIndex]);
+                try {
+                    const pointer = canvas.getPointer(options.e);
+                    const relativePointer = calculateRelativePointer(pointer, canvas, dimensionImages[currentImageIndex]);
 
-                const rect = checkRect(pointer);
+                    const rect = checkRect(pointer);
 
-                const image = await loadAndCleanImage(
-                    canvas,
-                    images[currentImageIndex]
-                );
+                    const image = await loadAndCleanImage(
+                        canvas,
+                        images[currentImageIndex]
+                    );
 
-                const isText = rect ? true : false;
+                    const isText = rect ? true : false;
 
-                const {croppedPointer, cropX, cropY, cropCanvas} = handleCropping(relativePointer, image, rect)
-                const updatedText = calculateTextCoordinates(
-                    cropCanvas,
-                    croppedPointer,
-                    selectedObject,
-                    isText,
-                    rect
-                );
+                    const { croppedPointer, cropX, cropY, cropCanvas } = handleCropping(relativePointer, image, rect);
 
-                updatedText.left += cropX;
-                updatedText.top += cropY;
+                    // Get font ID from selected object (if available)
+                    const fontId = selectedObject.fontId || selectedObject.fontFamily || 'default';
 
-                const { canvasLeft, canvasTop } = calculateRelativeObjectPosition(
-                    canvas,
-                    updatedText,
-                    dimensionImages[currentImageIndex]
-                );
+                    // Call async API to calculate text coordinates
+                    const updatedText = await calculateTextCoordinates(
+                        cropCanvas,
+                        croppedPointer,
+                        selectedObject,
+                        isText,
+                        rect,
+                        fontId
+                    );
 
-                selectedObject.set({
-                    left: canvasLeft,
-                    top: canvasTop,
-                    fontSize: updatedText.fontSize,
-                    width: updatedText.width,
-                });
-                selectedObject.setCoords();
-                canvas.bringObjectToFront(selectedObject);
-                canvas.discardActiveObject();
-                canvas.requestRenderAll();
-                
-                // Actualizar la selección después del movimiento
-                canvas.setActiveObject(selectedObject);
-                canvas.requestRenderAll();
+                    updatedText.left += cropX;
+                    updatedText.top += cropY;
+
+                    const { canvasLeft, canvasTop } = calculateRelativeObjectPosition(
+                        canvas,
+                        updatedText,
+                        dimensionImages[currentImageIndex]
+                    );
+
+                    selectedObject.set({
+                        left: canvasLeft,
+                        top: canvasTop,
+                        fontSize: updatedText.fontSize,
+                        width: updatedText.width,
+                    });
+                    selectedObject.setCoords();
+                    canvas.bringObjectToFront(selectedObject);
+                    canvas.discardActiveObject();
+                    canvas.requestRenderAll();
+
+                    // Actualizar la selección después del movimiento
+                    canvas.setActiveObject(selectedObject);
+                    canvas.requestRenderAll();
+                } catch (error) {
+                    console.error('Error adjusting text:', error);
+                    // Optionally show error to user
+                }
             }
         };
 
