@@ -6,7 +6,8 @@ const ColorControls = ({
   fillColor, setFillColor, strokeColor, setStrokeColor, strokeWidth, setStrokeWidth,
   hasStroke, setHasStroke, textObject, fabricCanvas, handleSizeInput, handleArrowKeys,
   handleFillColorChange, handleStrokeColorChange, handleStrokeToggle, handleStrokeWidthChange,
-  handleStrokeWidthButtonChange
+  handleStrokeWidthButtonChange,
+  strokeMode, handleStrokeModeChange
 }) => {
   const { saveState } = useLayerHistory();
   return (
@@ -68,6 +69,28 @@ const ColorControls = ({
           <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-500"></div>
           <span className="absolute w-5 h-5 bg-white rounded-full transition-all left-0.5 top-0.5 peer-checked:translate-x-5"></span>
         </label>
+        {hasStroke && (
+          <div className="flex items-center gap-1 ml-1" title="Modo de contorno">
+            <button
+              onClick={() => handleStrokeModeChange('center')}
+              className={`px-2 py-1 text-[10px] uppercase font-bold rounded transition-colors ${strokeMode === 'center'
+                ? 'bg-blue-600 text-white'
+                : 'bg-[#2a2a2a] text-gray-400 hover:bg-[#3a3a3a]'
+                }`}
+            >
+              C
+            </button>
+            <button
+              onClick={() => handleStrokeModeChange('outside')}
+              className={`px-2 py-1 text-[10px] uppercase font-bold rounded transition-colors ${strokeMode === 'outside'
+                ? 'bg-blue-600 text-white'
+                : 'bg-[#2a2a2a] text-gray-400 hover:bg-[#3a3a3a]'
+                }`}
+            >
+              O
+            </button>
+          </div>
+        )}
       </div>
     </>
   )

@@ -16,6 +16,7 @@ import {
     handleStrokeColorChange,
     handleStrokeToggle,
     handleStrokeWidthChange,
+    handleStrokeModeChange,
     handleFontSizeButtonChange,
     handleLineHeightButtonChange,
     handleStrokeWidthButtonChange,
@@ -36,6 +37,7 @@ const TextSettings = () => {
     const [hasStroke, setHasStroke] = useState(false);
     const [fillColor, setFillColor] = useState('#000000');
     const [strokeColor, setStrokeColor] = useState('#000000');
+    const [strokeMode, setStrokeMode] = useState('center');
     const [fontStyles, setFontStyles] = useState({
         bold: false,
         italic: false,
@@ -61,14 +63,14 @@ const TextSettings = () => {
 
     const updateSelectedObject = () => {
         const canvas = getCanvasInstance(activeImageIndex);
-        if (!canvas) return; 
+        if (!canvas) return;
         let activeObject = null;
-        if (canvas.getActiveObject()){
+        if (canvas.getActiveObject()) {
             activeObject = canvas.getActiveObject();
-        }else if (textObject){
+        } else if (textObject) {
             activeObject = textObject;
         }
-        
+
         if (activeObject && activeObject.type === 'textbox') {
             setTextObject(activeObject);
             setFontFamily(activeObject.fontFamily || 'Arial');
@@ -76,6 +78,7 @@ const TextSettings = () => {
             setLineHeight(String(activeObject.lineHeight || '1.0'));
             setStrokeWidth(String(activeObject.strokeWidth || '0'));
             setHasStroke(!!activeObject.stroke);
+            setStrokeMode(activeObject.strokeMode || 'center');
             setFillColor(activeObject.fill || '#000000');
             setStrokeColor(activeObject.stroke || '#000000');
             setFontStyles({
@@ -98,6 +101,7 @@ const TextSettings = () => {
             setLineHeight('1.0');
             setStrokeWidth('0');
             setHasStroke(false);
+            setStrokeMode('center');
             setUppercase(false);
             setLowercase(false);
             setFillColor('#000000');
@@ -113,7 +117,7 @@ const TextSettings = () => {
     };
 
     useEffect(() => {
-        if (!fabricCanvas) return; 
+        if (!fabricCanvas) return;
         fabricCanvas.on('selection:created', updateSelectedObject);
         fabricCanvas.on('selection:updated', updateSelectedObject);
         fabricCanvas.on('selection:cleared', updateSelectedObject);
@@ -204,6 +208,8 @@ const TextSettings = () => {
                 handleStrokeToggle={(enabled) => handleStrokeToggle(enabled, textObject, fabricCanvas, setHasStroke, strokeColor, saveState)}
                 handleStrokeWidthChange={(value) => handleStrokeWidthChange(value, textObject, fabricCanvas, setStrokeWidth, saveState)}
                 handleStrokeWidthButtonChange={(isUp, currentValue, setValue, handler) => handleStrokeWidthButtonChange(isUp, currentValue, setValue, handler, textObject, fabricCanvas, saveState)}
+                strokeMode={strokeMode}
+                handleStrokeModeChange={(mode) => handleStrokeModeChange(mode, textObject, fabricCanvas, setStrokeMode, saveState)}
             />
             <StyleAlignmentControls
                 fontStyles={fontStyles}

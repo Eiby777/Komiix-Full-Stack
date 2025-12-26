@@ -230,6 +230,20 @@ export const handleStrokeWidthChange = (value, textObject, fabricCanvas, setStro
   }
 };
 
+export const handleStrokeModeChange = (mode, textObject, fabricCanvas, setStrokeMode, saveState) => {
+  if (textObject) {
+    textObject.set({
+      strokeMode: mode,
+      dirty: true
+    });
+    fabricCanvas.requestRenderAll();
+    if (setStrokeMode) setStrokeMode(mode);
+    const typeText = textObject.typeText || "Ninguno";
+    updateConfigTypeTexts(textObject, 'strokeMode', mode, typeText);
+    saveState(textObject, ObjectStatus.UPDATE);
+  }
+};
+
 export const handleRotate = (direction, textObject, fabricCanvas, saveState) => {
   if (textObject) {
     const currentAngle = textObject.angle || 0;
