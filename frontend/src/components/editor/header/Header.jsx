@@ -145,6 +145,7 @@ export default function Header() {
           object.translatedText = currentCanvasObjects[(objectIndex + 1)]?.translatedText ?? null;
           object.typeText = currentCanvasObjects[(objectIndex + 1)]?.typeText ?? null;
           object.fontId = currentCanvasObjects[(objectIndex + 1)]?.fontId ?? null;
+          object.strokeMode = currentCanvasObjects[(objectIndex + 1)]?.strokeMode ?? 'center';
         });
       });
 

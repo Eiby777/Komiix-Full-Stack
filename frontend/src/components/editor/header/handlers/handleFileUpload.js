@@ -61,7 +61,8 @@ const handleCreateObject = (item, object, canvas, currentWidth, currentHeight, a
             originalText: object.originalText,
             translatedText: object.translatedText,
             typeText: object.typeText,
-            angle: object.angle
+            angle: object.angle,
+            strokeMode: object.strokeMode ?? 'center'
         });
 
         // Set fontId - this is the primary identifier

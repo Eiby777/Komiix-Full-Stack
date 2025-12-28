@@ -16,25 +16,24 @@ export const createTextSlice = (set, get) => ({
   }),
   getConfigTypeTexts: () => get().configTypeTexts,
   updateTextConfig: (textObject, typeText) => {
-    
+
     const { canvasObjectStatus, canvasInstances } = get();
-    canvasInstances.forEach((canvas, index) => { 
+    canvasInstances.forEach((canvas, index) => {
       if (!canvasObjectStatus[index]) return;
-      
+
       const objects = canvas.getObjects();
       const hasTextBox = objects.some((obj) => obj.type === 'textbox' && obj !== textObject && obj.typeText === typeText);
       if (!hasTextBox) return;
-      
+
       const textBoxes = objects.filter((obj) => obj.type === 'textbox' && obj !== textObject && obj.typeText === typeText);
-      const configTypeText = get().configTypeTexts[typeText] ?? {};
       const propertiesToApply = [
         'fontFamily', 'lineHeight', 'fill', 'stroke', 'textAlign',
-        'uppercase', 'lowercase', 'underline', 'strikethrough', 'italic', 'bold', 'strokeWidth'
+        'uppercase', 'lowercase', 'underline', 'strikethrough', 'italic', 'bold', 'strokeWidth', 'strokeMode'
       ];
       const propertiesToApplyFiltered = propertiesToApply.
-      filter((property) => (property === 'stroke' || 
-      configTypeText[property] !== undefined && configTypeText[property] !== null));
-      
+        filter((property) => (property === 'stroke' ||
+          configTypeText[property] !== undefined && configTypeText[property] !== null));
+
       textBoxes.forEach((textBox) => {
         propertiesToApplyFiltered.forEach((property) => {
           if (configTypeText[property] !== undefined && configTypeText[property] !== null || property === 'stroke') {
@@ -61,7 +60,7 @@ export const createTextSlice = (set, get) => ({
         });
         textBox.setCoords();
       });
-      
+
       canvas.requestRenderAll();
     });
   },
