@@ -2,7 +2,7 @@ services:
   redis:
     image: docker.io/library/redis:alpine
     ports:
-      - "6379:6379"
+      - "6381:6379"
     restart: unless-stopped
 
   libretranslate:
