@@ -235,22 +235,18 @@ const EditPanel = ({
         )}
       </div>
 
-      {/* Tracking Changes Toggle */}
-      <div className="flex items-center gap-2">
+      {/* Tracking Changes Toggle - DISABLED */}
+      <div className="flex items-center gap-2 opacity-50 cursor-not-allowed" title="Auto-translation is currently disabled to optimize performance">
         <button
-          onClick={() => setIsTrackingChanges((prev) => !prev)}
-          className={`relative w-10 h-5 rounded-full transition-all duration-200 ease-in-out ${
-            isTrackingChanges ? 'bg-blue-500' : 'bg-gray-600'
-          }`}
+          disabled
+          className="relative w-10 h-5 rounded-full bg-gray-600 cursor-not-allowed"
         >
           <span
-            className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out ${
-              isTrackingChanges ? 'translate-x-5' : 'translate-x-0'
-            }`}
+            className="absolute top-0.5 left-0.5 w-4 h-4 bg-gray-400 rounded-full transition-transform duration-200 ease-in-out translate-x-0"
           />
         </button>
-        <span className="text-white text-xs">
-          {isTrackingChanges ? 'Tracking Changes' : 'Not Tracking'}
+        <span className="text-gray-400 text-xs">
+          Traducción Automática (Deshabilitada)
         </span>
       </div>
     </div>

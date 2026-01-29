@@ -5,14 +5,6 @@ services:
       - "6381:6379"
     restart: unless-stopped
 
-  libretranslate:
-    image: docker.io/libretranslate/libretranslate:latest
-    ports:
-      - "5001:5000"
-    environment:
-      - LT_LOAD_ONLY=es,en,zh-Hans,ko,ja
-    restart: unless-stopped
-
   komiix-backend:
     build:
       context: ./backend
@@ -28,9 +20,7 @@ services:
       - SUPABASE_KEY=${VITE_SUPABASE_KEY}
       - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
       - COMPOSE_BAKE=${COMPOSE_BAKE}
-      - LIBRETRANSLATE_URL=${LIBRETRANSLATE_URL}
     depends_on:
-      - libretranslate
       - redis
     restart: unless-stopped
 

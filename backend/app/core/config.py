@@ -23,9 +23,6 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
     
-    # LibreTranslate
-    LIBRETRANSLATE_URL: str = ""
-    
     # Paths - determine if running in Docker or local
     @property
     def BASE_DIR(self) -> Path:

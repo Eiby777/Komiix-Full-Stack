@@ -76,7 +76,6 @@ dependencies = [
     "wrapt==1.17.2",
     "yarl==1.20.1",
     "setuptools",
-    "llama-cpp-python==0.3.16",
     "scikit-image",
     "pyphen>=0.14.0",
 ]
@@ -86,9 +85,6 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
-
-[tool.uv.sources]
-llama-cpp-python = { git = "https://github.com/abetlen/llama-cpp-python.git", rev = "v0.3.16" }
 
 [dependency-groups]
 dev = []

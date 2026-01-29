@@ -25,9 +25,6 @@ RUN pip install uv
 # Create directories for new structure
 RUN mkdir -p /app/assets/ml_models /app/data
 
-# Download the translation model to new location
-RUN curl -L -o /app/assets/ml_models/LFM2-350M-ENJP-MT-Q8_0.gguf https://huggingface.co/LiquidAI/LFM2-350M-ENJP-MT-GGUF/resolve/main/LFM2-350M-ENJP-MT-Q8_0.gguf
-
 # Copy pyproject.toml and uv.lock first for better caching
 COPY pyproject.toml uv.lock ./
 RUN uv sync --no-install-project
